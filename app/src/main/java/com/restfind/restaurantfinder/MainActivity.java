@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Test sdfs
     private String name = "test";
 
     @Override
