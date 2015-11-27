@@ -6,7 +6,7 @@ import android.os.Bundle;
 public class MainActivity extends AppCompatActivity {
 
     // Test sdfs
-    private String name = "test";
+    private String name = "test23";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
