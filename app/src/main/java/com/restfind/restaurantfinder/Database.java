@@ -46,10 +46,13 @@ public class Database {
 
     private static List<String> execute(Operation operation, String... arguments) {
         try {
+            // erzeuge URL zur *.php Datei auf Server
             StringBuilder sbUrl = new StringBuilder(serverUrl);
             sbUrl.append(operation.toString());
             sbUrl.append(".php");
 
+            // Parameter (arguments) werden zu einem String zusammen gefügt, der später
+            // an PHP gesendet wird.
             StringBuilder sbData = new StringBuilder();
             if (arguments.length > 0) {
                 sbData.append(URLEncoder.encode("arg0", "UTF-8") + "=" + URLEncoder.encode(arguments[0], "UTF-8"));
@@ -58,12 +61,14 @@ public class Database {
                 sbData.append("&" + URLEncoder.encode("arg" + i, "UTF-8") + "=" + URLEncoder.encode(arguments[i], "UTF-8"));
             }
 
+            // Verbindung zu Server wird aufgebaut
             URL url = new URL(sbUrl.toString());
             URLConnection conn = url.openConnection();
 
             conn.setDoOutput(true);
             OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
 
+            // String mit Parametern wird an die PHP Datei als Stream gesendet
             wr.write(sbData.toString());
             wr.flush();
 
@@ -72,7 +77,7 @@ public class Database {
             List<String> result = new ArrayList<>();
             String line;
 
-            // Read Server Response
+            // Ergebnis der SQL-Abfrage wird vom Input Stream gelesen
             while ((line = reader.readLine()) != null) {
                 result.add(line);
             }
