@@ -18,11 +18,10 @@ import java.util.List;
 public class Database {
 
     private enum Operation {
-        login, register
+        login, register, getFriendInvite
     }
 
     private final static String serverUrl = "http://restfind.heliohost.org/";
-    private final static String logTag = "Database";
 
     public static boolean register(String username, String password) {
         List<String> result = execute(Operation.register, username, password);
@@ -35,12 +34,14 @@ public class Database {
         if(result == null)
             return false;
         if (result.size() == 1) {
-            Log.v(logTag, "Login successful");
             return true;
         } else {
-            Log.v(logTag, "Login failed");
             return false;
         }
+    }
+
+    public static List<String> getFriendInvite(String username) {
+        return execute(Operation.getFriendInvite, username);
     }
 
     private static List<String> execute(Operation operation, String... arguments) {
@@ -48,7 +49,6 @@ public class Database {
             StringBuilder sbUrl = new StringBuilder(serverUrl);
             sbUrl.append(operation.toString());
             sbUrl.append(".php");
-            Log.v(logTag, "Connecting to: " + sbUrl.toString());
 
             StringBuilder sbData = new StringBuilder();
             if (arguments.length > 0) {
@@ -74,12 +74,10 @@ public class Database {
 
             // Read Server Response
             while ((line = reader.readLine()) != null) {
-                Log.v(logTag, line);
                 result.add(line);
             }
             return result;
         } catch (Exception e) {
-            Log.e(logTag, Log.getStackTraceString(e));
             return null;
         }
     }
