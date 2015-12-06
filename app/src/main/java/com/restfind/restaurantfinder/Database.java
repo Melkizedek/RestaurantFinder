@@ -12,10 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This static class handles the database access.
  * Created by gabriel on 04.12.15.
  */
 
 public class Database {
+
+    private static final String trueString = "TRUE";
+    private static final String falseString = "FALSE";
 
     private enum Operation {
         login, register, getFriendInvite
@@ -25,19 +29,12 @@ public class Database {
 
     public static boolean register(String username, String password) {
         List<String> result = execute(Operation.register, username, password);
-        return false;
+        return checkResult(result);
     }
 
     public static boolean login(String username, String password) {
         List<String> result = execute(Operation.login, username, password);
-
-        if(result == null)
-            return false;
-        if (result.size() == 1) {
-            return true;
-        } else {
-            return false;
-        }
+        return checkResult(result);
     }
 
     public static List<String> getFriendInvite(String username) {
@@ -47,22 +44,25 @@ public class Database {
     private static List<String> execute(Operation operation, String... arguments) {
         try {
             // erzeuge URL zur *.php Datei auf Server
-            StringBuilder sbUrl = new StringBuilder(serverUrl);
-            sbUrl.append(operation.toString());
-            sbUrl.append(".php");
+            String urlString = serverUrl + operation.toString() + ".php";
 
             // Parameter (arguments) werden zu einem String zusammen gefügt, der später
             // an PHP gesendet wird.
             StringBuilder sbData = new StringBuilder();
             if (arguments.length > 0) {
-                sbData.append(URLEncoder.encode("arg0", "UTF-8") + "=" + URLEncoder.encode(arguments[0], "UTF-8"));
+                sbData.append(URLEncoder.encode("arg0", "UTF-8"));
+                sbData.append("=");
+                sbData.append(URLEncoder.encode(arguments[0], "UTF-8"));
             }
             for (int i = 1; i < arguments.length; i++) {
-                sbData.append("&" + URLEncoder.encode("arg" + i, "UTF-8") + "=" + URLEncoder.encode(arguments[i], "UTF-8"));
+                sbData.append("&");
+                sbData.append(URLEncoder.encode("arg" + i, "UTF-8"));
+                sbData.append("=");
+                sbData.append(URLEncoder.encode(arguments[i], "UTF-8"));
             }
 
             // Verbindung zu Server wird aufgebaut
-            URL url = new URL(sbUrl.toString());
+            URL url = new URL(urlString);
             URLConnection conn = url.openConnection();
 
             conn.setDoOutput(true);
@@ -87,4 +87,12 @@ public class Database {
         }
     }
 
+    private static boolean checkResult(List<String> result) {
+//        if(result == null || result.isEmpty())
+//            return false;
+//
+//        return result.get(0).equals(trueString);
+
+        return !(result == null || result.isEmpty()) && result.get(0).equals(trueString);
+    }
 }
