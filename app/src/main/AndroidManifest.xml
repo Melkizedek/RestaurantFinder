@@ -24,6 +24,25 @@
         </activity>
         <activity android:name=".MainActivity" >
         </activity>
+
+        <service
+            android:name=".CheckInvitationsService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
+
+        <activity android:name=".RegisterActivity" >
+        </activity>
+        <activity android:name=".SearchResultsActivity" >
+        </activity>
+        <activity android:name=".SearchOptionsActivity" >
+        </activity>
+        <activity android:name=".FriendsActivity" >
+        </activity>
+        <activity android:name=".FavoritesActivity" >
+        </activity>
+        <activity android:name=".InvitationsActivity" >
+        </activity>
     </application>
 
 </manifest>

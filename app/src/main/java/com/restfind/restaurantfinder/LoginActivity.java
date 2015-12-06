@@ -5,10 +5,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import java.util.concurrent.Callable;
@@ -18,82 +19,109 @@ import java.util.concurrent.Future;
 
 public class LoginActivity extends Activity {
 
+    SharedPreferences spLoginSaved;
+    CheckBox cbAutomaticLogin;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        //create UI Elements
         final EditText username_Field = (EditText) findViewById(R.id.username);
         final EditText password_Field = (EditText) findViewById(R.id.passwort);
         Button registerButton = (Button) findViewById(R.id.register);
         Button signInButton = (Button) findViewById(R.id.signIn);
+        cbAutomaticLogin = (CheckBox) findViewById(R.id.cbAutomaticLogin);
 
-//        final Context context = this;
-        final AlertDialog.Builder passwordFalse = new AlertDialog.Builder(this);
-        passwordFalse.setTitle("Warning");
-        passwordFalse.setMessage("Password or Username not correct");
-        passwordFalse.setCancelable(true);
-        passwordFalse.setNegativeButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        //look for saved username and password
+        spLoginSaved = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_saved), Context.MODE_PRIVATE);
+        String username = spLoginSaved.getString("username", null);
+        String password = spLoginSaved.getString("password", null);
+        //username and password were saved (automatic login)
+        if(username != null && password != null){
+            login(username, password);
+        }
 
-
+        //Register Button
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //startActivity(new Intent(LoginActivity.this, RegisterActivity));
+                //start new Activity (Register)
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
             }
         });
 
+        //Sign-In Button
         signInButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                boolean loginResult = false;
                 final String username = username_Field.getText().toString();
                 final String password = password_Field.getText().toString();
 
-                if (!username.equals("") && !password.equals("")) {
-                    ExecutorService es = Executors.newSingleThreadExecutor();
-                    Future<Boolean> result = es.submit(new Callable<Boolean>() {
-                        public Boolean call() throws Exception {
-                            if (Database.login(username, password)) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        }
-                    });
-                    try {
-                        loginResult = result.get();
-                    } catch (Exception e) {
-                        // failed
+                if(username.contains(";") || password.contains(";")){
+                    showAlertDialog(getResources().getString(R.string.login_illegal));
+                }else{
+                    //username and password not empty
+                    if (!username.equals("") && !password.equals("")) {
+                        login(username, password);
                     }
-                    es.shutdown();
-
-                    //Login successful
-                    if (loginResult) {
-                        Log.v("LoginTest", "successful");
-                        Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
-                        myIntent.putExtra("username", username); //Optional parameters
-                        LoginActivity.this.startActivity(myIntent);
-                    } else {
-                        AlertDialog dialog = passwordFalse.create();
-                        dialog.show();
-                    }
-
                 }
             }
         });
-        // CharSequence test = getText(R.id.username);
-        // CharSequence test2 = getText(R.id.passwort);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+    private void login(final String username, final String password){
+        boolean loginSuccessful = false;
 
+        //Thread that tries to login
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        Future<Boolean> result = es.submit(new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                return Database.login(username, password);
+            }
+        });
 
+        try {
+            loginSuccessful = result.get();
+        } catch (Exception e) {
+            // failed
+        }
+        es.shutdown();
+
+        if (loginSuccessful) {
+            //Save username and password for future automatic logins
+            if(cbAutomaticLogin.isChecked()){
+                SharedPreferences.Editor editor = spLoginSaved.edit();
+                editor.putString("username", username);
+                editor.putString("password", password);
+                editor.commit();
+            }
+
+            //save current logged-in username
+            SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = spLoginCurrent.edit();
+            editor.putString(getResources().getString(R.string.login_current), username);
+            editor.commit();
+
+            //Start new Activity (Main)
+            LoginActivity.this.startActivity(new Intent(LoginActivity.this, SearchOptionsActivity.class));
+        }
+        //login failed
+        else {
+            showAlertDialog(getResources().getString(R.string.login_incorrect));
+        }
+    }
+
+    //AlertDialog for incorrect input
+    private void showAlertDialog(String text){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(text);
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

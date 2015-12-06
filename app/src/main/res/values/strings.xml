@@ -1,4 +1,23 @@
 <resources>
     <string name="app_name">Restaurant Finder</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Restaurant Finder</string>
+
+    <string name="login_current">usernameCurrent</string>
+    <string name="login_saved">loginSaved</string>
+
+    <string name="login_automatically">Log in automatically next time</string>
+    <string name="login_incorrect">Password or Username not correct!</string>
+    <string name="login_illegal">Username or Password contain illegal Characters!</string>
+
+    <string name="sign_in">Sign In</string>
+    <string name="register">Register</string>
+
+    <string name="search_options">searchOptions</string>
+    <string name="search_by_name">Search Location By Name</string>
+    <string name="search_all">Search all Locations</string>
+
+    <string-array name="search_options_array">
+        <item>Search Locations by Options</item>
+        <item>Search Location by Name</item>
+    </string-array>
 </resources>
