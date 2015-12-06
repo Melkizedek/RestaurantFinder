@@ -88,11 +88,6 @@ public class Database {
     }
 
     private static boolean checkResult(List<String> result) {
-//        if(result == null || result.isEmpty())
-//            return false;
-//
-//        return result.get(0).equals(trueString);
-
         return !(result == null || result.isEmpty()) && result.get(0).equals(trueString);
     }
 }
