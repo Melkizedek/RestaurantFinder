@@ -20,4 +20,5 @@
         <item>Search Locations by Options</item>
         <item>Search Location by Name</item>
     </string-array>
+    <string name="title_activity_app_bar">AppBarActivity</string>
 </resources>

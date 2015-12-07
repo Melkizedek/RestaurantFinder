@@ -1,10 +1,11 @@
 package com.restfind.restaurantfinder;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,12 +15,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class RegisterActivity extends Activity {
+public class RegisterActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         //create UI Elements
         final EditText username_Field = (EditText) findViewById(R.id.username);
@@ -33,6 +37,7 @@ public class RegisterActivity extends Activity {
                 final String username = username_Field.getText().toString();
                 final String password = password_Field.getText().toString();
 
+                //username or password contain illegal characters
                 if(username.contains(";") || password.contains(";")){
                     showAlertDialog("Username or Password contain illegal Characters");
                 }else{
@@ -65,7 +70,7 @@ public class RegisterActivity extends Activity {
 
         //Register successful
         if (registerSuccessful) {
-            //Start new Activity (Login)
+            //Start new Activity (back to Login)
             RegisterActivity.this.startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
         }
         //Registration failed

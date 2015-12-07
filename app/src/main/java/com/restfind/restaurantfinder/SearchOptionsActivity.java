@@ -8,7 +8,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -27,7 +31,7 @@ import com.google.android.gms.location.LocationServices;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchOptionsActivity extends AppCompatActivity implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
+public class SearchOptionsActivity extends AppBarActivity implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
 
@@ -43,8 +47,40 @@ public class SearchOptionsActivity extends AppCompatActivity implements Connecti
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_options);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         //Set up UI-Elements
         final EditText etSearchText = (EditText) findViewById(R.id.etSearchText);
+        final EditText etRadius = (EditText) findViewById(R.id.radiusEditText);
+
+        etSearchText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.setFocusable(true);
+                v.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
+        etRadius.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.setFocusable(true);
+                v.setFocusableInTouchMode(true);
+                return false;
+            }
+        });
+
+//        etRadius.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//
+//            public void onFocusChange(View v, boolean hasFocus) {
+//                if (!hasFocus && !etRadius.getText().toString().isEmpty()) {
+//                    Log.v("SearchOptions", "focus lost");
+//                    etRadius.setText(etRadius.getText().toString() + " meters");
+//                }
+//            }
+//        });
 
         /*Set up Spinner
         0...Search by Options
