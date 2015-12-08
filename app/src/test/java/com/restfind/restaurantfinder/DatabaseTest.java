@@ -63,6 +63,14 @@ public class DatabaseTest {
         }
     }
 
+
+    @Test
+    public void deleteFriend() {
+        assertEquals(2, Database.getFriends("tester3").size());
+        assertEquals(true, Database.deleteFriend("tester3", "tester2"));
+        assertEquals(1, Database.getFriends("tester3").size());
+    }
+
     @Test
     public void getFriends() {
         List<String> expected = new ArrayList<>();

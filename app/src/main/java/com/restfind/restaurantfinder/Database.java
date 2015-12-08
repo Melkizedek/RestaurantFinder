@@ -1,5 +1,6 @@
 package com.restfind.restaurantfinder;
 
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -22,7 +23,7 @@ public class Database {
     private static final String falseString = "FALSE";
 
     private enum Operation {
-        login, register, getFriendInvite, getFriends,
+        login, register, getFriendInvite, getFriends, deleteFriend,
         favorite, deleteFavorite, getFavorites
     }
 
@@ -40,6 +41,11 @@ public class Database {
 
     public static List<String> getFriendInvite(String username) {
         return execute(Operation.getFriendInvite, username);
+    }
+
+    public static boolean deleteFriend(String username, String friend) {
+        List<String> result = Database.execute(Operation.deleteFriend, username, friend);
+        return checkResult(result);
     }
 
     public static List<String> getFriends(String username) {
