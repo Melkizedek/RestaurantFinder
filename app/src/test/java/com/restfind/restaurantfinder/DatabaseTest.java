@@ -111,10 +111,10 @@ public class DatabaseTest {
         assertEquals(true, actual);
 
         actual = Database.deleteFavorite("tester", "loc1");
-        assertEquals(false, actual);
+        assertEquals(true, actual);
 
         actual = Database.deleteFavorite("testerLol", "loc1");
-        assertEquals(false, actual);
+        assertEquals(true, actual);
 
         actual = Database.deleteFavorite("tester", "loc2");
         assertEquals(true, actual);
