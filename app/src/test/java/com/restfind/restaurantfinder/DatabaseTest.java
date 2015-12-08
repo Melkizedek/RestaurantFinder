@@ -14,19 +14,6 @@ import static org.junit.Assert.assertEquals;
  * Created by gabriel on 04.12.15.
  */
 public class DatabaseTest {
-    @Test
-    public void getFriendInvites() throws Exception {
-        List<String> actual = new ArrayList<>();
-        for(int i = 2; i < 6; i++) {
-            actual.add("tester" + i);
-        }
-
-        List<String> result = Database.getFriendInvite("tester1");
-
-        for(int i = 0; i < result.size(); i++) {
-            assertEquals(actual.get(i), result.get(i));
-        }
-    }
 
     @Test
     public void login() {
@@ -60,6 +47,36 @@ public class DatabaseTest {
 
         actual = Database.register("tester6", "tests1");
         assertEquals(false, actual);
+    }
+
+    @Test
+    public void getFriendInvites() throws Exception {
+        List<String> actual = new ArrayList<>();
+        for(int i = 2; i < 6; i++) {
+            actual.add("tester" + i);
+        }
+
+        List<String> result = Database.getFriendInvite("tester1");
+
+        for(int i = 0; i < result.size(); i++) {
+            assertEquals(actual.get(i), result.get(i));
+        }
+    }
+
+    @Test
+    public void getFriends() {
+        List<String> expected = new ArrayList<>();
+        expected.add("tester1");
+        expected.add("tester2");
+        expected.add("tester3");
+        expected.add("tester5");
+
+        List<String> actual = Database.getFriends("tester");
+
+        assertEquals(expected.size(), actual.size());
+        for(int i = 0; i < expected.size(); i++) {
+            assertEquals(true, actual.contains(expected.get(i)));
+        }
     }
 
     @Test
