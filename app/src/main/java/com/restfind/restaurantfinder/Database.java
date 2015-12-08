@@ -22,7 +22,7 @@ public class Database {
     private static final String falseString = "FALSE";
 
     private enum Operation {
-        login, register, getFriendInvite, favorite, deleteFavorite
+        login, register, getFriendInvite, favorite, deleteFavorite, getFavorites
     }
 
     private final static String serverUrl = "http://restfind.heliohost.org/";
@@ -44,6 +44,10 @@ public class Database {
     public static boolean favorite(String username, String locationID) {
         List<String> result = execute(Operation.favorite, username, locationID);
         return checkResult(result);
+    }
+
+    public static List<String> getFavorites(String username) {
+        return execute(Operation.getFavorites, username);
     }
 
     public static boolean deleteFavorite(String username, String locationID) {

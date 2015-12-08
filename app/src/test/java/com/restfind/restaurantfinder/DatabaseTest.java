@@ -1,5 +1,7 @@
 package com.restfind.restaurantfinder;
 
+import android.provider.ContactsContract;
+
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -113,4 +115,28 @@ public class DatabaseTest {
         assertEquals(true, actual);
     }
 
+    @Test
+    public void getFavorites() {
+        List<String> result = Database.getFavorites("tester");
+        assertEquals(0, result.size());
+
+        List<String> expected =  new ArrayList<>();
+        expected.add("place01");
+        expected.add("place02");
+        expected.add("place03");
+
+        assertEquals(true, Database.favorite("tester", expected.get(0)));
+        assertEquals(true, Database.favorite("tester", expected.get(1)));
+        assertEquals(true, Database.favorite("tester", expected.get(2)));
+
+        List<String> actual = Database.getFavorites("tester");
+        assertEquals(expected.size(), actual.size());
+        for(int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i), actual.get(i));
+        }
+
+        assertEquals(true, Database.deleteFavorite("tester", expected.get(0)));
+        assertEquals(true, Database.deleteFavorite("tester", expected.get(1)));
+        assertEquals(true, Database.deleteFavorite("tester", expected.get(2)));
+    }
 }
