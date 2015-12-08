@@ -56,13 +56,13 @@ public class DatabaseTest {
         actual = Database.register("tester6", "tests");
         assertEquals(true, actual);
 
-        actual = Database.register("tester6", "tests");
+        actual = Database.register("tester6", "tests1");
         assertEquals(false, actual);
     }
 
-    // Table "Favorite" has to be empty before launching this test
     @Test
     public void favorite() {
+        // favorite
         boolean actual = Database.favorite("tester", "loc1");
         assertEquals(true, actual);
 
@@ -86,5 +86,31 @@ public class DatabaseTest {
 
         actual = Database.favorite("tester2", "loc1");
         assertEquals(true, actual);
+
+        // deleteFavorite
+        actual = Database.deleteFavorite("tester", "loc1");
+        assertEquals(true, actual);
+
+        actual = Database.deleteFavorite("tester", "loc1");
+        assertEquals(false, actual);
+
+        actual = Database.deleteFavorite("testerLol", "loc1");
+        assertEquals(false, actual);
+
+        actual = Database.deleteFavorite("tester", "loc2");
+        assertEquals(true, actual);
+
+        actual = Database.deleteFavorite("tester1", "loc1");
+        assertEquals(true, actual);
+
+        actual = Database.deleteFavorite("tester1", "loc2");
+        assertEquals(true, actual);
+
+        actual = Database.deleteFavorite("tester2", "loc2");
+        assertEquals(true, actual);
+
+        actual = Database.deleteFavorite("tester2", "loc1");
+        assertEquals(true, actual);
     }
+
 }
