@@ -23,7 +23,8 @@ public class Database {
     private static final String falseString = "FALSE";
 
     private enum Operation {
-        login, register, getFriendInvite, getFriends, deleteFriend,
+        login, register, getFriendInvites, sendFriendInvite,
+        getFriends, deleteFriend,
         favorite, deleteFavorite, getFavorites
     }
 
@@ -39,8 +40,13 @@ public class Database {
         return checkResult(result);
     }
 
-    public static List<String> getFriendInvite(String username) {
-        return execute(Operation.getFriendInvite, username);
+    public static List<String> getFriendInvites(String username) {
+        return execute(Operation.getFriendInvites, username);
+    }
+
+    public static boolean sendFriendInvite(String username, String friend) {
+        List<String> result = Database.execute(Operation.sendFriendInvite, username, friend);
+        return checkResult(result);
     }
 
     public static boolean deleteFriend(String username, String friend) {

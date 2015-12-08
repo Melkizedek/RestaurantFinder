@@ -36,7 +36,7 @@ public class DatabaseTest {
         assertEquals(true, actual);
     }
 
-    // für diesen Test darf es den user "tester6" noch nicht geben
+    // the user "tester6" must not exist, before executing this test
     @Test
     public void register() {
         boolean actual = Database.register("tester", "irgendows");
@@ -49,18 +49,22 @@ public class DatabaseTest {
         assertEquals(false, actual);
     }
 
+    // Tests for sending and getting friend requests.
+    // The table "Friend_Invite" has to be truncated before executing
+    // this test.
     @Test
-    public void getFriendInvites() throws Exception {
-        List<String> actual = new ArrayList<>();
-        for(int i = 2; i < 6; i++) {
-            actual.add("tester" + i);
-        }
+    public void sendFriendInvite() {
+        List<String> actual = Database.getFriendInvites("tester1");
+        assertEquals(0, actual.size());
+        assertEquals(true, Database.sendFriendInvite("tester2", "tester1"));
+        assertEquals(true, Database.sendFriendInvite("tester3", "tester1"));
+        assertEquals(true, Database.sendFriendInvite("tester4", "tester1"));
 
-        List<String> result = Database.getFriendInvite("tester1");
+        actual = Database.getFriendInvites("tester1");
+        assertEquals(3, actual.size());
 
-        for(int i = 0; i < result.size(); i++) {
-            assertEquals(actual.get(i), result.get(i));
-        }
+        actual = Database.getFriendInvites("tester2");
+        assertEquals(0, actual.size());
     }
 
 
