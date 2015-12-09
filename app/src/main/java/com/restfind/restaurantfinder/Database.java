@@ -30,14 +30,13 @@ public class Database {
 
     private final static String serverUrl = "http://restfind.heliohost.org/";
 
+    // *********** Methoden für die einzelnen SQL-Statements **************
     public static boolean register(String username, String password) {
-        List<String> result = execute(Operation.register, username, password);
-        return checkResult(result);
+        return checkResult(Operation.register, username, password);
     }
 
     public static boolean login(String username, String password) {
-        List<String> result = execute(Operation.login, username, password);
-        return checkResult(result);
+        return checkResult(Operation.login, username, password);
     }
 
     public static List<String> getFriendInvites(String username) {
@@ -45,13 +44,11 @@ public class Database {
     }
 
     public static boolean sendFriendInvite(String username, String friend) {
-        List<String> result = Database.execute(Operation.sendFriendInvite, username, friend);
-        return checkResult(result);
+        return checkResult(Operation.sendFriendInvite, username, friend);
     }
 
     public static boolean deleteFriend(String username, String friend) {
-        List<String> result = Database.execute(Operation.deleteFriend, username, friend);
-        return checkResult(result);
+        return checkResult(Operation.deleteFriend, username, friend);
     }
 
     public static List<String> getFriends(String username) {
@@ -59,8 +56,7 @@ public class Database {
     }
 
     public static boolean favorite(String username, String locationID) {
-        List<String> result = execute(Operation.favorite, username, locationID);
-        return checkResult(result);
+        return checkResult(Operation.favorite, username, locationID);
     }
 
     public static List<String> getFavorites(String username) {
@@ -68,10 +64,22 @@ public class Database {
     }
 
     public static boolean deleteFavorite(String username, String locationID) {
-        List<String> result = execute(Operation.deleteFavorite, username, locationID);
-        return checkResult(result);
+        return checkResult(Operation.deleteFavorite, username, locationID);
     }
 
+    // Diese Methode überprüft, ob das Einfügen von Daten in die Tabelle oder das Löschen
+    // von Daten aus der Tabelle erfolgreich ist.
+    private static boolean checkResult(Operation operation, String... arguments) {
+        List<String> result = Database.execute(operation, arguments);
+        return !(result == null || result.isEmpty()) && result.get(0).equals(trueString);
+    }
+
+    // Diese Methode führt die jeweilige .php Datei aus, die den Zugriff auf die Datenbank
+    // ausführt. Dazu müssen die Parameter für das SQL Statement mit übergeben werden.
+    // Das Ergebnis wird als eine Liste aus Strings zurückgegeben, wobei ein String für
+    // einen Datensatz in der Tabelle steht. Die Spalten einer Tabelle sind mittels ";"
+    // im String geteilt. Bei Insert und Delete SQL Statements beinhaltet die Liste nur
+    // einen String, der die beiden Werte "TRUE" oder "FALSE" haben kann.
     private static List<String> execute(Operation operation, String... arguments) {
         try {
             // erzeuge URL zur *.php Datei auf Server
@@ -116,9 +124,5 @@ public class Database {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    private static boolean checkResult(List<String> result) {
-        return !(result == null || result.isEmpty()) && result.get(0).equals(trueString);
     }
 }

@@ -1,7 +1,5 @@
 package com.restfind.restaurantfinder;
 
-import android.provider.ContactsContract;
-
 import org.junit.Test;
 
 import java.util.ArrayList;
