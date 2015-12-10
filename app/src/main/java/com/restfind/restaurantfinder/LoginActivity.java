@@ -130,4 +130,9 @@ public class LoginActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+
+    @Override
+    public void onBackPressed() {
+        //Do nothing
+    }
 }

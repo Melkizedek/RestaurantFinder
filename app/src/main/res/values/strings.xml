@@ -8,6 +8,9 @@
     <string name="login_automatically">Log in automatically next time</string>
     <string name="login_incorrect">Password or Username not correct!</string>
     <string name="login_illegal">Username or Password contain illegal Characters!</string>
+    <string name="connection_error">Could not connect to the Server!</string>
+
+    <string name="registerNameUnavailable">This Username is not available</string>
 
     <string name="sign_in">Sign In</string>
     <string name="register">Register</string>

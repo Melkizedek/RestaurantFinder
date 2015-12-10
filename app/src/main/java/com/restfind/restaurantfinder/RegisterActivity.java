@@ -75,7 +75,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
         //Registration failed
         else {
-            showAlertDialog("Regristration failed!");
+            showAlertDialog(getResources().getString(R.string.registerNameUnavailable));
         }
     }
 

@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -51,6 +52,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         setSupportActionBar(toolbar);
 
         //Set up UI-Elements
+        final Button btnSearch = (Button) findViewById(R.id.btnSearch);
         final EditText etSearchText = (EditText) findViewById(R.id.etSearchText);
         final EditText etRadius = (EditText) findViewById(R.id.radiusEditText);
 
@@ -96,10 +98,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(position == 0){
+                if (position == 0) {
                     etSearchText.setVisibility(View.GONE);
-                }
-                else if(position == 1){
+                } else if (position == 1) {
                     etSearchText.setVisibility(View.VISIBLE);
                 }
             }
@@ -107,6 +108,15 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
+            }
+        });
+
+        //Search-Button
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
+                intent.putExtra(getResources().getString(R.string.search_options), new SearchOptions(""));
+                startActivity(intent);
             }
         });
     }

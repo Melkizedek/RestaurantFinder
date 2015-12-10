@@ -4,16 +4,20 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import java.util.List;
 
-public class SearchResultsActivity extends AppCompatActivity {
+public class SearchResultsActivity extends AppBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         Intent intent = getIntent();
         SearchOptions searchOptions = intent.getParcelableExtra(getResources().getString(R.string.search_options));
