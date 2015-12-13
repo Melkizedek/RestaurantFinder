@@ -41,11 +41,6 @@
         </activity>
         <activity android:name=".InvitationsActivity" >
         </activity>
-        <activity
-            android:name=".AppBarActivity"
-            android:label="@string/title_activity_app_bar"
-            android:theme="@style/AppTheme" >
-        </activity>
     </application>
 
 </manifest>

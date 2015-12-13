@@ -24,4 +24,14 @@
         <item>Search Location by Name</item>
     </string-array>
     <string name="title_activity_app_bar">AppBarActivity</string>
+
+    <string-array name="restaurant_types">
+        <item>Chinese</item>
+        <item>Japanese</item>
+        <item>Indian</item>
+        <item>Italian</item>
+        <item>Pizza</item>
+        <item>Mexican</item>
+        <item>Steak</item>
+    </string-array>
 </resources>

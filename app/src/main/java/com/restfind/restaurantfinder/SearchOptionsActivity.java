@@ -6,18 +6,18 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -43,6 +43,8 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     private int radius;
 //    private List<String> types;
 
+    private List<CheckBox> checkBoxesRest;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +57,33 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         final Button btnSearch = (Button) findViewById(R.id.btnSearch);
         final EditText etSearchText = (EditText) findViewById(R.id.etSearchText);
         final EditText etRadius = (EditText) findViewById(R.id.radiusEditText);
+        final CheckBox cbCafe = (CheckBox) findViewById(R.id.cbCafe);
+        final CheckBox cbPub = (CheckBox) findViewById(R.id.cbPub);
+        final CheckBox cbRest = (CheckBox) findViewById(R.id.cbRestaurant);
+        final LinearLayout llCbRest = (LinearLayout) findViewById(R.id.llCheckboxesRest);
+
+        checkBoxesRest = new ArrayList<>();
+        String[] restaurantTypes = getResources().getStringArray(R.array.restaurant_types);
+
+        for(int i = 0; i < restaurantTypes.length; i++){
+            CheckBox cb = new CheckBox(this);
+            cb.setText(restaurantTypes[i]);
+
+            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked && allCheckboxesChecked()) {
+                        cbRest.setChecked(true);
+                    } else {
+                        cbRest.setChecked(false);
+                    }
+                }
+            });
+
+            llCbRest.addView(cb);
+
+            checkBoxesRest.add(cb);
+        }
 
         etSearchText.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -111,6 +140,21 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             }
         });
 
+        cbRest.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                CheckBox cb = (CheckBox) v;
+                if(cb.isChecked()){
+                    for(CheckBox b : checkBoxesRest){
+                        b.setChecked(true);
+                    }
+                } else{
+                    for(CheckBox b : checkBoxesRest){
+                        b.setChecked(false);
+                    }
+                }
+            }
+        });
+
         //Search-Button
         btnSearch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -119,6 +163,15 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                 startActivity(intent);
             }
         });
+    }
+
+    private boolean allCheckboxesChecked(){
+        for(CheckBox cb : checkBoxesRest){
+            if(!cb.isChecked()){
+                return false;
+            }
+        }
+        return true;
     }
 
 

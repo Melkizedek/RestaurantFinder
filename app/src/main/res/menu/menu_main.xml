@@ -6,20 +6,18 @@
         android:title="Logout"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_addRestaurant"
-        android:icon="@drawable/ic_bookmark_black_48dp"
-        android:title="Add Restaurant"
-        app:showAsAction="ifRoom"/>
-
+        android:id="@+id/action_friends"
+        android:icon="@drawable/ic_people_black_48dp"
+        android:title="Friends"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/action_favorite"
         android:icon="@drawable/ic_favorite_black_48dp"
-        android:title="Favorite"
-        app:showAsAction="ifRoom"/>
+        android:title="Favorite Restaurants"
+        app:showAsAction="always"/>
     <item
-    android:id="@+id/action_friends"
-    android:icon="@drawable/ic_people_black_48dp"
-    android:title="Friends"
-    app:showAsAction="ifRoom"/>
-
+        android:id="@+id/action_invitations"
+        android:icon="@drawable/ic_bookmark_black_48dp"
+        android:title="Restaurant Invitations"
+        app:showAsAction="always"/>
 </menu>
