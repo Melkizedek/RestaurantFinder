@@ -6,20 +6,20 @@
         android:title="Logout"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/addfirends"
-        android:icon="@drawable/ic_group_add_black_48dp"
-        android:title="add friends"
+        android:id="@+id/action_addRestaurant"
+        android:icon="@drawable/ic_bookmark_black_48dp"
+        android:title="Add Restaurant"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_favorite"
         android:icon="@drawable/ic_favorite_black_48dp"
-        android:title="add favorite"
+        android:title="Favorite"
         app:showAsAction="ifRoom"/>
     <item
-    android:id="@+id/firends"
+    android:id="@+id/action_friends"
     android:icon="@drawable/ic_people_black_48dp"
-    android:title="friends"
+    android:title="Friends"
     app:showAsAction="ifRoom"/>
 
 </menu>

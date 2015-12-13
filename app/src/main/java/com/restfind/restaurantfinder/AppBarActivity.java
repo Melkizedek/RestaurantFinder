@@ -52,6 +52,15 @@ public abstract class AppBarActivity extends AppCompatActivity {
                 startActivity(new Intent(AppBarActivity.this, LoginActivity.class));
 
                 return true;
+            case R.id.action_addRestaurant:
+                startActivity(new Intent(AppBarActivity.this, InvitationsActivity.class));
+                return true;
+            case R.id.action_favorite:
+                startActivity(new Intent(AppBarActivity.this, FavoritesActivity.class));
+                return true;
+            case R.id.action_friends:
+                startActivity(new Intent(AppBarActivity.this, FriendsActivity.class));
+                return true;
 
             default:
                 // If we got here, the user's action was not recognized.
