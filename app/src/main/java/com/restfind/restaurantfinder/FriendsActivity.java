@@ -6,11 +6,12 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FriendsActivity extends AppCompatActivity {
+public class FriendsActivity extends AppBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +32,13 @@ public class FriendsActivity extends AppCompatActivity {
         //Start task
         GetFriendsTask task = new GetFriendsTask();
         task.execute(username);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_friends, menu);
+        return true;
     }
 
     //<Input for doInBackground, (Progress), Input for onPostExecute>

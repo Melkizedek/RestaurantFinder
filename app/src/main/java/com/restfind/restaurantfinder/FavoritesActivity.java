@@ -7,10 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 
 import java.util.List;
 
-public class FavoritesActivity extends AppCompatActivity {
+public class FavoritesActivity extends AppBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +32,13 @@ public class FavoritesActivity extends AppCompatActivity {
         //Start task
         GetFavoritesTask task = new GetFavoritesTask();
         task.execute(username);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_logout_only, menu);
+        return true;
     }
 
     //<Input for doInBackground, (Progress), Input for onPostExecute>

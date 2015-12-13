@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 public abstract class AppBarActivity extends AppCompatActivity {
 
@@ -55,6 +56,10 @@ public abstract class AppBarActivity extends AppCompatActivity {
                 return true;
             case R.id.action_friends:
                 startActivity(new Intent(AppBarActivity.this, FriendsActivity.class));
+                return true;
+            case R.id.action_add_friend:
+                Toast toast = Toast.makeText(this, "Add Friend", Toast.LENGTH_SHORT);
+                toast.show();
                 return true;
 
             default:
