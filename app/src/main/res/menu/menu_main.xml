@@ -5,4 +5,21 @@
     <item android:id="@+id/action_logout"
         android:title="Logout"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/addfirends"
+        android:icon="@drawable/ic_group_add_black_48dp"
+        android:title="add friends"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_favorite"
+        android:icon="@drawable/ic_favorite_black_48dp"
+        android:title="add favorite"
+        app:showAsAction="ifRoom"/>
+    <item
+    android:id="@+id/firends"
+    android:icon="@drawable/ic_people_black_48dp"
+    android:title="friends"
+    app:showAsAction="ifRoom"/>
+
 </menu>
