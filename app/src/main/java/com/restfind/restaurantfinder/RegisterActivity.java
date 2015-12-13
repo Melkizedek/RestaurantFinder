@@ -1,8 +1,10 @@
 package com.restfind.restaurantfinder;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -64,12 +66,20 @@ public class RegisterActivity extends AppCompatActivity {
         try {
             registerSuccessful = result.get();
         } catch (Exception e) {
-            // failed
+            showAlertDialog(getResources().getString(R.string.connection_error));
+            return;
+        } finally {
+            es.shutdown();
         }
-        es.shutdown();
 
         //Register successful
         if (registerSuccessful) {
+            //delete saved login
+            SharedPreferences spLoginSaved = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_saved), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = spLoginSaved.edit();
+            editor.clear();
+            editor.commit();
+
             //Start new Activity (back to Login)
             RegisterActivity.this.startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
         }

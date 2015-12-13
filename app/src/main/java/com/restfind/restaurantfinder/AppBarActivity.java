@@ -47,6 +47,8 @@ public abstract class AppBarActivity extends AppCompatActivity {
                 editor.clear();
                 editor.commit();
 
+                //TODO: stop Service
+
                 startActivity(new Intent(AppBarActivity.this, LoginActivity.class));
 
                 return true;

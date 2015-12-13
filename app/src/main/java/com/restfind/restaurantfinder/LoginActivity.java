@@ -13,7 +13,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
+import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -82,17 +84,20 @@ public class LoginActivity extends AppCompatActivity {
         //Thread that tries to login
         ExecutorService es = Executors.newSingleThreadExecutor();
         Future<Boolean> result = es.submit(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                return Database.login(username, password);
+            public Boolean call() throws IOException {
+                    return Database.login(username, password);
             }
         });
 
         try {
             loginSuccessful = result.get();
         } catch (Exception e) {
-            // failed
+//            e.printStackTrace();
+            showAlertDialog(getResources().getString(R.string.connection_error));
+            return;
+        } finally {
+            es.shutdown();
         }
-        es.shutdown();
 
         if (loginSuccessful) {
             //Save username and password for future automatic logins
