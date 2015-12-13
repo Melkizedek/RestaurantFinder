@@ -2,6 +2,7 @@ package com.restfind.restaurantfinder;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 public class DatabaseTest {
 
     @Test
-    public void login() {
+    public void login() throws IOException {
         boolean actual = Database.login("tester", "tests");
         assertEquals(true, actual);
 
@@ -36,7 +37,7 @@ public class DatabaseTest {
 
     // the user "tester6" must not exist, before executing this test
     @Test
-    public void register() {
+    public void register() throws IOException {
         boolean actual = Database.register("tester", "irgendows");
         assertEquals(false, actual);
 
@@ -51,7 +52,7 @@ public class DatabaseTest {
     // The table "Friend_Invite" has to be truncated before executing
     // this test.
     @Test
-    public void sendFriendInvite() {
+    public void sendFriendInvite() throws IOException {
         List<String> actual = Database.getFriendInvites("tester1");
         assertEquals(0, actual.size());
         assertEquals(true, Database.sendFriendInvite("tester2", "tester1"));
@@ -66,15 +67,17 @@ public class DatabaseTest {
     }
 
 
+    // for this test, tester3 has to have two friends, of which one of them
+    // is tester2
     @Test
-    public void deleteFriend() {
+    public void deleteFriend() throws IOException {
         assertEquals(2, Database.getFriends("tester3").size());
         assertEquals(true, Database.deleteFriend("tester3", "tester2"));
         assertEquals(1, Database.getFriends("tester3").size());
     }
 
     @Test
-    public void getFriends() {
+    public void getFriends() throws IOException {
         List<String> expected = new ArrayList<>();
         expected.add("tester1");
         expected.add("tester2");
@@ -90,7 +93,7 @@ public class DatabaseTest {
     }
 
     @Test
-    public void favorite() {
+    public void favorite() throws IOException {
         // favorite
         boolean actual = Database.favorite("tester", "loc1");
         assertEquals(true, actual);
@@ -142,8 +145,9 @@ public class DatabaseTest {
         assertEquals(true, actual);
     }
 
+    // this test include adding, getting and deleting favorite restaurants
     @Test
-    public void getFavorites() {
+    public void getFavorites() throws IOException {
         List<String> result = Database.getFavorites("tester");
         assertEquals(0, result.size());
 
