@@ -17,7 +17,7 @@
         app:showAsAction="always"/>
     <item
         android:id="@+id/action_invitations"
-        android:icon="@drawable/ic_bookmark_black_24dp"
+        android:icon="@drawable/ic_sms_failed_black_24dp"
         android:title="Restaurant Invitations"
         app:showAsAction="always"/>
 </menu>
