@@ -3,14 +3,17 @@ package com.restfind.restaurantfinder;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.Menu;
+import android.widget.ListView;
 
 import java.util.List;
 
-public class FavoritesActivity extends AppCompatActivity {
+public class FavoritesActivity extends AppBarActivity {
+
+    private ListView lvFavoriteList;
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,19 +21,26 @@ public class FavoritesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_favorites);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Favorites");
         setSupportActionBar(toolbar);
 
         //Get current logged-in username
         SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
-        String username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
+        username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
 
-        /*
-        TODO: ListView for Elements, Delete Button in AppBar
-         */
+        //Set up UI-Elements
+        lvFavoriteList = (ListView) findViewById(R.id.lvFavoriteList);
 
         //Start task
         GetFavoritesTask task = new GetFavoritesTask();
         task.execute(username);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_logout_only, menu);
+        return true;
     }
 
     //<Input for doInBackground, (Progress), Input for onPostExecute>

@@ -1,15 +1,12 @@
 package com.restfind.restaurantfinder;
 
-import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
+//Saves all Search Options that are used to Search Locations
 public class SearchOptions implements Parcelable {
     private String searchText;
     private double longitude;

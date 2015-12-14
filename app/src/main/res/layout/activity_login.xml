@@ -24,7 +24,7 @@
                 android:inputType="textPersonName"
                 android:hint="Username"
                 android:ems="10"
-                android:id="@+id/username"
+                android:id="@+id/etUsername"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="20dp" />
@@ -35,27 +35,27 @@
                 android:inputType="textPassword"
                 android:hint="Password"
                 android:ems="10"
-                android:id="@+id/passwort"
-                android:layout_below="@+id/username"
+                android:id="@+id/etPassword"
+                android:layout_below="@+id/etUsername"
                 android:layout_centerHorizontal="true"
                 />
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sign_in"
-                android:id="@+id/signIn"
+                android:text="@string/login"
+                android:id="@+id/btnLogin"
                 android:layout_centerVertical="true"
-                android:layout_alignLeft="@+id/register"
-                android:layout_alignStart="@+id/register"
+                android:layout_alignLeft="@+id/btnRegister"
+                android:layout_alignStart="@+id/btnRegister"
                 android:layout_centerHorizontal="true"/>
 
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/register"
-                android:id="@+id/register"
-                android:layout_below="@+id/signIn"
+                android:id="@+id/btnRegister"
+                android:layout_below="@+id/btnLogin"
                 android:layout_centerHorizontal="true"/>
 
             <CheckBox
@@ -63,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/login_automatically"
                 android:id="@+id/cbAutomaticLogin"
-                android:layout_above="@+id/signIn"
+                android:layout_above="@+id/btnLogin"
                 android:layout_centerHorizontal="true" />
         </RelativeLayout>
     </LinearLayout>

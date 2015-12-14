@@ -6,13 +6,13 @@ import android.os.IBinder;
 
 public class CheckInvitationsService extends Service {
     /*
-    TODO: regularly check Database for Friendinvites and Restaurant-Invitations
-    if there is something, send it to currently running Activity (maybe an AlertDialog)
-    There you can accept or decline it
+    TODO: gestartet von SearchOptionsActivity sofort nach Login
+    (vielleicht kann sich nur AppBarActivity dran binden,
+    damit alle Activities die davon ableiten auch gebindet sind)
 
-    Probably best with starting Service, not binding
-
-    MAYBE: if App is not running send Notification
+    holt sich in bestimmten Abständen Friend-Invites und Restaurant-Invitations von Database,
+    wenn neue vorhanden (maybe durch Timestamps überprüfen) irgendwie in gerade laufender App anzeigen
+    (kleine Zahl auf z.B. Friends-Button in AppBar, oder ein Toast, oder AlertDialog, k.a.)
     */
 
     public CheckInvitationsService() {

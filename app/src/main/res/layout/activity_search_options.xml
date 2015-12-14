@@ -19,8 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:paddingTop="5dp"
-            android:id="@+id/spinner" />
+            android:paddingTop="6dp"
+            android:id="@+id/spinnerSearchOptions" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -46,117 +46,35 @@
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:ems="10"
-                    android:id="@+id/radiusEditText"
+                    android:id="@+id/etRadius"
                     android:hint="Radius in meter"
                     android:focusable="false"/>
 
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox" />
+                    android:text="Cafe"
+                    android:id="@+id/cbCafe" />
 
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox2" />
+                    android:text="Pub"
+                    android:id="@+id/cbPub" />
 
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox3" />
+                    android:text="Restaurant"
+                    android:id="@+id/cbRestaurant" />
 
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox4" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox5" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox6" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox7" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox8" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox9" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox10" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox11" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox12" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox13" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox14" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox15" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox16" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox"
-                    android:id="@+id/checkBox17" />
-
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="New CheckBox 18"
-                    android:id="@+id/checkBox18" />
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="25dp"
+                    android:id="@+id/llCheckboxesRest">
+                </LinearLayout>
 
             </LinearLayout>
         </ScrollView>
