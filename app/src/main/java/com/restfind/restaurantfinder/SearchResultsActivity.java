@@ -11,16 +11,20 @@ import java.util.List;
 
 public class SearchResultsActivity extends AppBarActivity {
 
+    SearchOptions searchOptions;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Results");
         setSupportActionBar(toolbar);
 
+        //Get Search Options from previous Activity
         Intent intent = getIntent();
-        SearchOptions searchOptions = intent.getParcelableExtra(getResources().getString(R.string.search_options));
+        searchOptions = intent.getParcelableExtra(getResources().getString(R.string.search_options));
 
         //start AsyncTask
         GetSearchResultsTask task = new GetSearchResultsTask();

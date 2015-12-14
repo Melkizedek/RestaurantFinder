@@ -19,8 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:paddingTop="5dp"
-            android:id="@+id/spinner" />
+            android:paddingTop="6dp"
+            android:id="@+id/spinnerSearchOptions" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -46,7 +46,7 @@
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:ems="10"
-                    android:id="@+id/radiusEditText"
+                    android:id="@+id/etRadius"
                     android:hint="Radius in meter"
                     android:focusable="false"/>
 

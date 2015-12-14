@@ -8,7 +8,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -41,7 +40,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     private LocationRequest locationRequest;
 
     private int radius;
-//    private List<String> types;
+    private List<String> types;
 
     private List<CheckBox> checkBoxesRest;
 
@@ -51,20 +50,23 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         setContentView(R.layout.activity_search_options);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Search Options");
         setSupportActionBar(toolbar);
 
         //Set up UI-Elements
         final Button btnSearch = (Button) findViewById(R.id.btnSearch);
         final EditText etSearchText = (EditText) findViewById(R.id.etSearchText);
-        final EditText etRadius = (EditText) findViewById(R.id.radiusEditText);
+        final EditText etRadius = (EditText) findViewById(R.id.etRadius);
         final CheckBox cbCafe = (CheckBox) findViewById(R.id.cbCafe);
         final CheckBox cbPub = (CheckBox) findViewById(R.id.cbPub);
-        final CheckBox cbRest = (CheckBox) findViewById(R.id.cbRestaurant);
+        final CheckBox cbRestaurant = (CheckBox) findViewById(R.id.cbRestaurant);
         final LinearLayout llCbRest = (LinearLayout) findViewById(R.id.llCheckboxesRest);
 
         checkBoxesRest = new ArrayList<>();
+        //Get Restaurant-Types out of String-Array
         String[] restaurantTypes = getResources().getStringArray(R.array.restaurant_types);
 
+        //Create Checkboxes out of those Restaurant-Types and add them to the ListView and a List
         for(int i = 0; i < restaurantTypes.length; i++){
             CheckBox cb = new CheckBox(this);
             cb.setText(restaurantTypes[i]);
@@ -72,19 +74,21 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
                     if (isChecked && allCheckboxesChecked()) {
-                        cbRest.setChecked(true);
-                    } else {
-                        cbRest.setChecked(false);
+                        cbRestaurant.setChecked(true);
+                    }
+                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
+                    else {
+                        cbRestaurant.setChecked(false);
                     }
                 }
             });
-
             llCbRest.addView(cb);
-
             checkBoxesRest.add(cb);
         }
 
+        //EditTexts are only focused when touched, not when starting the Activity
         etSearchText.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -93,7 +97,6 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                 return false;
             }
         });
-
         etRadius.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -103,21 +106,11 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             }
         });
 
-//        etRadius.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//
-//            public void onFocusChange(View v, boolean hasFocus) {
-//                if (!hasFocus && !etRadius.getText().toString().isEmpty()) {
-//                    Log.v("SearchOptions", "focus lost");
-//                    etRadius.setText(etRadius.getText().toString() + " meters");
-//                }
-//            }
-//        });
-
         /*Set up Spinner
-        0...Search by Options
+        0...Search by Options (default)
         1...Search by Name
          */
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        Spinner spinner = (Spinner) findViewById(R.id.spinnerSearchOptions);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.search_options_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -127,28 +120,30 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //Search by Options
                 if (position == 0) {
                     etSearchText.setVisibility(View.GONE);
-                } else if (position == 1) {
+                }
+                //Search by Name
+                else if (position == 1) {
                     etSearchText.setVisibility(View.VISIBLE);
                 }
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
-        cbRest.setOnClickListener(new View.OnClickListener() {
+        //Restaurant-Checkbox checks or unchecks all Sub-Checkboxes
+        cbRestaurant.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 CheckBox cb = (CheckBox) v;
-                if(cb.isChecked()){
-                    for(CheckBox b : checkBoxesRest){
+                if (cb.isChecked()) {
+                    for (CheckBox b : checkBoxesRest) {
                         b.setChecked(true);
                     }
-                } else{
-                    for(CheckBox b : checkBoxesRest){
+                } else {
+                    for (CheckBox b : checkBoxesRest) {
                         b.setChecked(false);
                     }
                 }
@@ -158,13 +153,17 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         //Search-Button
         btnSearch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                //TODO: create SearchOptions
+                SearchOptions options = new SearchOptions("");
+
                 Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
-                intent.putExtra(getResources().getString(R.string.search_options), new SearchOptions(""));
+                intent.putExtra(getResources().getString(R.string.search_options), options);
                 startActivity(intent);
             }
         });
     }
 
+    //Checks if all Sub-Checkboxes of Restaurant are checked
     private boolean allCheckboxesChecked(){
         for(CheckBox cb : checkBoxesRest){
             if(!cb.isChecked()){
