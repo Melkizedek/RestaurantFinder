@@ -26,7 +26,8 @@ public class Database {
     private static final String falseString = "FALSE";
 
     private enum Operation {
-        login, register, getFriendInvites, sendFriendInvite,
+        login, register,
+        getFriendInvites, sendFriendInvite, acceptFriendInvite, declineFriendInvite,
         getFriends, deleteFriend,
         favorite, deleteFavorite, getFavorites
     }
@@ -46,8 +47,16 @@ public class Database {
         return execute(Operation.getFriendInvites, username);
     }
 
-    public static boolean sendFriendInvite(String username, String friend) throws IOException {
-        return checkResult(Operation.sendFriendInvite, username, friend);
+    public static boolean sendFriendInvite(String username, String invitedUser) throws IOException {
+        return checkResult(Operation.sendFriendInvite, username, invitedUser);
+    }
+
+    public static boolean acceptFriendInvite(String username, String invitor) throws IOException {
+        return checkResult(Operation.acceptFriendInvite, username, invitor);
+    }
+
+    public static boolean declineFriendInvite(String username, String invitor) throws IOException {
+        return checkResult(Operation.declineFriendInvite, username, invitor);
     }
 
     public static boolean deleteFriend(String username, String friend) throws IOException {
