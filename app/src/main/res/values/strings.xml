@@ -33,4 +33,30 @@
         <item>Mexican</item>
         <item>Steak</item>
     </string-array>
+
+    <string-array name="bar_types">
+        <item>Pub</item>
+        <item>Irish-Pub</item>
+        <item>Bar</item>
+        <item>Gay-Bar</item>
+        <item>Tapas Bar</item>
+        <item>Sports-Bar</item>
+        <item>Nightclub</item>
+        <item>Cocktail-Bar</item>
+        <item>Karaoke-Bar</item>
+        <item>Wine-Bar</item>
+        <item>Brasserie</item>
+        <item>Jazz-Club</item>
+        <item>Gastropub</item>
+        <item>Live music venue</item>
+        <item>Barbecue</item>
+    </string-array>
+
+    <string-array name="cafe_types">
+
+    </string-array>
+
+    <string-array name="takeaway_types">
+
+    </string-array>
 </resources>
