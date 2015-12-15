@@ -36,7 +36,8 @@ public class FriendsActivity extends AppBarActivity {
 
     private ListView lvFriendList;
     private String username;
-    AlertDialog dialogAddFriend;
+    private AlertDialog dialogAddFriend;
+    private GetFriendsTask task;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +53,7 @@ public class FriendsActivity extends AppBarActivity {
         username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
 
         //Start task
-        GetFriendsTask task = new GetFriendsTask();
+        task = new GetFriendsTask();
         task.execute(username);
     }
 
@@ -95,7 +96,11 @@ public class FriendsActivity extends AppBarActivity {
 
                                     try {
                                         addingSuccessful = result.get();
-                                    } catch (Exception e) {
+                                    }
+//                                    catch (InviteAlreadyExistsException e){
+//                                        showAlertDialog("This User has already sent you an Invite!");
+//                                    }
+                                    catch (Exception e) {
                                         //Could not connect to Server with .php-files
                                         showAlertDialog(getResources().getString(R.string.connection_error));
                                         return;
@@ -180,8 +185,17 @@ public class FriendsActivity extends AppBarActivity {
     //<Input for doInBackground, (Progress), Input for onPostExecute>
     private class GetFriendsTask extends AsyncTask<String, Integer, Map<String, Boolean>> {
 
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//
+//            lvFriendList.setAdapter(null);
+//        }
+
         @Override
         protected Map<String, Boolean> doInBackground(String... params) {
+            Log.v("Task", "restarted");
+
             Map<String, Boolean> friendsMap = new TreeMap<String, Boolean>();
             List<String> friends = null;
 
@@ -297,7 +311,7 @@ public class FriendsActivity extends AppBarActivity {
 //                convertView = inflater.inflate(R.layout.list_view_element_friend, null);
 //            }
 
-            Map.Entry<String, Boolean> item = getItem(position);
+            final Map.Entry<String, Boolean> item = getItem(position);
 
             //Handle TextView and display string from your list
             TextView listItemText = (TextView)view.findViewById(R.id.tvFriend);
@@ -317,8 +331,7 @@ public class FriendsActivity extends AppBarActivity {
                         ExecutorService es = Executors.newSingleThreadExecutor();
                         Future<Boolean> result = es.submit(new Callable<Boolean>() {
                             public Boolean call() throws IOException {
-                                //TODO: Database.accept(username, list.get(position));
-                                return false;
+                                return Database.acceptFriendInvite(username, item.getKey());
                             }
                         });
 
@@ -332,10 +345,11 @@ public class FriendsActivity extends AppBarActivity {
                             es.shutdown();
                         }
 
-                        //Friend does not exist
                         if (acceptSuccessful) {
+                            Log.v("Friends", "acceptSuccessful");
+                            lvFriendList.setAdapter(null);
                             //Start task
-                            GetFriendsTask task = new GetFriendsTask();
+                            task = new GetFriendsTask();
                             task.execute(username);
                         }
 
@@ -351,8 +365,7 @@ public class FriendsActivity extends AppBarActivity {
                         ExecutorService es = Executors.newSingleThreadExecutor();
                         Future<Boolean> result = es.submit(new Callable<Boolean>() {
                             public Boolean call() throws IOException {
-                                //TODO: Database.decline(username, list.get(position));
-                                return false;
+                                return Database.declineFriendInvite(username, item.getKey());
                             }
                         });
 

@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingBottom="0dp"
     tools:context="com.restfind.restaurantfinder.SearchOptionsActivity">
 
     <LinearLayout
@@ -50,17 +50,7 @@
                     android:hint="Radius in meter"
                     android:focusable="false"/>
 
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Cafe"
-                    android:id="@+id/cbCafe" />
 
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Pub"
-                    android:id="@+id/cbPub" />
 
                 <CheckBox
                     android:layout_width="wrap_content"
@@ -76,6 +66,53 @@
                     android:id="@+id/llCheckboxesRest">
                 </LinearLayout>
 
+
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bar"
+                    android:id="@+id/cbBar" />
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="25dp"
+                    android:id="@+id/llCheckboxesBar">
+                </LinearLayout>
+
+
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cafe"
+                    android:id="@+id/cbCafe" />
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="25dp"
+                    android:id="@+id/llCheckboxesCafe">
+                </LinearLayout>
+
+
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Takeaway"
+                    android:id="@+id/cbTakeaway" />
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="25dp"
+                    android:id="@+id/llCheckboxesTakeaway">
+                </LinearLayout>
             </LinearLayout>
         </ScrollView>
 
@@ -83,7 +120,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="Search"
+            android:text="@string/search"
+            android:background="@color/colorPrimary"
             android:id="@+id/btnSearch" />
 
     </LinearLayout>

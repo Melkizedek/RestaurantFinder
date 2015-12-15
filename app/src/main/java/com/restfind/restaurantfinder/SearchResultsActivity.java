@@ -6,12 +6,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.ListView;
 
 import java.util.List;
 
 public class SearchResultsActivity extends AppBarActivity {
 
     SearchOptions searchOptions;
+    ListView lvSearchResults;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +27,9 @@ public class SearchResultsActivity extends AppBarActivity {
         //Get Search Options from previous Activity
         Intent intent = getIntent();
         searchOptions = intent.getParcelableExtra(getResources().getString(R.string.search_options));
+
+        //Set up UI-Elements
+        lvSearchResults = (ListView) findViewById(R.id.lvSearchResults);
 
         //start AsyncTask
         GetSearchResultsTask task = new GetSearchResultsTask();

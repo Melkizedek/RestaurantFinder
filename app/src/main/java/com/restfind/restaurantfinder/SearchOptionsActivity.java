@@ -43,6 +43,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     private List<String> types;
 
     private List<CheckBox> checkBoxesRest;
+    private List<CheckBox> checkBoxesCafe;
+    private List<CheckBox> checkBoxesBar;
+    private List<CheckBox> checkBoxesTakeaway;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,35 +61,117 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         final EditText etSearchText = (EditText) findViewById(R.id.etSearchText);
         final EditText etRadius = (EditText) findViewById(R.id.etRadius);
         final CheckBox cbCafe = (CheckBox) findViewById(R.id.cbCafe);
-        final CheckBox cbPub = (CheckBox) findViewById(R.id.cbPub);
+        final CheckBox cbBar = (CheckBox) findViewById(R.id.cbBar);
         final CheckBox cbRestaurant = (CheckBox) findViewById(R.id.cbRestaurant);
+        final CheckBox cbTakeaway = (CheckBox) findViewById(R.id.cbTakeaway);
         final LinearLayout llCbRest = (LinearLayout) findViewById(R.id.llCheckboxesRest);
+        final LinearLayout llCbBar = (LinearLayout) findViewById(R.id.llCheckboxesBar);
+        final LinearLayout llCbCafe = (LinearLayout) findViewById(R.id.llCheckboxesCafe);
+        final LinearLayout llCbTakeaway = (LinearLayout) findViewById(R.id.llCheckboxesTakeaway);
 
         checkBoxesRest = new ArrayList<>();
+        checkBoxesBar = new ArrayList<>();
+        checkBoxesCafe = new ArrayList<>();
+        checkBoxesTakeaway = new ArrayList<>();
+
         //Get Restaurant-Types out of String-Array
-        String[] restaurantTypes = getResources().getStringArray(R.array.restaurant_types);
+        String[] restaurantTypesArray = getResources().getStringArray(R.array.restaurant_types);
+        String[] barTypesArray = getResources().getStringArray(R.array.bar_types);
+        String[] cafeTypesArray = getResources().getStringArray(R.array.cafe_types);
+        String[] takeawayTypesArray = getResources().getStringArray(R.array.takeaway_types);
 
-        //Create Checkboxes out of those Restaurant-Types and add them to the ListView and a List
-        for(int i = 0; i < restaurantTypes.length; i++){
-            CheckBox cb = new CheckBox(this);
-            cb.setText(restaurantTypes[i]);
+        setupCheckboxes(cbBar, checkBoxesBar, barTypesArray, llCbBar);
+        setupCheckboxes(cbCafe, checkBoxesCafe, cafeTypesArray, llCbCafe);
+        setupCheckboxes(cbRestaurant, checkBoxesRest, restaurantTypesArray, llCbRest);
+        setupCheckboxes(cbTakeaway, checkBoxesTakeaway, takeawayTypesArray, llCbTakeaway);
 
-            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
-                    if (isChecked && allCheckboxesChecked()) {
-                        cbRestaurant.setChecked(true);
-                    }
-                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
-                    else {
-                        cbRestaurant.setChecked(false);
-                    }
-                }
-            });
-            llCbRest.addView(cb);
-            checkBoxesRest.add(cb);
-        }
+//        //Create Checkboxes out of those Restaurant-Types and add them to the ListView and a List
+//        for(int i = 0; i < restaurantTypes.length; i++){
+//            CheckBox cb = new CheckBox(this);
+//            cb.setText(restaurantTypes[i]);
+//
+//            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
+//                    if (isChecked && allCheckboxesChecked(checkBoxesRest)) {
+//                        cbRestaurant.setChecked(true);
+//                    }
+//                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
+//                    else {
+//                        cbRestaurant.setChecked(false);
+//                    }
+//                }
+//            });
+//            llCbRest.addView(cb);
+//            checkBoxesRest.add(cb);
+//        }
+//
+//        //Create Checkboxes out of those Bar-Types and add them to the ListView and a List
+//        for(int i = 0; i < barTypes.length; i++){
+//            CheckBox cb = new CheckBox(this);
+//            cb.setText(barTypes[i]);
+//
+//            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
+//                    if (isChecked && allCheckboxesChecked(checkBoxesBar)) {
+//                        cbBar.setChecked(true);
+//                    }
+//                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
+//                    else {
+//                        cbBar.setChecked(false);
+//                    }
+//                }
+//            });
+//            llCbBar.addView(cb);
+//            checkBoxesBar.add(cb);
+//        }
+//
+//        //Create Checkboxes out of those Cafe-Types and add them to the ListView and a List
+//        for(int i = 0; i < cafeTypes.length; i++){
+//            CheckBox cb = new CheckBox(this);
+//            cb.setText(cafeTypes[i]);
+//
+//            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
+//                    if (isChecked && allCheckboxesChecked(checkBoxesCafe)) {
+//                        cbCafe.setChecked(true);
+//                    }
+//                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
+//                    else {
+//                        cbCafe.setChecked(false);
+//                    }
+//                }
+//            });
+//            llCbCafe.addView(cb);
+//            checkBoxesCafe.add(cb);
+//        }
+//
+//        //Create Checkboxes out of those Takeaway-Types and add them to the ListView and a List
+//        for(int i = 0; i < takeawayTypes.length; i++){
+//            CheckBox cb = new CheckBox(this);
+//            cb.setText(takeawayTypes[i]);
+//
+//            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//                @Override
+//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
+//                    if (isChecked && allCheckboxesChecked(checkBoxesTakeaway)) {
+//                        cbTakeaway.setChecked(true);
+//                    }
+//                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
+//                    else {
+//                        cbTakeaway.setChecked(false);
+//                    }
+//                }
+//            });
+//            llCbTakeaway.addView(cb);
+//            checkBoxesTakeaway.add(cb);
+//        }
 
         //EditTexts are only focused when touched, not when starting the Activity
         etSearchText.setOnTouchListener(new View.OnTouchListener() {
@@ -129,26 +214,27 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                     etSearchText.setVisibility(View.VISIBLE);
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
 
-        //Restaurant-Checkbox checks or unchecks all Sub-Checkboxes
-        cbRestaurant.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                CheckBox cb = (CheckBox) v;
-                if (cb.isChecked()) {
-                    for (CheckBox b : checkBoxesRest) {
-                        b.setChecked(true);
-                    }
-                } else {
-                    for (CheckBox b : checkBoxesRest) {
-                        b.setChecked(false);
-                    }
-                }
-            }
-        });
+//        //Restaurant-Checkbox checks or unchecks all Sub-Checkboxes
+//        cbRestaurant.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                CheckBox cb = (CheckBox) v;
+//                if (cb.isChecked()) {
+//                    for (CheckBox b : checkBoxesRest) {
+//                        b.setChecked(true);
+//                    }
+//                } else {
+//                    for (CheckBox b : checkBoxesRest) {
+//                        b.setChecked(false);
+//                    }
+//                }
+//            }
+//        });
 
         //Search-Button
         btnSearch.setOnClickListener(new View.OnClickListener() {
@@ -163,9 +249,50 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         });
     }
 
+    //Creates all sub-Checkboxes (for Restaurants, Cafes, Bars, Takeaway) and gives them Listeners
+    private void setupCheckboxes(final CheckBox cbType, final List<CheckBox> cbSubTypes, final String[] typeArray, LinearLayout llcbType){
+        //Restaurant-Checkbox checks or unchecks all Sub-Checkboxes
+        cbType.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                CheckBox cb = (CheckBox) v;
+                if (cb.isChecked()) {
+                    for (CheckBox b : cbSubTypes) {
+                        b.setChecked(true);
+                    }
+                } else {
+                    for (CheckBox b : cbSubTypes) {
+                        b.setChecked(false);
+                    }
+                }
+            }
+        });
+
+        //Create Checkboxes out of those Takeaway-Types and add them to the ListView and a List
+        for(int i = 0; i < typeArray.length; i++){
+            CheckBox cb = new CheckBox(this);
+            cb.setText(typeArray[i]);
+
+            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
+                    if (isChecked && allCheckboxesChecked(cbSubTypes)) {
+                        cbType.setChecked(true);
+                    }
+                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
+                    else {
+                        cbType.setChecked(false);
+                    }
+                }
+            });
+            llcbType.addView(cb);
+            cbSubTypes.add(cb);
+        }
+    }
+
     //Checks if all Sub-Checkboxes of Restaurant are checked
-    private boolean allCheckboxesChecked(){
-        for(CheckBox cb : checkBoxesRest){
+    private boolean allCheckboxesChecked(List<CheckBox> checkBoxes){
+        for(CheckBox cb : checkBoxes){
             if(!cb.isChecked()){
                 return false;
             }

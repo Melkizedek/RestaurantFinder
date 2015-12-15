@@ -18,6 +18,7 @@
     <string name="search_options">searchOptions</string>
     <string name="search_by_name">Search Location By Name</string>
     <string name="search_all">Search all Locations</string>
+    <string name="search">Search</string>
 
     <string-array name="search_options_array">
         <item>Search Locations by Options</item>
