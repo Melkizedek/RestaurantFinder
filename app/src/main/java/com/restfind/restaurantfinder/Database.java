@@ -48,6 +48,8 @@ public class Database {
     }
 
     public static boolean sendFriendInvite(String username, String invitedUser) throws IOException {
+        if(username.equals(invitedUser))
+            return false;
         return checkResult(Operation.sendFriendInvite, username, invitedUser);
     }
 
