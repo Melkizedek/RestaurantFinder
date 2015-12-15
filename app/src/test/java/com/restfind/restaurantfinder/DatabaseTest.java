@@ -81,8 +81,9 @@ public class DatabaseTest {
         assertEquals(false, Database.sendFriendInvite("Pia", "Max"));
         assertEquals(false, Database.sendFriendInvite("Max", "User"));
         assertEquals(false, Database.sendFriendInvite("User", "Pia"));
-        assertEquals(true, Database.sendFriendInvite("Max", "Alex"));
+        assertEquals(true, Database.sendFriendInvite("Alex", "Max"));
         assertEquals(true, Database.sendFriendInvite("Pia", "Alex"));
+        assertEquals(false, Database.sendFriendInvite("Pia", "Pia"));
     }
 
     // The test send FriendInvite has to be executed and passed before this test.
@@ -111,8 +112,9 @@ public class DatabaseTest {
         assertEquals(true, Database.acceptFriendInvite("Pia", "Max"));
         assertEquals(false, Database.acceptFriendInvite("Pia", "Max"));
         assertEquals(false, Database.acceptFriendInvite("User1", "User2"));
-        assertEquals(true, Database.acceptFriendInvite("Alex", "Max"));
+        assertEquals(true, Database.acceptFriendInvite("Max", "Alex"));
         assertEquals(true, Database.acceptFriendInvite("Alex", "Pia"));
+        assertEquals(false, Database.acceptFriendInvite("Pia", "Pia"));
     }
 
     // The test "sendFriendInvite" has to be executed and passed before this test.
@@ -121,6 +123,7 @@ public class DatabaseTest {
         assertEquals(true, Database.declineFriendInvite("Alex", "Pia"));
         assertEquals(true, Database.declineFriendInvite("Alex", "Max"));
         assertEquals(true, Database.declineFriendInvite("Pia", "Max"));
+        assertEquals(false, Database.declineFriendInvite("Pia", "Pia"));
     }
 
     // The test send acceptFriendInvite has to be executed and passed before this test.
