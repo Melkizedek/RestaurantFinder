@@ -32,6 +32,13 @@
         <item>Pizza</item>
         <item>Mexican</item>
         <item>Steak</item>
+        <item>Swiss</item>
+        <item>Tapas</item>
+        <item>Vegetarian</item>
+        <item>Hamburger</item>
+        <item>Brazilian</item>
+        <item>French</item>
+        <item>Oyster Bar</item>
     </string-array>
 
     <string-array name="bar_types">
@@ -53,10 +60,18 @@
     </string-array>
 
     <string-array name="cafe_types">
-
+        <item>Cafe</item>
+        <item>Coffee Shop</item>
     </string-array>
 
     <string-array name="takeaway_types">
-
+        <item>Pizza Takeaway</item>
+        <item>Takeaway</item>
+        <item>Indian Takeaway</item>
+        <item>Chinese Takeaway</item>
+        <item>Fastfood</item>
+        <item>Catering Food and Drink Supplier</item>
+        <item>Fried Chicken Takeaway</item>
+        <item>Kebab Shop</item>
     </string-array>
 </resources>
