@@ -48,32 +48,32 @@ public class SearchResultsActivity extends AppBarActivity {
             SearchOptions options = params[0];
 
             if(options != null){
-                Log.v("GetSearchResultsTask", "name: " + options.getName());
-                Log.v("GetSearchResultsTask", "radius: " + options.getRadius());
-                Log.v("GetSearchResultsTask", "longitude: " + options.getLongitude());
-                Log.v("GetSearchResultsTask", "latitude: " + options.getLatitude());
-                Log.v("GetSearchResultsTask", "timeIsNow: " + options.isTimeNow());
-                Log.v("GetSearchResultsTask", "time: " + options.getTime());
-                Log.v("GetSearchResultsTask", "dayOfWeek: " + options.getDayOfWeek());
+                Log.v(LOG_TAG, "name: " + options.getName());
+                Log.v(LOG_TAG, "radius: " + options.getRadius());
+                Log.v(LOG_TAG, "longitude: " + options.getLongitude());
+                Log.v(LOG_TAG, "latitude: " + options.getLatitude());
+                Log.v(LOG_TAG, "timeIsNow: " + options.isTimeNow());
+                Log.v(LOG_TAG, "time: " + options.getTime());
+                Log.v(LOG_TAG, "dayOfWeek: " + options.getDayOfWeek());
 
                 if(options.getTypesRestaurant() != null) {
                     for (String s : options.getTypesRestaurant()) {
-                        Log.v("GetSearchResultsTask", "Restaurant-types: " + s);
+                        Log.v(LOG_TAG, "Restaurant-types: " + s);
                     }
                 }
                 if(options.getTypesBar() != null) {
                     for (String s : options.getTypesBar()) {
-                        Log.v("GetSearchResultsTask", "Bar-types: " + s);
+                        Log.v(LOG_TAG, "Bar-types: " + s);
                     }
                 }
                 if(options.getTypesCafe() != null) {
                     for (String s : options.getTypesCafe()) {
-                        Log.v("GetSearchResultsTask", "Cafe-types: " + s);
+                        Log.v(LOG_TAG, "Cafe-types: " + s);
                     }
                 }
                 if(options.getTypesTakeaway() != null) {
                     for (String s : options.getTypesTakeaway()) {
-                        Log.v("GetSearchResultsTask", "Takeaway-types: " + s);
+                        Log.v(LOG_TAG, "Takeaway-types: " + s);
                     }
                 }
             }

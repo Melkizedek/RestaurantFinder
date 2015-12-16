@@ -332,7 +332,6 @@ public class FriendsActivity extends AppBarActivity {
                         }
 
                         if (acceptSuccessful) {
-                            Log.v("Friends", "acceptSuccessful");
                             lvFriendList.setAdapter(null);
                             //Start task
                             task = new GetFriendsTask();

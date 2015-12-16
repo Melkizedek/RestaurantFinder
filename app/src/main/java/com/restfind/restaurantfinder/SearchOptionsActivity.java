@@ -288,15 +288,16 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
          */
         btnSearch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //TODO: create SearchOptions
-                if(chosenNewPosition && !rbCurrentPos.isChecked()) {
-                    startSearchResultsActivity();
-                }else{
-                    Log.v(TAG_LOG, "currentLocation");
-
-                    //Get current Position and start SearchResultsActivity
-                    operation = Operation.Search;
-                    buildApiClient();
+                if(etRadius.getText() == null || etRadius.getText().toString().isEmpty()) {
+                    showAlertDialog("You need to enter a Radius!");
+                }else {
+                    if (chosenNewPosition && !rbCurrentPos.isChecked()) {
+                        startSearchResultsActivity();
+                    } else {
+                        //Get current Position and start SearchResultsActivity
+                        operation = Operation.Search;
+                        buildApiClient();
+                    }
                 }
             }
         });
@@ -455,6 +456,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
 
     private SearchOptions createSearchOptions(){
         SearchOptions options = new SearchOptions();
+
         if(etName.getText() != null){
             options.setName(etName.getText().toString());
         }
@@ -468,7 +470,11 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             options.setLongitude(longitude);
             options.setLatitude(latitude);
         }
-        options.setTimeIsNow(timeIsNow);
+        if(timeIsNow && dateIsNow){
+            options.setTimeIsNow(true);
+        }else{
+            options.setTimeIsNow(false);
+        }
         options.setTime(chosenTime);
         options.setDayOfWeek(dayOfWeek);
 
@@ -513,6 +519,12 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                 }
             }
         }
+
+        if(options.getName().isEmpty() && restaurantStringList.isEmpty() && barStringList.isEmpty() && cafeStringList.isEmpty() && takeawayStringList.isEmpty()){
+            showAlertDialog("You need to either check at least one Checkbox or enter a Search-Name!");
+            return null;
+        }
+
         options.setTypesRestaurant(restaurantStringList);
         options.setTypesBar(barStringList);
         options.setTypesCafe(cafeStringList);
@@ -522,9 +534,13 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     }
 
     private void startSearchResultsActivity() {
-        Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
-        intent.putExtra(getResources().getString(R.string.search_options), createSearchOptions());
-        startActivity(intent);
+        SearchOptions options = createSearchOptions();
+
+        if(options != null) {
+            Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
+            intent.putExtra(getResources().getString(R.string.search_options), options);
+            startActivity(intent);
+        }
     }
 
     /*
@@ -560,6 +576,8 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     public void onLocationChanged(Location location) {
         longitude = location.getLongitude();
         latitude = location.getLatitude();
+
+        Log.v(LOG_TAG, "onLocationChanged");
 
         if(operation == Operation.ChangePosition){
             Intent intent = new Intent(SearchOptionsActivity.this, ChangePositionActivity.class);

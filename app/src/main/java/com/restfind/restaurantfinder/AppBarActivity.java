@@ -13,6 +13,8 @@ import android.view.MenuItem;
 //handles almost all Toolbar-Actions and can create a custom AlertDialog with String-Parameter
 public abstract class AppBarActivity extends AppCompatActivity {
 
+    public final String LOG_TAG = "RESTFIND";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
