@@ -3,7 +3,9 @@ package com.restfind.restaurantfinder;
 import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
@@ -55,8 +57,6 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     private final String TAG_LOG = "SearchOptionsActivity";
     private final int CHANGE_POSITION_REQUEST = 1;
 
-    private int radius;
-    private List<String> types;
     private boolean timeIsNow;
     private boolean dateIsNow;
     private int dayOfWeek; //Sunday = 1, Saturday = 7
@@ -65,9 +65,19 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     private boolean chosenNewPosition;
     private double chosenLongitude;
     private double chosenLatitude;
+    private double longitude;
+    private double latitude;
 
+    private EditText etName;
+    private EditText etRadius;
     private TextView tvTime;
     private RadioButton rbCurrentPos;
+
+    private CheckBox cbCafe;
+    private CheckBox cbBar;
+    private CheckBox cbRestaurant;
+    private CheckBox cbTakeaway;
+
     private List<CheckBox> checkBoxesRest;
     private List<CheckBox> checkBoxesCafe;
     private List<CheckBox> checkBoxesBar;
@@ -88,12 +98,12 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
 
         //Set up UI-Elements
         final Button btnSearch = (Button) findViewById(R.id.btnSearch);
-        final EditText etSearchText = (EditText) findViewById(R.id.etSearchText);
-        final EditText etRadius = (EditText) findViewById(R.id.etRadius);
-        final CheckBox cbCafe = (CheckBox) findViewById(R.id.cbCafe);
-        final CheckBox cbBar = (CheckBox) findViewById(R.id.cbBar);
-        final CheckBox cbRestaurant = (CheckBox) findViewById(R.id.cbRestaurant);
-        final CheckBox cbTakeaway = (CheckBox) findViewById(R.id.cbTakeaway);
+        etName = (EditText) findViewById(R.id.etSearchText);
+        etRadius = (EditText) findViewById(R.id.etRadius);
+        cbCafe = (CheckBox) findViewById(R.id.cbCafe);
+        cbBar = (CheckBox) findViewById(R.id.cbBar);
+        cbRestaurant = (CheckBox) findViewById(R.id.cbRestaurant);
+        cbTakeaway = (CheckBox) findViewById(R.id.cbTakeaway);
         final LinearLayout llCbRest = (LinearLayout) findViewById(R.id.llCheckboxesRest);
         final LinearLayout llCbBar = (LinearLayout) findViewById(R.id.llCheckboxesBar);
         final LinearLayout llCbCafe = (LinearLayout) findViewById(R.id.llCheckboxesCafe);
@@ -108,7 +118,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         EditTexts SearchText & Radius
          */
         //EditTexts are only focused when touched, not when starting the Activity
-        etSearchText.setOnTouchListener(new View.OnTouchListener() {
+        etName.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 v.setFocusable(true);
@@ -280,22 +290,50 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             public void onClick(View v) {
                 //TODO: create SearchOptions
                 if(chosenNewPosition && !rbCurrentPos.isChecked()) {
-                    Log.v(TAG_LOG, "chosenLongitude: " + chosenLongitude);
-                    Log.v(TAG_LOG, "chosenLatitude: " + chosenLatitude);
-                    SearchOptions options = new SearchOptions("");
-
-                    Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
-                    intent.putExtra(getResources().getString(R.string.search_options), options);
-                    startActivity(intent);
+                    startSearchResultsActivity();
                 }else{
                     Log.v(TAG_LOG, "currentLocation");
 
                     //Get current Position and start SearchResultsActivity
-//                operation = Operation.Search;
-//                buildApiClient();
+                    operation = Operation.Search;
+                    buildApiClient();
                 }
             }
         });
+
+        //Get saved SharedPreferences
+        SharedPreferences spOptions = getApplicationContext().getSharedPreferences(getResources().getString(R.string.search_options), Context.MODE_PRIVATE);
+        if(spOptions.contains("radius")){
+            etRadius.setText(spOptions.getString("radius", ""));
+        }
+        if(spOptions.contains("restaurant")) {
+            cbRestaurant.performClick();
+        } else{
+            for(int i = 0; i < checkBoxesRest.size(); i++){
+                checkBoxesRest.get(i).setChecked(spOptions.getBoolean("restaurant" + i, false));
+            }
+        }
+        if(spOptions.contains("bar")) {
+            cbBar.performClick();
+        } else{
+            for(int i = 0; i < checkBoxesBar.size(); i++){
+                checkBoxesBar.get(i).setChecked(spOptions.getBoolean("bar" + i, false));
+            }
+        }
+        if(spOptions.contains("cafe")) {
+            cbCafe.performClick();
+        } else{
+            for(int i = 0; i < checkBoxesCafe.size(); i++){
+                checkBoxesCafe.get(i).setChecked(spOptions.getBoolean("cafe" + i, false));
+            }
+        }
+        if(spOptions.contains("takeaway")) {
+            cbTakeaway.performClick();
+        } else{
+            for(int i = 0; i < checkBoxesTakeaway.size(); i++){
+                checkBoxesTakeaway.get(i).setChecked(spOptions.getBoolean("takeaway" + i, false));
+            }
+        }
     }
 
     //Creates all sub-Checkboxes (for Restaurants, Cafes, Bars, Takeaway) and gives them Listeners
@@ -366,7 +404,42 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     protected void onPause() {
         super.onPause();
 
-        //TODO: Save Options to SharedPreferences
+        //save current options
+        SharedPreferences spOptions = getApplicationContext().getSharedPreferences(getResources().getString(R.string.search_options), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = spOptions.edit();
+        editor.clear();
+        if(etRadius.getText() != null) {
+            editor.putString("radius", etRadius.getText().toString());
+        }
+        if(cbRestaurant.isChecked()){
+            editor.putBoolean("restaurant", cbRestaurant.isChecked());
+        } else{
+            for(int i = 0; i < checkBoxesRest.size(); i++){
+                editor.putBoolean("restaurant" + i, checkBoxesRest.get(i).isChecked());
+            }
+        }
+        if(cbBar.isChecked()){
+            editor.putBoolean("bar", cbBar.isChecked());
+        } else{
+            for(int i = 0; i < checkBoxesBar.size(); i++){
+                editor.putBoolean("bar" + i, checkBoxesBar.get(i).isChecked());
+            }
+        }
+        if(cbCafe.isChecked()){
+            editor.putBoolean("cafe", cbCafe.isChecked());
+        } else{
+            for(int i = 0; i < checkBoxesCafe.size(); i++){
+                editor.putBoolean("cafe" + i, checkBoxesCafe.get(i).isChecked());
+            }
+        }
+        if(cbTakeaway.isChecked()){
+            editor.putBoolean("takeaway", cbTakeaway.isChecked());
+        } else{
+            for(int i = 0; i < checkBoxesTakeaway.size(); i++){
+                editor.putBoolean("takeaway" + i, checkBoxesTakeaway.get(i).isChecked());
+            }
+        }
+        editor.commit();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -378,6 +451,80 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                 chosenNewPosition = true;
             }
         }
+    }
+
+    private SearchOptions createSearchOptions(){
+        SearchOptions options = new SearchOptions();
+        if(etName.getText() != null){
+            options.setName(etName.getText().toString());
+        }
+        if(etRadius.getText() != null){
+            options.setRadius(Integer.parseInt(etRadius.getText().toString()));
+        }
+        if(chosenNewPosition){
+            options.setLongitude(chosenLongitude);
+            options.setLatitude(chosenLatitude);
+        } else{
+            options.setLongitude(longitude);
+            options.setLatitude(latitude);
+        }
+        options.setTimeIsNow(timeIsNow);
+        options.setTime(chosenTime);
+        options.setDayOfWeek(dayOfWeek);
+
+        List<String> restaurantStringList = new ArrayList<>();
+        List<String> barStringList = new ArrayList<>();
+        List<String> cafeStringList = new ArrayList<>();
+        List<String> takeawayStringList = new ArrayList<>();
+
+        if(cbRestaurant.isChecked()){
+            restaurantStringList.add(cbRestaurant.getText().toString());
+        } else{
+            for(CheckBox cb : checkBoxesRest){
+                if(cb.isChecked()){
+                    restaurantStringList.add(cb.getText().toString());
+                }
+            }
+        }
+        if(cbBar.isChecked()){
+            barStringList.add(cbBar.getText().toString());
+        } else{
+            for(CheckBox cb : checkBoxesBar){
+                if(cb.isChecked()){
+                    barStringList.add(cb.getText().toString());
+                }
+            }
+        }
+        if(cbCafe.isChecked()){
+            cafeStringList.add(cbCafe.getText().toString());
+        } else{
+            for(CheckBox cb : checkBoxesCafe){
+                if(cb.isChecked()){
+                    cafeStringList.add(cb.getText().toString());
+                }
+            }
+        }
+        if(cbTakeaway.isChecked()){
+            takeawayStringList.add(cbTakeaway.getText().toString());
+        } else{
+            for(CheckBox cb : checkBoxesTakeaway){
+                if(cb.isChecked()){
+                    takeawayStringList.add(cb.getText().toString());
+                }
+            }
+        }
+        options.setTypesRestaurant(restaurantStringList);
+        options.setTypesBar(barStringList);
+        options.setTypesCafe(cafeStringList);
+        options.setTypesTakeaway(takeawayStringList);
+
+        return options;
+    }
+
+    private void startSearchResultsActivity() {
+        Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
+        intent.putExtra(getResources().getString(R.string.search_options), createSearchOptions());
+        startActivity(intent);
     }
 
     /*
@@ -411,8 +558,8 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     //starts a new Activity based on which operation is chosen
     @Override
     public void onLocationChanged(Location location) {
-        double longitude = location.getLongitude();
-        double latitude = location.getLatitude();
+        longitude = location.getLongitude();
+        latitude = location.getLatitude();
 
         if(operation == Operation.ChangePosition){
             Intent intent = new Intent(SearchOptionsActivity.this, ChangePositionActivity.class);
@@ -422,13 +569,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             startActivityForResult(intent, CHANGE_POSITION_REQUEST);
         }
         else if(operation == Operation.Search) {
-            List<String> types = new ArrayList<String>();
-            types.add("test1");
-            types.add("test2");
-
-            Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
-            intent.putExtra(getResources().getString(R.string.search_options), new SearchOptions(location.getLongitude(), location.getLatitude(), radius, types));
-            startActivity(intent);
+            startSearchResultsActivity();
         }
     }
 

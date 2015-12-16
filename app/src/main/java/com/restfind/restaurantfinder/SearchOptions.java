@@ -8,43 +8,143 @@ import java.util.List;
 
 //Saves all Search Options that are used to Search Locations
 public class SearchOptions implements Parcelable {
-    private String searchText;
+    private String name;
+    private int radius;
     private double longitude;
     private double latitude;
-    private int radius;
-    private List<String> types;
+    private boolean timeIsNow;
+    private String time;
+    private int dayOfWeek;
+    private List<String> typesRestaurant;
+    private List<String> typesBar;
+    private List<String> typesCafe;
+    private List<String> typesTakeaway;
 
-    public SearchOptions(String searchText) {
-        this.searchText = searchText;
+    public SearchOptions(){
+        this("", 0, 0, 0, true, "", -1, null, null, null, null);
     }
 
-    public SearchOptions(double longitude, double latitude, int radius, List<String> types){
+    public SearchOptions(String name, int radius, double longitude, double latitude, boolean timeIsNow, String time, int dayOfWeek, List<String> typesRestaurant, List<String> typesBar, List<String> typesCafe, List<String> typesTakeaway) {
+        this.name = name;
+        this.radius = radius;
         this.longitude = longitude;
         this.latitude = latitude;
-        this.radius = radius;
-        this.types = types;
+        this.timeIsNow = timeIsNow;
+        this.time = time;
+        this.dayOfWeek = dayOfWeek - 1;
+        this.typesRestaurant = typesRestaurant;
+        this.typesBar = typesBar;
+        this.typesCafe = typesCafe;
+        this.typesTakeaway = typesTakeaway;
     }
 
-    public String getSearchText() { return searchText; }
-    public double getLatitude() { return latitude; }
+    public String getName() {
+        return name;
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
     public double getLongitude() {
         return longitude;
     }
-    public List<String> getTypes() { return types; }
-    public int getRadius() { return radius; }
 
+    public double getLatitude() {
+        return latitude;
+    }
 
+    public boolean isTimeNow() {
+        return timeIsNow;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public int getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public List<String> getTypesRestaurant() {
+        return typesRestaurant;
+    }
+
+    public List<String> getTypesBar() {
+        return typesBar;
+    }
+
+    public List<String> getTypesCafe() {
+        return typesCafe;
+    }
+
+    public List<String> getTypesTakeaway() {
+        return typesTakeaway;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setTimeIsNow(boolean timeIsNow) {
+        this.timeIsNow = timeIsNow;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public void setDayOfWeek(int dayOfWeek) {
+        this.dayOfWeek = dayOfWeek - 1;
+    }
+
+    public void setTypesRestaurant(List<String> typesRestaurant) {
+        this.typesRestaurant = typesRestaurant;
+    }
+
+    public void setTypesBar(List<String> typesBar) {
+        this.typesBar = typesBar;
+    }
+
+    public void setTypesCafe(List<String> typesCafe) {
+        this.typesCafe = typesCafe;
+    }
+
+    public void setTypesTakeaway(List<String> typesTakeaway) {
+        this.typesTakeaway = typesTakeaway;
+    }
 
     //Parcelable Part
 
     protected SearchOptions(Parcel in) {
-        this.searchText = in.readString();
-        this.longitude = in.readDouble();
-        this.latitude = in.readDouble();
-        this.radius = in.readInt();
+        name = in.readString();
+        radius = in.readInt();
+        longitude = in.readDouble();
+        latitude = in.readDouble();
+        timeIsNow = in.readInt() != 0;
+        time = in.readString();
+        dayOfWeek = in.readInt();
 
-        this.types = new ArrayList<String>();
-        in.readStringList(types);
+        typesRestaurant = new ArrayList<>();
+        in.readStringList(typesRestaurant);
+        typesBar = new ArrayList<>();
+        in.readStringList(typesBar);
+        typesCafe = new ArrayList<>();
+        in.readStringList(typesCafe);
+        typesTakeaway = new ArrayList<>();
+        in.readStringList(typesTakeaway);
     }
 
     public static final Creator<SearchOptions> CREATOR = new Creator<SearchOptions>() {
@@ -66,10 +166,16 @@ public class SearchOptions implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(searchText);
+        dest.writeString(name);
+        dest.writeInt(radius);
         dest.writeDouble(longitude);
         dest.writeDouble(latitude);
-        dest.writeInt(radius);
-        dest.writeStringList(types);
+        dest.writeInt(timeIsNow ? 1 : 0);
+        dest.writeString(time);
+        dest.writeInt(dayOfWeek);
+        dest.writeStringList(typesRestaurant);
+        dest.writeStringList(typesBar);
+        dest.writeStringList(typesCafe);
+        dest.writeStringList(typesTakeaway);
     }
 }

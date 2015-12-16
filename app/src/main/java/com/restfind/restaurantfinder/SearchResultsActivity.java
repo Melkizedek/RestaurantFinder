@@ -48,15 +48,32 @@ public class SearchResultsActivity extends AppBarActivity {
             SearchOptions options = params[0];
 
             if(options != null){
-                Log.v("GetSearchResultsTask", "searchText: " + options.getSearchText());
+                Log.v("GetSearchResultsTask", "name: " + options.getName());
+                Log.v("GetSearchResultsTask", "radius: " + options.getRadius());
                 Log.v("GetSearchResultsTask", "longitude: " + options.getLongitude());
                 Log.v("GetSearchResultsTask", "latitude: " + options.getLatitude());
-                Log.v("GetSearchResultsTask", "radius: " + options.getRadius());
+                Log.v("GetSearchResultsTask", "timeIsNow: " + options.isTimeNow());
+                Log.v("GetSearchResultsTask", "time: " + options.getTime());
+                Log.v("GetSearchResultsTask", "dayOfWeek: " + options.getDayOfWeek());
 
-                if(options.getTypes() != null) {
-                    Log.v("GetSearchResultsTask", "types!");
-                    for (String s : options.getTypes()) {
-                        Log.v("GetSearchResultsTask", "types: " + s);
+                if(options.getTypesRestaurant() != null) {
+                    for (String s : options.getTypesRestaurant()) {
+                        Log.v("GetSearchResultsTask", "Restaurant-types: " + s);
+                    }
+                }
+                if(options.getTypesBar() != null) {
+                    for (String s : options.getTypesBar()) {
+                        Log.v("GetSearchResultsTask", "Bar-types: " + s);
+                    }
+                }
+                if(options.getTypesCafe() != null) {
+                    for (String s : options.getTypesCafe()) {
+                        Log.v("GetSearchResultsTask", "Cafe-types: " + s);
+                    }
+                }
+                if(options.getTypesTakeaway() != null) {
+                    for (String s : options.getTypesTakeaway()) {
+                        Log.v("GetSearchResultsTask", "Takeaway-types: " + s);
                     }
                 }
             }
