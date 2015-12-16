@@ -75,7 +75,7 @@ public class FriendsActivity extends AppBarActivity {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this)
                         .setTitle("Add Friend")
                         .setView(input)
-                                //Button that will send Friend-Request to the given User
+                        //Button that will send Friend-Request to the given User
                         .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -135,11 +135,10 @@ public class FriendsActivity extends AppBarActivity {
         }
     }
 
+    //Creates a context menu to delete a friend
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         if (v.getId()==R.id.lvFriendList) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-
             menu.add("Delete");
         }
     }
@@ -149,7 +148,7 @@ public class FriendsActivity extends AppBarActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
 
         switch (item.getItemId()) {
-            //Toolbar-Action: Add Friend
+            //Delete Friend
             case 0:
                 final String friend = ((Map.Entry<String, Boolean>)lvFriendList.getAdapter().getItem(info.position)).getKey();
 
@@ -173,6 +172,7 @@ public class FriendsActivity extends AppBarActivity {
                     es.shutdown();
                 }
 
+                //removes the friend from the listView
                 ((FriendAdapter)lvFriendList.getAdapter()).remove(info.position);
 
                 return true;
@@ -185,17 +185,9 @@ public class FriendsActivity extends AppBarActivity {
     //<Input for doInBackground, (Progress), Input for onPostExecute>
     private class GetFriendsTask extends AsyncTask<String, Integer, Map<String, Boolean>> {
 
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//
-//            lvFriendList.setAdapter(null);
-//        }
-
         @Override
         protected Map<String, Boolean> doInBackground(String... params) {
-            Log.v("Task", "restarted");
-
+            //Map with <Friend-Name, invite or not>
             Map<String, Boolean> friendsMap = new TreeMap<String, Boolean>();
             List<String> friends = null;
 
@@ -250,11 +242,11 @@ public class FriendsActivity extends AppBarActivity {
             return friendsMap;
         }
 
+        //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(Map<String, Boolean> result) {
             if(result != null){
                 lvFriendList = (ListView) findViewById(R.id.lvFriendList);
-                //instantiate custom adapter
                 FriendAdapter adapter = new FriendAdapter(result, FriendsActivity.this);
                 lvFriendList.setAdapter(adapter);
                 registerForContextMenu(lvFriendList);
@@ -264,12 +256,10 @@ public class FriendsActivity extends AppBarActivity {
 
     public class FriendAdapter extends BaseAdapter implements ListAdapter {
 
-        private Map<String, Boolean> map;
         private Context context;
         private final ArrayList mData;
 
         public FriendAdapter(Map<String, Boolean> map, Context context) {
-            this.map = map;
             this.context = context;
             mData = new ArrayList();
             mData.addAll(map.entrySet());
@@ -306,11 +296,6 @@ public class FriendsActivity extends AppBarActivity {
                 view = convertView;
             }
 
-//            if (convertView == null) {
-//                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//                convertView = inflater.inflate(R.layout.list_view_element_friend, null);
-//            }
-
             final Map.Entry<String, Boolean> item = getItem(position);
 
             //Handle TextView and display string from your list
@@ -321,6 +306,7 @@ public class FriendsActivity extends AppBarActivity {
             ImageButton btnAccept = (ImageButton)view.findViewById(R.id.btnAccept);
             ImageButton btnDecline = (ImageButton)view.findViewById(R.id.btnDecline);
 
+            //List-item is a friend-request -> show accept and decline buttons
             if(item.getValue()) {
                 btnAccept.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -361,7 +347,7 @@ public class FriendsActivity extends AppBarActivity {
                     public void onClick(View v) {
                         boolean declineSuccessful = false;
 
-                        //Thread that tries to accept friend
+                        //Thread that tries to decline friend
                         ExecutorService es = Executors.newSingleThreadExecutor();
                         Future<Boolean> result = es.submit(new Callable<Boolean>() {
                             public Boolean call() throws IOException {
@@ -387,6 +373,7 @@ public class FriendsActivity extends AppBarActivity {
                 btnAccept.setVisibility(View.VISIBLE);
                 btnDecline.setVisibility(View.VISIBLE);
             }
+            //Friends don't have accept or decline buttons
             else{
                 btnAccept.setVisibility(View.GONE);
                 btnDecline.setVisibility(View.GONE);

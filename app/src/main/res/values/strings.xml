@@ -15,15 +15,16 @@
     <string name="login">Login</string>
     <string name="register">Register</string>
 
+    <string name="longitude">longitude</string>
+    <string name="latitude">latitude</string>
+
+    <string name="newLongitude">longitude</string>
+    <string name="newLatitude">latitude</string>
+
     <string name="search_options">searchOptions</string>
     <string name="search_by_name">Search Location By Name</string>
     <string name="search_all">Search all Locations</string>
     <string name="search">Search</string>
-
-    <string-array name="search_options_array">
-        <item>Search Locations by Options</item>
-        <item>Search Location by Name</item>
-    </string-array>
 
     <string-array name="restaurant_types">
         <item>Chinese</item>
@@ -45,8 +46,6 @@
     <string-array name="bar_types">
         <item>Pub</item>
         <item>Irish-Pub</item>
-        <item>Bar</item>
-        <item>Gay-Bar</item>
         <item>Tapas Bar</item>
         <item>Sports-Bar</item>
         <item>Nightclub</item>
@@ -54,6 +53,7 @@
         <item>Karaoke-Bar</item>
         <item>Wine-Bar</item>
         <item>Brasserie</item>
+        <item>Gay-Bar</item>
         <item>Jazz-Club</item>
         <item>Gastropub</item>
         <item>Live music venue</item>
@@ -61,18 +61,17 @@
     </string-array>
 
     <string-array name="cafe_types">
-        <item>Cafe</item>
         <item>Coffee Shop</item>
     </string-array>
 
     <string-array name="takeaway_types">
-        <item>Pizza Takeaway</item>
-        <item>Takeaway</item>
-        <item>Indian Takeaway</item>
-        <item>Chinese Takeaway</item>
+        <item>Pizza</item>
+        <item>Indian</item>
+        <item>Chinese</item>
         <item>Fastfood</item>
         <item>Catering Food and Drink Supplier</item>
-        <item>Fried Chicken Takeaway</item>
-        <item>Kebab Shop</item>
+        <item>Fried Chicken</item>
+        <item>Kebab</item>
     </string-array>
+    <string name="title_activity_maps">Map</string>
 </resources>

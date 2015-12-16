@@ -1,6 +1,8 @@
 package com.restfind.restaurantfinder;
 
 import android.Manifest;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -8,16 +10,20 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -28,10 +34,17 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class SearchOptionsActivity extends AppBarActivity implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
+
+    private enum Operation {
+        ChangePosition, Search
+    }
+    private Operation operation;
 
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
 
@@ -39,9 +52,22 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
 
+    private final String TAG_LOG = "SearchOptionsActivity";
+    private final int CHANGE_POSITION_REQUEST = 1;
+
     private int radius;
     private List<String> types;
+    private boolean timeIsNow;
+    private boolean dateIsNow;
+    private int dayOfWeek; //Sunday = 1, Saturday = 7
+    private String chosenTime;
 
+    private boolean chosenNewPosition;
+    private double chosenLongitude;
+    private double chosenLatitude;
+
+    private TextView tvTime;
+    private RadioButton rbCurrentPos;
     private List<CheckBox> checkBoxesRest;
     private List<CheckBox> checkBoxesCafe;
     private List<CheckBox> checkBoxesBar;
@@ -56,6 +82,10 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         toolbar.setTitle("Search Options");
         setSupportActionBar(toolbar);
 
+        timeIsNow = true;
+        dateIsNow = true;
+        chosenNewPosition = false;
+
         //Set up UI-Elements
         final Button btnSearch = (Button) findViewById(R.id.btnSearch);
         final EditText etSearchText = (EditText) findViewById(R.id.etSearchText);
@@ -68,111 +98,15 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         final LinearLayout llCbBar = (LinearLayout) findViewById(R.id.llCheckboxesBar);
         final LinearLayout llCbCafe = (LinearLayout) findViewById(R.id.llCheckboxesCafe);
         final LinearLayout llCbTakeaway = (LinearLayout) findViewById(R.id.llCheckboxesTakeaway);
+        final Button btnChangePos = (Button) findViewById(R.id.btnChangePos);
+        final RadioGroup rgPos = (RadioGroup) findViewById(R.id.rgPos);
+        rbCurrentPos = (RadioButton) findViewById(R.id.rbCurrentPos);
+        final TextView tvDate = (TextView) findViewById(R.id.tvDate);
+        tvTime = (TextView) findViewById(R.id.tvTime);
 
-        checkBoxesRest = new ArrayList<>();
-        checkBoxesBar = new ArrayList<>();
-        checkBoxesCafe = new ArrayList<>();
-        checkBoxesTakeaway = new ArrayList<>();
-
-        //Get Restaurant-Types out of String-Array
-        String[] restaurantTypesArray = getResources().getStringArray(R.array.restaurant_types);
-        String[] barTypesArray = getResources().getStringArray(R.array.bar_types);
-        String[] cafeTypesArray = getResources().getStringArray(R.array.cafe_types);
-        String[] takeawayTypesArray = getResources().getStringArray(R.array.takeaway_types);
-
-        setupCheckboxes(cbBar, checkBoxesBar, barTypesArray, llCbBar);
-        setupCheckboxes(cbCafe, checkBoxesCafe, cafeTypesArray, llCbCafe);
-        setupCheckboxes(cbRestaurant, checkBoxesRest, restaurantTypesArray, llCbRest);
-        setupCheckboxes(cbTakeaway, checkBoxesTakeaway, takeawayTypesArray, llCbTakeaway);
-
-//        //Create Checkboxes out of those Restaurant-Types and add them to the ListView and a List
-//        for(int i = 0; i < restaurantTypes.length; i++){
-//            CheckBox cb = new CheckBox(this);
-//            cb.setText(restaurantTypes[i]);
-//
-//            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
-//                    if (isChecked && allCheckboxesChecked(checkBoxesRest)) {
-//                        cbRestaurant.setChecked(true);
-//                    }
-//                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
-//                    else {
-//                        cbRestaurant.setChecked(false);
-//                    }
-//                }
-//            });
-//            llCbRest.addView(cb);
-//            checkBoxesRest.add(cb);
-//        }
-//
-//        //Create Checkboxes out of those Bar-Types and add them to the ListView and a List
-//        for(int i = 0; i < barTypes.length; i++){
-//            CheckBox cb = new CheckBox(this);
-//            cb.setText(barTypes[i]);
-//
-//            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
-//                    if (isChecked && allCheckboxesChecked(checkBoxesBar)) {
-//                        cbBar.setChecked(true);
-//                    }
-//                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
-//                    else {
-//                        cbBar.setChecked(false);
-//                    }
-//                }
-//            });
-//            llCbBar.addView(cb);
-//            checkBoxesBar.add(cb);
-//        }
-//
-//        //Create Checkboxes out of those Cafe-Types and add them to the ListView and a List
-//        for(int i = 0; i < cafeTypes.length; i++){
-//            CheckBox cb = new CheckBox(this);
-//            cb.setText(cafeTypes[i]);
-//
-//            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
-//                    if (isChecked && allCheckboxesChecked(checkBoxesCafe)) {
-//                        cbCafe.setChecked(true);
-//                    }
-//                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
-//                    else {
-//                        cbCafe.setChecked(false);
-//                    }
-//                }
-//            });
-//            llCbCafe.addView(cb);
-//            checkBoxesCafe.add(cb);
-//        }
-//
-//        //Create Checkboxes out of those Takeaway-Types and add them to the ListView and a List
-//        for(int i = 0; i < takeawayTypes.length; i++){
-//            CheckBox cb = new CheckBox(this);
-//            cb.setText(takeawayTypes[i]);
-//
-//            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//                @Override
-//                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                    //All Sub-Checkboxes are now checked -> Restaurant-Checkbox gets checked
-//                    if (isChecked && allCheckboxesChecked(checkBoxesTakeaway)) {
-//                        cbTakeaway.setChecked(true);
-//                    }
-//                    //All Sub-Checkboxes aren't checked now -> Restaurant-Checkbox gets unchecked
-//                    else {
-//                        cbTakeaway.setChecked(false);
-//                    }
-//                }
-//            });
-//            llCbTakeaway.addView(cb);
-//            checkBoxesTakeaway.add(cb);
-//        }
-
+        /*
+        EditTexts SearchText & Radius
+         */
         //EditTexts are only focused when touched, not when starting the Activity
         etSearchText.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -191,60 +125,175 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             }
         });
 
-        /*Set up Spinner
-        0...Search by Options (default)
-        1...Search by Name
+        /*
+        RadioGroup: Use current position or use custom position
          */
-        Spinner spinner = (Spinner) findViewById(R.id.spinnerSearchOptions);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.search_options_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setSelection(0);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        rgPos.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //Search by Options
-                if (position == 0) {
-                    etSearchText.setVisibility(View.GONE);
-                }
-                //Search by Name
-                else if (position == 1) {
-                    etSearchText.setVisibility(View.VISIBLE);
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch (checkedId) {
+                    case R.id.rbCurrentPos:
+                        btnChangePos.setVisibility(View.GONE);
+                        return;
+                    case R.id.rbCustomPos:
+                        btnChangePos.setVisibility(View.VISIBLE);
                 }
             }
+        });
+        rgPos.check(R.id.rbCurrentPos);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+        /*
+        Button: Change Position
+         */
+        btnChangePos.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //Get current Position and start ChangePositionActivity
+                operation = Operation.ChangePosition;
+                buildApiClient();
             }
         });
 
-//        //Restaurant-Checkbox checks or unchecks all Sub-Checkboxes
-//        cbRestaurant.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                CheckBox cb = (CheckBox) v;
-//                if (cb.isChecked()) {
-//                    for (CheckBox b : checkBoxesRest) {
-//                        b.setChecked(true);
-//                    }
-//                } else {
-//                    for (CheckBox b : checkBoxesRest) {
-//                        b.setChecked(false);
-//                    }
-//                }
-//            }
-//        });
+        /*
+        TextView: Date
+         */
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        String formattedDate = df.format(c.getTime());
+        tvDate.setText(formattedDate);
 
-        //Search-Button
+        dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+
+        //Change Date
+        tvDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar c = Calendar.getInstance();
+                final int year = c.get(Calendar.YEAR);
+                final int month = c.get(Calendar.MONTH);
+                final int day = c.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog dialog = new DatePickerDialog(SearchOptionsActivity.this, new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
+                                if(year != selectedYear || month != selectedMonth || day != selectedDay) {
+                                    dateIsNow = false;
+                                } else{
+                                    dateIsNow = true;
+                                }
+
+                                Calendar calNow = Calendar.getInstance();
+                                Calendar calSet = (Calendar) calNow.clone();
+
+                                calSet.set(Calendar.DATE, selectedDay);
+                                calSet.set(Calendar.MONTH, selectedMonth);
+                                calSet.set(Calendar.YEAR, selectedYear);
+
+                                long time_val = calSet.getTimeInMillis();
+
+                                String formatted_date = (DateFormat.format("dd.MM.yyyy", time_val))
+                                        .toString();
+
+                                tvDate.setText(formatted_date);
+
+                                dayOfWeek = calSet.get(Calendar.DAY_OF_WEEK);
+                            }
+                        }, year, month, day);
+
+                dialog.setTitle("Select Date");
+                dialog.show();
+
+            }
+        });
+
+
+        /*
+        TextView: Time
+         */
+        //Change Time
+        tvTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar c = Calendar.getInstance();
+                final int min = c.get(Calendar.MINUTE);
+                int hour = c.get(Calendar.HOUR);
+                if(c.get(Calendar.AM_PM) == Calendar.PM){
+                    hour += 12;
+                }
+                final int curHour = hour;
+
+                TimePickerDialog dialog;
+                dialog = new TimePickerDialog(SearchOptionsActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        String hourString = String.valueOf(selectedHour);
+                        String minString = String.valueOf(selectedMinute);
+
+                        if(selectedHour <= 9){
+                            hourString = "0" + hourString;
+                        }
+                        if(selectedMinute <= 9){
+                            minString = "0" + minString;
+                        }
+                        chosenTime = hourString + ":" + minString;
+
+                        if(curHour != selectedHour || min != selectedMinute) {
+                            timeIsNow = false;
+                            tvTime.setText(chosenTime);
+                        } else{
+                            timeIsNow = true;
+                            tvTime.setText("Now");
+                        }
+                    }
+                }, curHour, min, true);
+
+                dialog.setTitle("Select Time");
+                dialog.show();
+
+            }
+        });
+
+        /*
+        Checkboxes: Restaurant, Bar, Cafe, Takeaway Types
+         */
+        checkBoxesRest = new ArrayList<>();
+        checkBoxesBar = new ArrayList<>();
+        checkBoxesCafe = new ArrayList<>();
+        checkBoxesTakeaway = new ArrayList<>();
+
+        //Get Restaurant-Types out of String-Array
+        String[] restaurantTypesArray = getResources().getStringArray(R.array.restaurant_types);
+        String[] barTypesArray = getResources().getStringArray(R.array.bar_types);
+        String[] cafeTypesArray = getResources().getStringArray(R.array.cafe_types);
+        String[] takeawayTypesArray = getResources().getStringArray(R.array.takeaway_types);
+
+        //create sub-types for all types
+        setupCheckboxes(cbBar, checkBoxesBar, barTypesArray, llCbBar);
+        setupCheckboxes(cbCafe, checkBoxesCafe, cafeTypesArray, llCbCafe);
+        setupCheckboxes(cbRestaurant, checkBoxesRest, restaurantTypesArray, llCbRest);
+        setupCheckboxes(cbTakeaway, checkBoxesTakeaway, takeawayTypesArray, llCbTakeaway);
+
+
+        /*
+        Button: Search
+         */
         btnSearch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //TODO: create SearchOptions
-                SearchOptions options = new SearchOptions("");
+                if(chosenNewPosition && !rbCurrentPos.isChecked()) {
+                    Log.v(TAG_LOG, "chosenLongitude: " + chosenLongitude);
+                    Log.v(TAG_LOG, "chosenLatitude: " + chosenLatitude);
+                    SearchOptions options = new SearchOptions("");
 
-                Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
-                intent.putExtra(getResources().getString(R.string.search_options), options);
-                startActivity(intent);
+                    Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
+                    intent.putExtra(getResources().getString(R.string.search_options), options);
+                    startActivity(intent);
+                }else{
+                    Log.v(TAG_LOG, "currentLocation");
+
+                    //Get current Position and start SearchResultsActivity
+//                operation = Operation.Search;
+//                buildApiClient();
+                }
             }
         });
     }
@@ -300,10 +349,36 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         return true;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        if(timeIsNow) {
+            Calendar c = Calendar.getInstance();
+            SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+            chosenTime = df.format(c.getTime());
 
+            tvTime.setText("Now");
+        }
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
 
+        //TODO: Save Options to SharedPreferences
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CHANGE_POSITION_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                chosenLongitude = data.getDoubleExtra(getResources().getString(R.string.newLongitude), 0);
+                chosenLatitude = data.getDoubleExtra(getResources().getString(R.string.newLatitude), 0);
+
+                chosenNewPosition = true;
+            }
+        }
+    }
 
     /*
     Everything below gets current Position once
@@ -333,16 +408,28 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
 //        location = fusedLocationProviderApi.getLastLocation(googleApiClient);
     }
 
-    //repeatedly called when fusedLocationProviderApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+    //starts a new Activity based on which operation is chosen
     @Override
     public void onLocationChanged(Location location) {
-        List<String> types = new ArrayList<String>();
-        types.add("test1");
-        types.add("test2");
+        double longitude = location.getLongitude();
+        double latitude = location.getLatitude();
 
-        Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
-        intent.putExtra(getResources().getString(R.string.search_options), new SearchOptions(location.getLongitude(), location.getLatitude(), radius, types));
-        startActivity(intent);
+        if(operation == Operation.ChangePosition){
+            Intent intent = new Intent(SearchOptionsActivity.this, ChangePositionActivity.class);
+            intent.putExtra(getResources().getString(R.string.longitude), longitude);
+            intent.putExtra(getResources().getString(R.string.latitude), latitude);
+
+            startActivityForResult(intent, CHANGE_POSITION_REQUEST);
+        }
+        else if(operation == Operation.Search) {
+            List<String> types = new ArrayList<String>();
+            types.add("test1");
+            types.add("test2");
+
+            Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
+            intent.putExtra(getResources().getString(R.string.search_options), new SearchOptions(location.getLongitude(), location.getLatitude(), radius, types));
+            startActivity(intent);
+        }
     }
 
     //called by googleApiClient.connect()

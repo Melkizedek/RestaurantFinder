@@ -42,6 +42,8 @@
         </activity>
         <activity android:name=".InvitationsActivity" >
         </activity>
+        <activity android:name=".ChangePositionActivity">
+        </activity>
     </application>
 
 </manifest>

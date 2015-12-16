@@ -15,13 +15,6 @@
             layout="@layout/toolbar">
         </include>
 
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:paddingTop="6dp"
-            android:id="@+id/spinnerSearchOptions" />
-
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dip"
@@ -38,7 +31,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/etSearchText"
-                    android:hint="Search Text"
+                    android:hint="Location Name"
                     android:focusable="false"/>
 
                 <EditText
@@ -50,7 +43,71 @@
                     android:hint="Radius in meter"
                     android:focusable="false"/>
 
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:id="@+id/rgPos">
 
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Use Current Position"
+                        android:id="@+id/rbCurrentPos" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Use Custom Position"
+                        android:id="@+id/rbCustomPos" />
+                </RadioGroup>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Change Position"
+                    android:background="@color/colorPrimary"
+                    android:id="@+id/btnChangePos" />
+
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="10dp"
+                        android:text="Use Time:"
+                        android:id="@+id/textView" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:paddingRight="20dp"
+                        android:text="Large Text"
+                        android:textColor="@color/colorAccent"
+                        android:textStyle="bold"
+                        android:id="@+id/tvTime" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:text="Large Text"
+                        android:textColor="@color/colorAccent"
+                        android:textStyle="bold"
+                        android:id="@+id/tvDate" />
+
+                </LinearLayout>
 
                 <CheckBox
                     android:layout_width="wrap_content"
@@ -113,6 +170,7 @@
                     android:paddingLeft="25dp"
                     android:id="@+id/llCheckboxesTakeaway">
                 </LinearLayout>
+
             </LinearLayout>
         </ScrollView>
 
@@ -122,6 +180,7 @@
             android:layout_weight="0"
             android:text="@string/search"
             android:background="@color/colorPrimary"
+            android:textStyle="bold"
             android:id="@+id/btnSearch" />
 
     </LinearLayout>
