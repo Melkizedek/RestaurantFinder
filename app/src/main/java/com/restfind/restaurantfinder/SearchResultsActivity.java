@@ -8,12 +8,18 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ListView;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.Places;
+
 import java.util.List;
 
-public class SearchResultsActivity extends AppBarActivity {
+public class SearchResultsActivity extends AppBarActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    SearchOptions searchOptions;
-    ListView lvSearchResults;
+    private GoogleApiClient mGoogleApiClient;
+
+    private SearchOptions searchOptions;
+    private ListView lvSearchResults;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +37,43 @@ public class SearchResultsActivity extends AppBarActivity {
         //Set up UI-Elements
         lvSearchResults = (ListView) findViewById(R.id.lvSearchResults);
 
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .addApi(Places.GEO_DATA_API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
         //start AsyncTask
         GetSearchResultsTask task = new GetSearchResultsTask();
         task.execute(searchOptions);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        showAlertDialog("Could not connect to the Google Places API!");
     }
 
     private class SearchResult {

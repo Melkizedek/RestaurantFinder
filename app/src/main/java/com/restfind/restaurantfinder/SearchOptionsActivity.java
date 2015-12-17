@@ -315,9 +315,8 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
 
         //Get saved SharedPreferences
         SharedPreferences spOptions = getApplicationContext().getSharedPreferences(getResources().getString(R.string.search_options), Context.MODE_PRIVATE);
-        if(spOptions.contains("radius")){
-            etRadius.setText(spOptions.getString("radius", ""));
-        }
+        etRadius.setText(spOptions.getString("radius", "500"));
+
         if(spOptions.contains("restaurant")) {
             cbRestaurant.performClick();
         } else{

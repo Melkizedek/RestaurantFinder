@@ -34,13 +34,21 @@
                     android:hint="Location Name"
                     android:focusable="false"/>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Radius in meter (max. 50.000):"
+                    android:textColor="@color/colorBlack"
+                    android:id="@+id/textView2" />
+
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:ems="10"
                     android:id="@+id/etRadius"
-                    android:hint="Radius in meter (max. 50.000)"
+                    android:hint="Radius"
                     android:focusable="false"/>
 
                 <RadioGroup
