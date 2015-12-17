@@ -134,6 +134,17 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                 return false;
             }
         });
+        etRadius.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus && etRadius.getText() != null && !etRadius.getText().toString().isEmpty()){
+                    int radius = Integer.parseInt(etRadius.getText().toString());
+                    if(radius > 50000){
+                        etRadius.setText("50000");
+                    }
+                }
+            }
+        });
 
         /*
         RadioGroup: Use current position or use custom position
@@ -461,7 +472,11 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             options.setName(etName.getText().toString());
         }
         if(etRadius.getText() != null){
-            options.setRadius(Integer.parseInt(etRadius.getText().toString()));
+            int radius = Integer.parseInt(etRadius.getText().toString());
+            if(radius > 50000){
+                radius = 50000;
+            }
+            options.setRadius(radius);
         }
         if(chosenNewPosition){
             options.setLongitude(chosenLongitude);
@@ -583,6 +598,14 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             Intent intent = new Intent(SearchOptionsActivity.this, ChangePositionActivity.class);
             intent.putExtra(getResources().getString(R.string.longitude), longitude);
             intent.putExtra(getResources().getString(R.string.latitude), latitude);
+            if(etRadius.getText() != null && !etRadius.getText().toString().isEmpty()){
+                int radius = Integer.parseInt(etRadius.getText().toString());
+
+                if(radius > 50000){
+                    radius = 50000;
+                }
+                intent.putExtra("radius", radius);
+            }
 
             startActivityForResult(intent, CHANGE_POSITION_REQUEST);
         }

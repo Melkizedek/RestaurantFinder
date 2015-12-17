@@ -1,7 +1,7 @@
 package com.restfind.restaurantfinder;
 
 import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,6 +12,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -21,7 +23,9 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
     private GoogleMap mMap;
     private double longitude;
     private double latitude;
+    private int radius;
     private Marker lastPos;
+    private Circle circle;
     private Intent intent;
 
     @Override
@@ -32,6 +36,7 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
         intent = getIntent();
         longitude = intent.getDoubleExtra(getResources().getString(R.string.longitude), -1);
         latitude = intent.getDoubleExtra(getResources().getString(R.string.latitude), -1);
+        radius = intent.getIntExtra("radius", 0);
 
         //Set up UI
         Button btnCancel = (Button) findViewById(R.id.btnCancel);
@@ -85,6 +90,14 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPos));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
 
+        if(radius > 0){
+            circle = mMap.addCircle(new CircleOptions()
+                    .center(new LatLng(latitude, longitude))
+                    .radius(radius)
+                    .strokeColor(Color.RED)
+                    .fillColor(0x50ed6f01));
+        }
+
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {
@@ -92,6 +105,10 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
                     lastPos.remove();
                 }
                 lastPos = mMap.addMarker(new MarkerOptions().position(point));
+
+                if(circle != null){
+                    circle.setCenter(lastPos.getPosition());
+                }
             }
         });
     }

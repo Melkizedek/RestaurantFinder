@@ -71,6 +71,7 @@ public abstract class AppBarActivity extends AppCompatActivity {
     //creates an AlertDialog with the given text
     protected void showAlertDialog(String text){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Error!");
         builder.setMessage(text);
         builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {

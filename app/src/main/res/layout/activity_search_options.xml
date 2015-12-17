@@ -40,7 +40,7 @@
                     android:inputType="number"
                     android:ems="10"
                     android:id="@+id/etRadius"
-                    android:hint="Radius in meter"
+                    android:hint="Radius in meter (max. 50.000)"
                     android:focusable="false"/>
 
                 <RadioGroup
