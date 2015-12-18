@@ -83,7 +83,7 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
+        // Add a marker in current Position and move the camera
         LatLng currentPos = new LatLng(latitude, longitude);
         mMap.addMarker(new MarkerOptions().position(currentPos).title("Current Position"));
 //        .icon(BitmapDescriptorFactory.fromResource(R.drawable.)

@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Restaurant Finder</string>
 
+    <string name="api_browser_key">AIzaSyBlLTzeqS-loYL59qpIZ5MjjvyeDSvGX6s</string>
+
     <string name="login_current">usernameCurrent</string>
     <string name="login_saved">loginSaved</string>
 

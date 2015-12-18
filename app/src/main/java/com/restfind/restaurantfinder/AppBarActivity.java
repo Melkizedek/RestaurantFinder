@@ -13,7 +13,8 @@ import android.view.MenuItem;
 //handles almost all Toolbar-Actions and can create a custom AlertDialog with String-Parameter
 public abstract class AppBarActivity extends AppCompatActivity {
 
-    public final String LOG_TAG = "RESTFIND";
+    protected final String LOG_TAG = "RESTFIND_LOG";
+    protected static final String PLACES_SEARCH_URL =  "https://maps.googleapis.com/maps/api/place/search/json?";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
