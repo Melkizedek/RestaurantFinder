@@ -222,6 +222,17 @@ public abstract class AppBarActivity extends AppCompatActivity {
         return place;
     }
 
+    String createDetailsRequest(String placeID){
+        StringBuilder builder = new StringBuilder();
+        builder.append(PLACES_SEARCH_URL);
+        builder.append("placeID=");
+        builder.append(placeID);
+        builder.append("&key=");
+        builder.append(R.string.api_browser_key);
+        return builder.toString();
+    }
+
+
     public class JasonTask extends AsyncTask<String, Integer, String> {
         JsonReader reader;
         StringBuilder builder = new StringBuilder();
