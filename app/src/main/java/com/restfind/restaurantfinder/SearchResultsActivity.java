@@ -146,12 +146,12 @@ public class SearchResultsActivity extends AppBarActivity implements OnMapReadyC
 //            StringBuilder jsonResults = new StringBuilder();
 //
 //            try {
-////                URL url = new URL(PLACES_SEARCH_URL +
+// URL url = new URL(PLACES_SEARCH_URL +
 ////                        "key=" + getResources().getString(R.string.api_browser_key) +
 ////                "");
 //
 //                StringBuilder request = new StringBuilder(PLACES_SEARCH_URL);
-//                request.append("key=" + getResources().getString(R.string.api_browser_key));
+//             request.append("key=" + getResources().getString(R.string.api_browser_key));
 //                request.append("&location=" + 48.306793 + "," + 14.287260);
 //                request.append("&radius=200");
 //                request.append("&types=" + "restaurant");
