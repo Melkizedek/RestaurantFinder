@@ -28,6 +28,8 @@
     <string name="search_all">Search all Locations</string>
     <string name="search">Search</string>
 
+    <string name="map_activity_type">MapActivityType</string>
+
     <string-array name="restaurant_types">
         <item>Chinese</item>
         <item>Japanese</item>

@@ -45,6 +45,8 @@
         </activity>
         <activity android:name=".CreateInvitationActivity" >
         </activity>
+        <activity android:name=".MapActivity" >
+        </activity>
     </application>
 
 </manifest>
