@@ -24,6 +24,8 @@ public class Place implements Parcelable {
     private List<String> types;
     private String vicinity;
     private String formatted_address;
+    private String id;
+    private String scope;
 
     public Place(){
         openingHours = new ArrayList<String>();
@@ -187,5 +189,13 @@ public class Place implements Parcelable {
         dest.writeStringList(types);
         dest.writeString(vicinity);
         dest.writeString(formatted_address);
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }
