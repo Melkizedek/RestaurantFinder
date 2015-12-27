@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -35,6 +37,9 @@ import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.*;
+
+import org.json.JSONException;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -137,9 +142,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         etRadius.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus && etRadius.getText() != null && !etRadius.getText().toString().isEmpty()){
+                if (!hasFocus && etRadius.getText() != null && !etRadius.getText().toString().isEmpty()) {
                     int radius = Integer.parseInt(etRadius.getText().toString());
-                    if(radius > 50000){
+                    if (radius > 50000) {
                         etRadius.setText("50000");
                     }
                 }
@@ -303,7 +308,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                     showAlertDialog("You need to enter a Radius!");
                 }else {
                     if (chosenNewPosition && !rbCurrentPos.isChecked()) {
-                        startSearchResultsActivity();
+                        startSearchResultsTask();
                     } else {
                         //Get current Position and start SearchResultsActivity
                         operation = Operation.Search;
@@ -547,13 +552,16 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         return options;
     }
 
-    private void startSearchResultsActivity() {
+    private void startSearchResultsTask() {
         SearchOptions options = createSearchOptions();
 
         if(options != null) {
-            Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
-            intent.putExtra(getResources().getString(R.string.search_options), options);
-            startActivity(intent);
+//            Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
+//            intent.putExtra(getResources().getString(R.string.search_options), options);
+//            startActivity(intent);
+
+            GetSearchResultsTask task = new GetSearchResultsTask();
+            task.execute(options);
         }
     }
 
@@ -609,7 +617,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             startActivityForResult(intent, CHANGE_POSITION_REQUEST);
         }
         else if(operation == Operation.Search) {
-            startSearchResultsActivity();
+            startSearchResultsTask();
         }
     }
 
@@ -672,5 +680,77 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     @Override
     public void onBackPressed() {
         //Do nothing (don't go back to Login)
+    }
+
+    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    private class GetSearchResultsTask extends AsyncTask<SearchOptions, Integer, List<Place>> {
+
+        @Override
+        protected List<Place> doInBackground(SearchOptions... params) {
+            SearchOptions searchOptions = params[0];
+
+//            if(searchOptions != null){
+//                Log.v(LOG_TAG, "name: " + searchOptions.getName());
+//                Log.v(LOG_TAG, "radius: " + searchOptions.getRadius());
+//                Log.v(LOG_TAG, "longitude: " + searchOptions.getLongitude());
+//                Log.v(LOG_TAG, "latitude: " + searchOptions.getLatitude());
+//                Log.v(LOG_TAG, "timeIsNow: " + searchOptions.isTimeNow());
+//                Log.v(LOG_TAG, "time: " + searchOptions.getTime());
+//                Log.v(LOG_TAG, "dayOfWeek: " + searchOptions.getDayOfWeek());
+//
+//                if(searchOptions.getTypesRestaurant() != null) {
+//                    for (String s : searchOptions.getTypesRestaurant()) {
+//                        Log.v(LOG_TAG, "Restaurant-types: " + s);
+//                    }
+//                }
+//                if(searchOptions.getTypesBar() != null) {
+//                    for (String s : searchOptions.getTypesBar()) {
+//                        Log.v(LOG_TAG, "Bar-types: " + s);
+//                    }
+//                }
+//                if(searchOptions.getTypesCafe() != null) {
+//                    for (String s : searchOptions.getTypesCafe()) {
+//                        Log.v(LOG_TAG, "Cafe-types: " + s);
+//                    }
+//                }
+//                if(searchOptions.getTypesTakeaway() != null) {
+//                    for (String s : searchOptions.getTypesTakeaway()) {
+//                        Log.v(LOG_TAG, "Takeaway-types: " + s);
+//                    }
+//                }
+//            }
+
+            String request = "";
+            //Google Places API Request...
+//            String PLACES_SEARCH_URL =  "https://maps.googleapis.com/maps/api/place/search/json?";
+//
+//            StringBuilder request = new StringBuilder(PLACES_SEARCH_URL);
+//            request.append("key=" + getResources().getString(R.string.api_browser_key));
+//            request.append("&location=" + 48.306793 + "," + 14.287260);
+//            request.append("&radius=200");
+//            request.append("&types=" + "restaurant");
+//            request.append("&sensor=true");
+            //...until here
+
+//            String request = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBlLTzeqS-loYL59qpIZ5MjjvyeDSvGX6s&location=48.306103,14.286544&radius=200&sensor=false&types=restaurant&keywords=(%22Steak%20House%22)%20OR%20(%22Chinese%20Restaurant%22)";
+
+            List<Place> places = new ArrayList<>();
+            try {
+                places = createPlaces(getApiResult(request.toString()));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return places;
+        }
+
+        @Override
+        protected void onPostExecute(List<Place> places) {
+            Intent intent = new Intent(SearchOptionsActivity.this, MapActivity.class);
+            intent.putExtra(getResources().getString(R.string.map_activity_type), MapActivityType.SearchResults);
+            intent.putParcelableArrayListExtra("places", (ArrayList<Place>)places);
+
+            startActivity(intent);
+        }
     }
 }

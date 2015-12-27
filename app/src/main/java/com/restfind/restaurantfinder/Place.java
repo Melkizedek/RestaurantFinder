@@ -1,41 +1,40 @@
 package com.restfind.restaurantfinder;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Melkizedek on 18.12.2015.
  */
-public class Place {
-    String icon;
-    Double lat;
-    Double lng;
-    String id;
-    String name;
-    List<String> openingHours;
-    boolean openNow;
-    String place_ID;
-    String scope;
+public class Place implements Parcelable {
+    private String icon;
+    private Double lat;
+    private Double lng;
+    private String name;
+    private List<String> openingHours;
+    private boolean openNow;
+    private String place_ID;
+    private String reference;
+    //alt_ids
+    private String price_level;
+    private Double rating;
+    private List<String> types;
+    private String vicinity;
+    private String formatted_address;
+
+    public Place(){
+        openingHours = new ArrayList<String>();
+        types = new ArrayList<String>();
+    }
 
     public String getReference() {
         return reference;
     }
 
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
-
-    String reference;
-    //alt_ids
-    String price_level;
-    Double rating;
-    List<String> types;
-    String vicinity;
-    String formatted_address;
-    Place(){
-        openingHours = new ArrayList<String>();
-        types = new ArrayList<String>();
-    }
+    public void setReference(String reference) { this.reference = reference; }
 
     public String getIcon() {
         return icon;
@@ -59,14 +58,6 @@ public class Place {
 
     public void setLng(Double lng) {
         this.lng = lng;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -99,14 +90,6 @@ public class Place {
 
     public void setPlace_ID(String place_ID) {
         this.place_ID = place_ID;
-    }
-
-    public String getScope() {
-        return scope;
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
     }
 
     public String getPrice_level() {
@@ -149,4 +132,66 @@ public class Place {
         this.formatted_address = formatted_address;
     }
 
+
+    //Parcelable Part
+
+    protected Place(Parcel in) {
+        icon = in.readString();
+        lat = in.readDouble();
+        lng = in.readDouble();
+        name = in.readString();
+        openingHours = new ArrayList<>();
+        in.readStringList(openingHours);
+        openNow = in.readInt() != 0;;
+        place_ID = in.readString();
+        reference = in.readString();
+        price_level = in.readString();
+        rating = in.readDouble();
+        types = new ArrayList<>();
+        in.readStringList(types);
+        vicinity = in.readString();
+        formatted_address = in.readString();
+    }
+
+    public static final Creator<Place> CREATOR = new Creator<Place>() {
+        @Override
+        public Place createFromParcel(Parcel in) {
+            return new Place(in);
+        }
+
+        @Override
+        public Place[] newArray(int size) {
+            return new Place[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(icon);
+        dest.writeDouble(lat);
+        dest.writeDouble(lng);
+        dest.writeString(name);
+        dest.writeStringList(openingHours);
+        dest.writeInt(openNow ? 1 : 0);
+        dest.writeString(place_ID);
+        dest.writeString(reference);
+        if(price_level != null) {
+            dest.writeString(price_level);
+        } else{
+            dest.writeString("-1");
+        }
+        if(rating != null) {
+            dest.writeDouble(rating);
+        } else{
+            dest.writeDouble(-1);
+        }
+        dest.writeStringList(types);
+        dest.writeString(vicinity);
+        dest.writeString(formatted_address);
+    }
 }
