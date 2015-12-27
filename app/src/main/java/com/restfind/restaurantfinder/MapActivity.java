@@ -22,8 +22,6 @@ public class MapActivity extends AppBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        Log.v(LOG_TAG, "555");
-
         Intent intent = getIntent();
         mapActivityType = (MapActivityType) intent.getSerializableExtra(getResources().getString(R.string.map_activity_type));
         ArrayList<Place> places = intent.getParcelableArrayListExtra("places");
@@ -33,5 +31,12 @@ public class MapActivity extends AppBarActivity {
             Log.v(LOG_TAG, p.getLat() + ", " + p.getLng());
             Log.v(LOG_TAG, "rating: " + p.getRating());
         }
+
+        Log.v(LOG_TAG, "Details: ");
+
+        Place place = getPlaceDetails(places.get(1).getPlace_ID());
+        Log.v(LOG_TAG, place.getName() + ", " + place.getPlace_ID());
+        Log.v(LOG_TAG, place.getLat() + ", " + place.getLng());
+        Log.v(LOG_TAG, "rating: " + place.getRating());
     }
 }

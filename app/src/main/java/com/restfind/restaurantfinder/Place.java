@@ -28,6 +28,8 @@ public class Place implements Parcelable {
     public Place(){
         openingHours = new ArrayList<String>();
         types = new ArrayList<String>();
+        price_level = "";
+        rating = -1.0;
     }
 
     public String getReference() {
@@ -180,16 +182,8 @@ public class Place implements Parcelable {
         dest.writeInt(openNow ? 1 : 0);
         dest.writeString(place_ID);
         dest.writeString(reference);
-        if(price_level != null) {
-            dest.writeString(price_level);
-        } else{
-            dest.writeString("-1");
-        }
-        if(rating != null) {
-            dest.writeDouble(rating);
-        } else{
-            dest.writeDouble(-1);
-        }
+        dest.writeString(price_level);
+        dest.writeDouble(rating);
         dest.writeStringList(types);
         dest.writeString(vicinity);
         dest.writeString(formatted_address);

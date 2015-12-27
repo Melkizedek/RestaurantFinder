@@ -83,10 +83,6 @@ public abstract class AppBarActivity extends AppCompatActivity {
     }
     */
 
-
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -148,6 +144,26 @@ public abstract class AppBarActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    protected Place getPlaceDetails(String placeID){
+        Place place = new Place();
+        try {
+            place = createPlaces(getApiResult(createDetailsRequest(placeID))).get(0);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return place;
+    }
+
+    protected String createDetailsRequest(String placeID){
+        StringBuilder builder = new StringBuilder();
+        builder.append("https://maps.googleapis.com/maps/api/place/details/json?");
+        builder.append("placeid=");
+        builder.append(placeID);
+        builder.append("&key=");
+        builder.append(getResources().getString(R.string.api_browser_key));
+        return builder.toString();
+    }
+
     protected String getApiResult(final String request){
 //        JasonTask jasonTask = new JasonTask();
         String result = null;
@@ -180,7 +196,6 @@ public abstract class AppBarActivity extends AppCompatActivity {
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
-                Log.v(LOG_TAG, "222.2");
                 return resultFuture;
             }
         });
@@ -205,66 +220,77 @@ public abstract class AppBarActivity extends AppCompatActivity {
     }
 
     protected List<Place> createPlaces(String apiResult) throws JSONException {
-        List<Place> place = new ArrayList<Place>();
+        List<Place> places = new ArrayList<Place>();
         JSONObject object;
         if(apiResult != null) {
             object = new JSONObject(apiResult);
-            JSONArray results = object.getJSONArray("results");
 
-            for(int i = 0; i < results.length(); i++) {
-                JSONObject curObject = results.getJSONObject(i);
-                Place place_act = new Place();
-                if (curObject.has("geometry")) {
-                    JSONObject geometryObject = curObject.getJSONObject("geometry");
-                    if (geometryObject.has("location")) {
-                        JSONObject locationObject = geometryObject.getJSONObject("location");
-                        place_act.setLat(locationObject.getDouble("lat"));
-                        place_act.setLng(locationObject.getDouble("lng"));
-                    }
-                }
-                if (curObject.has("icon")) {
-                    place_act.setIcon(curObject.getString("icon"));
-                }
-                if (curObject.has("name")) {
-                    place_act.setName(curObject.getString("name"));
-                }
-                if (curObject.has("opening_hours")) {
-                    JSONObject opening_hoursObject = curObject.getJSONObject("opening_hours");
-                    place_act.setOpenNow(opening_hoursObject.getBoolean("open_now"));
-                    if (opening_hoursObject.has("weekday_text")) {
-                        JSONArray weekday = opening_hoursObject.getJSONArray("weekday_text");
-                        for (int j = 0; j < weekday.length(); j++) {
-                            place_act.setOpeningHours(weekday.getString(j));
-                        }
-                    }
+            if(object.has("results")) {
+                JSONArray results = object.getJSONArray("results");
 
+                for (int i = 0; i < results.length(); i++) {
+                    JSONObject curObject = results.getJSONObject(i);
+                    places.add(createPlace(curObject));
                 }
-                if (curObject.has("place_id")) {
-                    place_act.setPlace_ID(curObject.getString("place_id"));
-                }
-                if (curObject.has("rating")) {
-                    place_act.setRating(curObject.getDouble("rating"));
-                }
-                if (curObject.has("reference")) {
-                    place_act.setReference(curObject.getString("reference"));
-                }
-                if (curObject.has("types")) {
-                    JSONArray types = new JSONArray();
-                    for (int j = 0; j < types.length(); j++) {
-                        place_act.setTypes(types.getString(j));
-                    }
-
-                }
-                if (curObject.has("vicinity")) {
-                    place_act.setVicinity(curObject.getString("vicinity"));
-                }
-                if (curObject.has("formatted_address")) {
-                    place_act.setFormatted_address(curObject.getString("formatted_address"));
-                }
-                place.add(place_act);
+            }
+            //only 1 result (Details-request)
+            else{
+                places.add(createPlace(object.getJSONObject("result")));
             }
         }
-        return place;
+        return places;
+    }
+
+    private Place createPlace(JSONObject curObject) throws JSONException {
+        Place place_act = new Place();
+        if (curObject.has("geometry")) {
+            JSONObject geometryObject = curObject.getJSONObject("geometry");
+            if (geometryObject.has("location")) {
+                JSONObject locationObject = geometryObject.getJSONObject("location");
+                place_act.setLat(locationObject.getDouble("lat"));
+                place_act.setLng(locationObject.getDouble("lng"));
+            }
+        }
+        if (curObject.has("icon")) {
+            place_act.setIcon(curObject.getString("icon"));
+        }
+        if (curObject.has("name")) {
+            place_act.setName(curObject.getString("name"));
+        }
+        if (curObject.has("opening_hours")) {
+            JSONObject opening_hoursObject = curObject.getJSONObject("opening_hours");
+            place_act.setOpenNow(opening_hoursObject.getBoolean("open_now"));
+            if (opening_hoursObject.has("weekday_text")) {
+                JSONArray weekday = opening_hoursObject.getJSONArray("weekday_text");
+                for (int j = 0; j < weekday.length(); j++) {
+                    place_act.setOpeningHours(weekday.getString(j));
+                }
+            }
+
+        }
+        if (curObject.has("place_id")) {
+            place_act.setPlace_ID(curObject.getString("place_id"));
+        }
+        if (curObject.has("rating")) {
+            place_act.setRating(curObject.getDouble("rating"));
+        }
+        if (curObject.has("reference")) {
+            place_act.setReference(curObject.getString("reference"));
+        }
+        if (curObject.has("types")) {
+            JSONArray types = new JSONArray();
+            for (int j = 0; j < types.length(); j++) {
+                place_act.setTypes(types.getString(j));
+            }
+
+        }
+        if (curObject.has("vicinity")) {
+            place_act.setVicinity(curObject.getString("vicinity"));
+        }
+        if (curObject.has("formatted_address")) {
+            place_act.setFormatted_address(curObject.getString("formatted_address"));
+        }
+        return place_act;
     }
 
 //    private class JasonTask extends AsyncTask<String, Integer, String> {

@@ -732,7 +732,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
 //            request.append("&sensor=true");
             //...until here
 
-//            String request = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBlLTzeqS-loYL59qpIZ5MjjvyeDSvGX6s&location=48.306103,14.286544&radius=200&sensor=false&types=restaurant&keywords=(%22Steak%20House%22)%20OR%20(%22Chinese%20Restaurant%22)";
+           request = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBlLTzeqS-loYL59qpIZ5MjjvyeDSvGX6s&location=48.306103,14.286544&radius=200&sensor=false&types=restaurant&keywords=(%22Steak%20House%22)%20OR%20(%22Chinese%20Restaurant%22)";
 
             List<Place> places = new ArrayList<>();
             try {
