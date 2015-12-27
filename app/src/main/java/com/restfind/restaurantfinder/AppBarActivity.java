@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.JsonReader;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -27,22 +26,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 //handles almost all Toolbar-Actions and can create a custom AlertDialog with String-Parameter
 public abstract class AppBarActivity extends AppCompatActivity {
 
     protected final String LOG_TAG = "RESTFIND_LOG";
-
-    protected static enum MapActivityType{
-        SearchResults,
-        Invitations,
-        Favorites
-    }
+    protected static final String PLACES_SEARCH_URL =  "https://maps.googleapis.com/maps/api/place/search/json?";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +76,15 @@ public abstract class AppBarActivity extends AppCompatActivity {
 
 
 
+    String createDetailsRequest(String placeID){
+        StringBuilder builder = new StringBuilder();
+        builder.append(PLACES_SEARCH_URL);
+        builder.append("placeID=");
+        builder.append(placeID);
+        builder.append("&key=");
+        builder.append(R.string.api_browser_key);
+        return builder.toString();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -148,82 +147,43 @@ public abstract class AppBarActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    protected String getApiResult(final String request){
-//        JasonTask jasonTask = new JasonTask();
+    String getApiResult(String request){
+        JasonTask jasonTask = new JasonTask();
         String result = null;
-
-        //Thread that tries to login
-        ExecutorService es = Executors.newSingleThreadExecutor();
-        Future<String> future = es.submit(new Callable<String>() {
-            public String call() throws IOException {
-                String resultFuture = null;
-                JSONObject jObj = null;
-                try {
-                    URL url = new URL(request);
-                    InputStream iStream = null;
-                    HttpURLConnection urlConnection = null;
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    iStream = urlConnection.getInputStream();
-                    urlConnection.connect();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(iStream, "UTF-8"), 8);
-                    StringBuilder sb = new StringBuilder();
-                    String line = null;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    resultFuture = sb.toString();
-
-                } catch (MalformedURLException e1) {
-                    e1.printStackTrace();
-                } catch (UnsupportedEncodingException e1) {
-                    e1.printStackTrace();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-                Log.v(LOG_TAG, "222.2");
-                return resultFuture;
-            }
-        });
-
         try {
-            result = future.get();
-        } catch (Exception e) {
+            result = jasonTask.execute(request).get();
+        } catch (InterruptedException e) {
             e.printStackTrace();
-        } finally {
-            es.shutdown();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
-
-
-//        try {
-//            result = jasonTask.execute(request).get();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        }
         return result;
+
     }
 
-    protected List<Place> createPlaces(String apiResult) throws JSONException {
+    public List<Place> createPlaces(String apiResult) throws JSONException {
         List<Place> place = new ArrayList<Place>();
         JSONObject object;
         if(apiResult != null) {
             object = new JSONObject(apiResult);
             JSONArray results = object.getJSONArray("results");
-
-            for(int i = 0; i < results.length(); i++) {
+            int i = 0;
+            while (i < results.length()) {
                 JSONObject curObject = results.getJSONObject(i);
                 Place place_act = new Place();
                 if (curObject.has("geometry")) {
                     JSONObject geometryObject = curObject.getJSONObject("geometry");
                     if (geometryObject.has("location")) {
                         JSONObject locationObject = geometryObject.getJSONObject("location");
-                        place_act.setLat(locationObject.getDouble("lat"));
-                        place_act.setLng(locationObject.getDouble("lng"));
+                        locationObject.getDouble("lat");
+                        locationObject.getDouble("lng");
                     }
                 }
                 if (curObject.has("icon")) {
                     place_act.setIcon(curObject.getString("icon"));
+                }
+                if (curObject.has("id")) {
+                    place_act.setId(curObject.getString("id"));
                 }
                 if (curObject.has("name")) {
                     place_act.setName(curObject.getString("name"));
@@ -245,8 +205,11 @@ public abstract class AppBarActivity extends AppCompatActivity {
                 if (curObject.has("rating")) {
                     place_act.setRating(curObject.getDouble("rating"));
                 }
+                if (curObject.has("scope")) {
+                    place_act.setScope(curObject.getString("scope"));
+                }
                 if (curObject.has("reference")) {
-                    place_act.setReference(curObject.getString("reference"));
+                    place_act.setScope(curObject.getString("reference"));
                 }
                 if (curObject.has("types")) {
                     JSONArray types = new JSONArray();
@@ -259,59 +222,14 @@ public abstract class AppBarActivity extends AppCompatActivity {
                     place_act.setVicinity(curObject.getString("vicinity"));
                 }
                 if (curObject.has("formatted_address")) {
-                    place_act.setFormatted_address(curObject.getString("formatted_address"));
+                    place_act.setVicinity(curObject.getString("formatted_address"));
                 }
                 place.add(place_act);
+                i++;
             }
         }
         return place;
     }
-
-//    private class JasonTask extends AsyncTask<String, Integer, String> {
-//        JsonReader reader;
-//        StringBuilder builder = new StringBuilder();
-//
-//        @Override
-//        protected String doInBackground(String... params) {
-//            params.toString();
-//            String result = null;
-//            JSONObject jObj = null;
-//            try {
-//                URL url = new URL(params[0]);
-//                InputStream iStream = null;
-//                HttpURLConnection urlConnection = null;
-//                urlConnection = (HttpURLConnection) url.openConnection();
-//                iStream = urlConnection.getInputStream();
-//                urlConnection.connect();
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(iStream, "UTF-8"), 8);
-//                StringBuilder sb = new StringBuilder();
-//                String line = null;
-//                while ((line = reader.readLine()) != null) {
-//                    sb.append(line + "\n");
-//                }
-//                result = sb.toString();
-//
-//            } catch (MalformedURLException e1) {
-//                e1.printStackTrace();
-//            } catch (UnsupportedEncodingException e1) {
-//                e1.printStackTrace();
-//            } catch (IOException e1) {
-//                e1.printStackTrace();
-//            }
-//            return result;
-//        }
-//    }
-}
-    String createDetailsRequest(String placeID){
-        StringBuilder builder = new StringBuilder();
-        builder.append(PLACES_SEARCH_URL);
-        builder.append("placeID=");
-        builder.append(placeID);
-        builder.append("&key=");
-        builder.append(R.string.api_browser_key);
-        return builder.toString();
-    }
-
 
     public class JasonTask extends AsyncTask<String, Integer, String> {
         JsonReader reader;
