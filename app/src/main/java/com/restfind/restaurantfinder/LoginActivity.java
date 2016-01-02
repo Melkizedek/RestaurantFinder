@@ -112,6 +112,11 @@ public class LoginActivity extends AppBarActivity {
             editor.putString(getResources().getString(R.string.login_current), username);
             editor.commit();
 
+            //Start Service
+//            Intent serviceIntent = new Intent(this, CheckInvitationsService.class);
+//            serviceIntent.putExtra("username", username);
+//            startService(serviceIntent);
+
             //Start new Activity
             LoginActivity.this.startActivity(new Intent(LoginActivity.this, SearchOptionsActivity.class));
         }

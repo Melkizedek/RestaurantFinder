@@ -53,8 +53,6 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     }
     private Operation operation;
 
-    private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
-
     private FusedLocationProviderApi fusedLocationProviderApi;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;

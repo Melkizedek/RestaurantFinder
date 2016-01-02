@@ -37,6 +37,7 @@ import java.util.concurrent.Future;
 public abstract class AppBarActivity extends AppCompatActivity {
 
     protected final String LOG_TAG = "RESTFIND_LOG";
+    protected static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
 
     protected static enum MapActivityType{
         SearchResults,

@@ -29,6 +29,7 @@
     <string name="search">Search</string>
 
     <string name="map_activity_type">MapActivityType</string>
+    <string name="iconRestaurant">https://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png</string>
 
     <string-array name="restaurant_types">
         <item>Chinese</item>
