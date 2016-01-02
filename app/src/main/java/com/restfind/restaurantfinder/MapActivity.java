@@ -37,11 +37,14 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
 
     private GoogleMap mMap;
 
+    private final int FAVORITE_REQUEST = 1;
+
     private MapActivityType mapActivityType;
     private ArrayList<Place> places;
     private Map<Marker, Place> markerPlaces;
     private Map<Marker, Location> markerFriends;
     private Marker curMarker;
+    private Marker curSelectedMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +98,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
 
             MarkerOptions m = new MarkerOptions().position(pos)
                     .title(p.getName())
-                    .snippet("<Tap here for more Details>");
+                    .snippet("<Tap here for more Details and Options>");
 
             //TODO: specific icons for different types
             if(p.getIcon().equals(getResources().getString(R.string.iconRestaurant))) {
@@ -119,7 +122,25 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         Intent intent = new Intent(MapActivity.this, PlaceDetailsActivity.class);
         intent.putExtra("place", markerPlaces.get(marker));
 
-        startActivity(intent);
+        if(mapActivityType == MapActivityType.Favorites){
+            curSelectedMarker = marker;
+            intent.putExtra("favorite", true);
+            startActivityForResult(intent, FAVORITE_REQUEST);
+        }else {
+            startActivity(intent);
+        }
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == FAVORITE_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                boolean deleted = data.getBooleanExtra("deleted", false);
+                if(deleted){
+                    markerPlaces.remove(curSelectedMarker);
+                    curSelectedMarker.remove();
+                }
+            }
+        }
     }
 
     /*

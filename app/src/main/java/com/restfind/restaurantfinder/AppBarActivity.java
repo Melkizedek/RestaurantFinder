@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -81,7 +82,13 @@ public abstract class AppBarActivity extends AppCompatActivity {
                 startActivity(new Intent(AppBarActivity.this, InvitationsActivity.class));
                 return true;
             case R.id.action_favorites:
-                startActivity(new Intent(AppBarActivity.this, FavoritesActivity.class));
+                //Get current logged-in username
+                spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
+                String username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
+
+                GetFavoritesTask task = new GetFavoritesTask();
+                task.execute(username);
+
                 return true;
             case R.id.action_friends:
                 startActivity(new Intent(AppBarActivity.this, FriendsActivity.class));
@@ -239,5 +246,47 @@ public abstract class AppBarActivity extends AppCompatActivity {
             place_act.setFormatted_address(curObject.getString("formatted_address"));
         }
         return place_act;
+    }
+
+    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    private class GetFavoritesTask extends AsyncTask<String, Integer, ArrayList<Place>> {
+
+        @Override
+        protected ArrayList<Place> doInBackground(String... params) {
+            final String username = params[0];
+            ArrayList<Place> places = new ArrayList<>();
+            List<String> placeIDs;
+
+            //Thread that tries to get favorites
+            ExecutorService es = Executors.newSingleThreadExecutor();
+            Future<List<String>> result = es.submit(new Callable<List<String>>() {
+                public List<String> call() throws IOException {
+                    return Database.getFavorites(username);
+                }
+            });
+
+            try {
+                placeIDs = result.get();
+            } catch (Exception e) {
+                //Could not connect to Server with .php-files
+                showAlertDialog(getResources().getString(R.string.connection_error));
+                return null;
+            } finally {
+                es.shutdown();
+            }
+            for(String s : placeIDs){
+                places.add(getPlaceDetails(s));
+            }
+            return places;
+        }
+
+        //puts the friend-requests and friends into the listView
+        @Override
+        protected void onPostExecute(ArrayList<Place> result) {
+            Intent intent = new Intent(AppBarActivity.this, MapActivity.class);
+            intent.putExtra(getResources().getString(R.string.map_activity_type), MapActivityType.Favorites);
+            intent.putParcelableArrayListExtra("places", result);
+            startActivity(intent);
+        }
     }
 }
