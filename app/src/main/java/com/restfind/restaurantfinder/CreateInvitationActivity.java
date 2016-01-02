@@ -1,6 +1,5 @@
 package com.restfind.restaurantfinder;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 public class CreateInvitationActivity extends AppBarActivity {
@@ -9,5 +8,7 @@ public class CreateInvitationActivity extends AppBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_invitation);
+
+        //TODO: Create New Invitation with Time, Friends,...
     }
 }

@@ -103,16 +103,17 @@ public class LoginActivity extends AppBarActivity {
                 SharedPreferences.Editor editor = spLoginSaved.edit();
                 editor.putString("username", username);
                 editor.putString("password", password);
-                editor.commit();
+                editor.apply();
             }
 
             //save current logged-in username used in the App
             SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = spLoginCurrent.edit();
             editor.putString(getResources().getString(R.string.login_current), username);
-            editor.commit();
+            editor.apply();
 
             //Start Service
+            //TODO: Start CheckInvitationsService
 //            Intent serviceIntent = new Intent(this, CheckInvitationsService.class);
 //            serviceIntent.putExtra("username", username);
 //            startService(serviceIntent);

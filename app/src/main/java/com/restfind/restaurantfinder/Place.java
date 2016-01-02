@@ -6,9 +6,6 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Melkizedek on 18.12.2015.
- */
 public class Place implements Parcelable {
     private String icon;
     private Double lat;
@@ -18,18 +15,15 @@ public class Place implements Parcelable {
     private boolean openNow;
     private String place_ID;
     private String reference;
-    //alt_ids
     private String price_level;
     private Double rating;
     private List<String> types;
     private String vicinity;
     private String formatted_address;
-    private String id;
-    private String scope;
 
     public Place(){
-        openingHours = new ArrayList<String>();
-        types = new ArrayList<String>();
+        openingHours = new ArrayList<>();
+        types = new ArrayList<>();
         price_level = "";
         rating = -1.0;
     }
@@ -146,7 +140,7 @@ public class Place implements Parcelable {
         name = in.readString();
         openingHours = new ArrayList<>();
         in.readStringList(openingHours);
-        openNow = in.readInt() != 0;;
+        openNow = in.readInt() != 0;
         place_ID = in.readString();
         reference = in.readString();
         price_level = in.readString();
@@ -189,13 +183,5 @@ public class Place implements Parcelable {
         dest.writeStringList(types);
         dest.writeString(vicinity);
         dest.writeString(formatted_address);
-    }
-
-    public void setScope(String scope) {
-        this.scope = scope;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 }

@@ -3,7 +3,6 @@ package com.restfind.restaurantfinder;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -11,7 +10,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -86,7 +84,6 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
         // Add a marker in current Position and move the camera
         LatLng currentPos = new LatLng(latitude, longitude);
         mMap.addMarker(new MarkerOptions().position(currentPos).title("Current Position"));
-//        .icon(BitmapDescriptorFactory.fromResource(R.drawable.)
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPos));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
 
@@ -98,6 +95,7 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
                     .fillColor(0x50ed6f01));
         }
 
+        //create new Marker based on the touched Location
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng point) {

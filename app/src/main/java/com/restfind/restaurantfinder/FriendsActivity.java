@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -152,8 +151,6 @@ public class FriendsActivity extends AppBarActivity {
             case 0:
                 final String friend = ((Map.Entry<String, Boolean>)lvFriendList.getAdapter().getItem(info.position)).getKey();
 
-                boolean deleteSuccessful = false;
-
                 //Thread that tries to delete friend
                 ExecutorService es = Executors.newSingleThreadExecutor();
                 Future<Boolean> result = es.submit(new Callable<Boolean>() {
@@ -163,7 +160,7 @@ public class FriendsActivity extends AppBarActivity {
                 });
 
                 try {
-                    deleteSuccessful = result.get();
+                    result.get();
                 } catch (Exception e) {
                     //Could not connect to Server with .php-files
                     showAlertDialog(getResources().getString(R.string.connection_error));
@@ -188,8 +185,8 @@ public class FriendsActivity extends AppBarActivity {
         @Override
         protected Map<String, Boolean> doInBackground(String... params) {
             //Map with <Friend-Name, invite or not>
-            Map<String, Boolean> friendsMap = new TreeMap<String, Boolean>();
-            List<String> friends = null;
+            Map<String, Boolean> friendsMap = new TreeMap<>();
+            List<String> friends;
 
             //Thread that tries to get friend-requests
             ExecutorService es = Executors.newSingleThreadExecutor();
@@ -247,7 +244,7 @@ public class FriendsActivity extends AppBarActivity {
         protected void onPostExecute(Map<String, Boolean> result) {
             if(result != null){
                 lvFriendList = (ListView) findViewById(R.id.lvFriendList);
-                FriendAdapter adapter = new FriendAdapter(result, FriendsActivity.this);
+                FriendAdapter adapter = new FriendAdapter(result);
                 lvFriendList.setAdapter(adapter);
                 registerForContextMenu(lvFriendList);
             }
@@ -255,12 +252,9 @@ public class FriendsActivity extends AppBarActivity {
     }
 
     public class FriendAdapter extends BaseAdapter implements ListAdapter {
-
-        private Context context;
         private final ArrayList mData;
 
-        public FriendAdapter(Map<String, Boolean> map, Context context) {
-            this.context = context;
+        public FriendAdapter(Map<String, Boolean> map) {
             mData = new ArrayList();
             mData.addAll(map.entrySet());
         }
@@ -344,8 +338,6 @@ public class FriendsActivity extends AppBarActivity {
                 btnDecline.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        boolean declineSuccessful = false;
-
                         //Thread that tries to decline friend
                         ExecutorService es = Executors.newSingleThreadExecutor();
                         Future<Boolean> result = es.submit(new Callable<Boolean>() {
@@ -355,7 +347,7 @@ public class FriendsActivity extends AppBarActivity {
                         });
 
                         try {
-                            declineSuccessful = result.get();
+                            result.get();
                         } catch (Exception e) {
                             //Could not connect to Server with .php-files
                             showAlertDialog(getResources().getString(R.string.connection_error));

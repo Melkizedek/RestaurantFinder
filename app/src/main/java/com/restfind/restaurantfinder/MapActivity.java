@@ -3,15 +3,12 @@ package com.restfind.restaurantfinder;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,7 +21,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -101,6 +97,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                     .title(p.getName())
                     .snippet("<Tap here for more Details>");
 
+            //TODO: specific icons for different types
             if(p.getIcon().equals(getResources().getString(R.string.iconRestaurant))) {
                 m.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_star_black_24dp));
             }
@@ -212,7 +209,6 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                 } else {
                     // permission denied
                 }
-                return;
             }
         }
     }

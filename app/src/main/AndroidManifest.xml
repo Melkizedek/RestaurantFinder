@@ -31,8 +31,6 @@
 
         <activity android:name=".RegisterActivity" >
         </activity>
-        <activity android:name=".SearchResultsActivity" >
-        </activity>
         <activity android:name=".SearchOptionsActivity" >
         </activity>
         <activity android:name=".FriendsActivity" >

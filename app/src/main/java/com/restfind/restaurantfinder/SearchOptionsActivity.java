@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -37,7 +36,6 @@ import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.*;
 
 import org.json.JSONException;
 
@@ -57,7 +55,6 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
 
-    private final String TAG_LOG = "SearchOptionsActivity";
     private final int CHANGE_POSITION_REQUEST = 1;
 
     private boolean timeIsNow;
@@ -308,7 +305,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                     if (chosenNewPosition && !rbCurrentPos.isChecked()) {
                         startSearchResultsTask();
                     } else {
-                        //Get current Position and start SearchResultsActivity
+                        //Get current Position and start MapActivity
                         operation = Operation.Search;
                         buildApiClient();
                     }
@@ -352,7 +349,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
 
     //Creates all sub-Checkboxes (for Restaurants, Cafes, Bars, Takeaway) and gives them Listeners
     private void setupCheckboxes(final CheckBox cbType, final List<CheckBox> cbSubTypes, final String[] typeArray, LinearLayout llcbType){
-        //Restaurant-Checkbox checks or unchecks all Sub-Checkboxes
+        //Main-Type-Checkbox checks or unchecks all Sub-Checkboxes
         cbType.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 CheckBox cb = (CheckBox) v;
@@ -368,10 +365,10 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             }
         });
 
-        //Create Checkboxes out of those Takeaway-Types and add them to the ListView and a List
-        for(int i = 0; i < typeArray.length; i++){
+        //Create Checkboxes out of those Types and add them to the ListView and a List
+        for(String s : typeArray){
             CheckBox cb = new CheckBox(this);
-            cb.setText(typeArray[i]);
+            cb.setText(s);
 
             cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -453,7 +450,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                 editor.putBoolean("takeaway" + i, checkBoxesTakeaway.get(i).isChecked());
             }
         }
-        editor.commit();
+        editor.apply();
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -552,80 +549,6 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         return options;
     }
 
-
-    String getKeyWordString(){
-        StringBuilder builder = new StringBuilder();
-        ArrayList<String> stringList = new ArrayList();
-        for(CheckBox cb: checkBoxesRest){
-            if(cb.isChecked()){
-                stringList.add(cb.getText().toString());
-            }
-        }
-        for(CheckBox cb: checkBoxesBar){
-            if(cb.isChecked()){
-                stringList.add(cb.getText().toString());
-            }
-        }
-        for(CheckBox cb: checkBoxesCafe){
-            if(cb.isChecked()){
-                stringList.add(cb.getText().toString());
-            }
-        }
-        for(CheckBox cb: checkBoxesTakeaway){
-            if(cb.isChecked()){
-                stringList.add(cb.getText().toString());
-            }
-        }
-        int counter = 0;
-        while(counter < stringList.size()){
-            if(counter != stringList.size()-1){
-                builder.append(stringList.get(counter));
-                builder.append(" OR ");
-            }else{
-                builder.append(stringList.get(counter));
-            }
-
-            counter++;
-        }
-        return builder.toString();
-    }
-
-    String checkTyp (){
-        boolean isFirst = true;
-        StringBuilder builderTyp = new StringBuilder();
-        if(cbBar.isChecked()) {
-            if(isFirst) {
-                builderTyp.append("bar");
-                isFirst = false;
-            }else {
-                builderTyp.append("|bar");
-            }
-
-        }if(cbTakeaway.isChecked()) {
-            if(isFirst) {
-                builderTyp.append("takeaway");
-                isFirst = false;
-            }else {
-                builderTyp.append("|takeaway");
-            }
-        }if(cbRestaurant.isChecked()) {
-            if(isFirst) {
-                builderTyp.append("restaurant");
-                isFirst = false;
-            }else {
-                builderTyp.append("|restaurant");
-            }
-        }if(cbCafe.isChecked()) {
-            if (isFirst) {
-                builderTyp.append("cafe");
-                isFirst = false;
-            } else {
-                builderTyp.append("|cafe");
-            }
-        }
-        return builderTyp.toString();
-    }
-
     boolean isText(){
         return etName.getText() != null;
     }
@@ -634,10 +557,6 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         SearchOptions options = createSearchOptions();
 
         if(options != null) {
-//            Intent intent = new Intent(SearchOptionsActivity.this, SearchResultsActivity.class);
-//            intent.putExtra(getResources().getString(R.string.search_options), options);
-//            startActivity(intent);
-
             GetSearchResultsTask task = new GetSearchResultsTask();
             task.execute(options);
         }
@@ -742,7 +661,6 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                 } else {
                     // permission denied
                 }
-                return;
             }
         }
     }
@@ -763,120 +681,182 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     //<Input for doInBackground, (Progress), Input for onPostExecute>
     private class GetSearchResultsTask extends AsyncTask<SearchOptions, Integer, List<Place>> {
 
+        private List<String> typesRestaurant;
+        private List<String> typesBar;
+        private List<String> typesCafe;
+        private List<String> typesTakeaway;
+
+        private String checkTypes (){
+            boolean isFirst = true;
+            StringBuilder builderTyp = new StringBuilder();
+            if(!typesRestaurant.isEmpty()) {
+                builderTyp.append("restaurant");
+                isFirst = false;
+            }
+            if(!typesBar.isEmpty()) {
+                if(isFirst) {
+                    builderTyp.append("bar");
+                    isFirst = false;
+                }else {
+                    builderTyp.append("|bar");
+                }
+
+            }
+            if(!typesCafe.isEmpty()) {
+                if (isFirst) {
+                    builderTyp.append("cafe");
+                    isFirst = false;
+                } else {
+                    builderTyp.append("|cafe");
+                }
+            }
+            if(!typesTakeaway.isEmpty()) {
+                if(isFirst) {
+                    builderTyp.append("takeaway");
+                }else {
+                    builderTyp.append("|takeaway");
+                }
+            }
+            return builderTyp.toString();
+        }
+
+//        private String getKeyWordString(){
+//            StringBuilder builder = new StringBuilder();
+//            ArrayList<String> stringList = new ArrayList<>();
+//
+//            for(String s : typesRestaurant){
+//                if(!s.equals("Restaurant")){
+//                    stringList.add(s);
+//                }
+//            }
+//            for(String s : typesBar){
+//                if(!s.equals("Bar")){
+//                    stringList.add(s);
+//                }
+//            }
+//            for(String s : typesCafe){
+//                if(!s.equals("Cafe")){
+//                    stringList.add(s);
+//                }
+//            }
+//            for(String s : typesTakeaway){
+//                if(!s.equals("Takeaway")){
+//                    stringList.add(s);
+//                }
+//            }
+//            builder.append("&keyword");
+//            if(stringList.size() > 1){
+//                builder.append("s");
+//            }
+//            builder.append("=");
+//            for(int i = 0; i < stringList.size(); i++){
+//                if(stringList.size() > 1) {
+//                    builder.append("(%22" + stringList.get(i).replace(" ", "%20") + "%22)");
+//                } else{
+//                    builder.append(stringList.get(i).replace(" ", "%20"));
+//                }
+//                if(i != stringList.size() - 1){
+//                    builder.append("%20OR%20");
+//                }
+//            }
+//            return builder.toString();
+//        }
+
         @Override
         protected List<Place> doInBackground(SearchOptions... params) {
             SearchOptions searchOptions = params[0];
+            typesRestaurant = searchOptions.getTypesRestaurant();
+            typesBar = searchOptions.getTypesBar();
+            typesCafe = searchOptions.getTypesCafe();
+            typesTakeaway = searchOptions.getTypesTakeaway();
             StringBuilder builder = new StringBuilder();
 
             //Nearby Search
             if(searchOptions.getRadius() != 0){
-                String nearbySearch = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
-                builder.append(nearbySearch);
-                String location = "location=";
-                builder.append(location);
-                // builder.append(searchOptions.getLongitude());
-                builder.append("48.306103");
-                builder.append(",");
-                // builder.append(searchOptions.getLatitude());
-                builder.append("14.286544");
-                String radius = "&radius=";
-                builder.append(radius);
-                builder.append(searchOptions.getRadius());
-                if(checkTyp() != null){
-                    builder.append("&type=");
-                    builder.append(checkTyp());
-
-                }
-                /*
-                if(getKeyWordString() != null){
-                    builder.append("&keyword=");
-                    builder.append(getKeyWordString());
-                }
-                */
-                builder.append("&key=");
+                builder.append("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+                builder.append("key=");
                 builder.append(getResources().getString(R.string.api_browser_key));
-
-
-            }
-            Log.v("testString",builder.toString());
-            /*
-            // Place
-            if(checkTyp() != null || isText()) {
-                builder.append("https://maps.googleapis.com/maps/api/place/radarsearch/json?");
-                builder.append("location=");
-                builder.append(searchOptions.getLongitude());
+                builder.append("&location=");
+                 builder.append(searchOptions.getLatitude());
                 builder.append(",");
-                builder.append(searchOptions.getLatitude());
+                builder.append(searchOptions.getLongitude());
                 builder.append("&radius=");
                 builder.append(searchOptions.getRadius());
-                if (checkTyp() != null) {
-                    builder.append("&type=");
-                    builder.append(checkTyp());
-
-                }
-                if(getKeyWordString() != null){
-                    builder.append("&keyword");
-                    builder.append(getKeyWordString());
-                }
-                builder.append("&key");
-                builder.append(R.string.api_browser_key);
+                builder.append("&sensor=true");
+//                if(checkTypes() != null){
+//                    builder.append("&types=");
+//                    builder.append(checkTypes());
+//                }
+//                if(getKeyWordString() != null){
+//                    builder.append(getKeyWordString());
+//                }
             }
-            */
 
-
-
-//            if(searchOptions != null){
-//                Log.v(LOG_TAG, "name: " + searchOptions.getName());
-//                Log.v(LOG_TAG, "radius: " + searchOptions.getRadius());
-//                Log.v(LOG_TAG, "longitude: " + searchOptions.getLongitude());
-//                Log.v(LOG_TAG, "latitude: " + searchOptions.getLatitude());
-//                Log.v(LOG_TAG, "timeIsNow: " + searchOptions.isTimeNow());
-//                Log.v(LOG_TAG, "time: " + searchOptions.getTime());
-//                Log.v(LOG_TAG, "dayOfWeek: " + searchOptions.getDayOfWeek());
-//
-//                if(searchOptions.getTypesRestaurant() != null) {
-//                    for (String s : searchOptions.getTypesRestaurant()) {
-//                        Log.v(LOG_TAG, "Restaurant-types: " + s);
-//                    }
-//                }
-//                if(searchOptions.getTypesBar() != null) {
-//                    for (String s : searchOptions.getTypesBar()) {
-//                        Log.v(LOG_TAG, "Bar-types: " + s);
-//                    }
-//                }
-//                if(searchOptions.getTypesCafe() != null) {
-//                    for (String s : searchOptions.getTypesCafe()) {
-//                        Log.v(LOG_TAG, "Cafe-types: " + s);
-//                    }
-//                }
-//                if(searchOptions.getTypesTakeaway() != null) {
-//                    for (String s : searchOptions.getTypesTakeaway()) {
-//                        Log.v(LOG_TAG, "Takeaway-types: " + s);
-//                    }
-//                }
-//            }
-
-            String request = "";
-            //Google Places API Request...
-//            String PLACES_SEARCH_URL =  "https://maps.googleapis.com/maps/api/place/search/json?";
-//
-//            StringBuilder request = new StringBuilder(PLACES_SEARCH_URL);
-//            request.append("key=" + getResources().getString(R.string.api_browser_key));
-//            request.append("&location=" + 48.306793 + "," + 14.287260);
-//            request.append("&radius=200");
-//            request.append("&types=" + "restaurant");
-//            request.append("&sensor=true");
-            //...until here
-
-           request = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBlLTzeqS-loYL59qpIZ5MjjvyeDSvGX6s&location=48.306103,14.286544&radius=200&sensor=false&types=restaurant&keywords=(%22Steak%20House%22)%20OR%20(%22Chinese%20Restaurant%22)";
+            String requestPartOne = builder.toString();
 
             List<Place> places = new ArrayList<>();
-            try {
-                places = createPlaces(getApiResult(request.toString()));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            boolean searched = false;
 
+            if(!typesRestaurant.isEmpty() && !typesRestaurant.get(0).equals("Restaurant")) {
+                searched = true;
+                for(String s : typesRestaurant) {
+                    try {
+                        Log.v(LOG_TAG, "searched: " + s);
+                        Log.v(LOG_TAG, "searchURL: " + requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=restaurant");
+                        List<Place> placesTmp = createPlaces(getApiResult(requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=restaurant"));
+                        places.addAll(placesTmp);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if(!typesBar.isEmpty() && !typesBar.get(0).equals("Bar")) {
+                searched = true;
+                for(String s : typesBar) {
+                    try {
+                        Log.v(LOG_TAG, "searched: " + s);
+                        Log.v(LOG_TAG, "searchURL: " + requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=bar");
+                        List<Place> placesTmp = createPlaces(getApiResult(requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=bar"));
+                        places.addAll(placesTmp);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if(!typesCafe.isEmpty() && !typesCafe.get(0).equals("Cafe")) {
+                searched = true;
+                for(String s : typesCafe) {
+                    try {
+                        Log.v(LOG_TAG, "searched: " + s);
+                        Log.v(LOG_TAG, "searchURL: " + requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=cafe");
+                        List<Place> placesTmp = createPlaces(getApiResult(requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=cafe"));
+                        places.addAll(placesTmp);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if(!typesTakeaway.isEmpty() && !typesTakeaway.get(0).equals("Restaurant")) {
+                searched = true;
+                for(String s : typesTakeaway) {
+                    try {
+                        Log.v(LOG_TAG, "searched: " + s);
+                        Log.v(LOG_TAG, "searchURL: " + requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=takeaway");
+                        List<Place> placesTmp = createPlaces(getApiResult(requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=takeaway"));
+                        places.addAll(placesTmp);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            if(!searched){
+                try {
+                    Log.v(LOG_TAG, "searchedAll: " + requestPartOne + "&types=" + checkTypes());
+                    places = createPlaces(getApiResult(requestPartOne + "&types=" + checkTypes()));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
             return places;
         }
 

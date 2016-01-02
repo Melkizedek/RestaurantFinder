@@ -22,5 +22,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
 
         TextView tv = (TextView) findViewById(R.id.textView);
         tv.setText(place.getName());
+
+        //TODO: list all needed fields of the given Place-Object
     }
 }

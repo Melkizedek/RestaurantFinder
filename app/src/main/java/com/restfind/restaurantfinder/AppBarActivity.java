@@ -5,11 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.JsonReader;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -21,25 +18,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-//handles almost all Toolbar-Actions and can create a custom AlertDialog with String-Parameter
+//handles almost all Toolbar-Actions, some methods used by multiple sub-Activities and can create a custom AlertDialog with String-Parameter
 public abstract class AppBarActivity extends AppCompatActivity {
 
     protected final String LOG_TAG = "RESTFIND_LOG";
+    //Constant-Int for real-time permissions
     protected static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
 
-    protected static enum MapActivityType{
+    //enum to differentiate multiple different uses of the MapActivity
+    protected enum MapActivityType{
         SearchResults,
         Invitations,
         Favorites
@@ -50,39 +46,6 @@ public abstract class AppBarActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_bar);
     }
-    /*
-    String getApiResult(String request){
-        StringBuilder builder =null;
-        try {
-            URL url = new URL(request.toString());
-            InputStream iStream = null;
-            HttpURLConnection urlConnection = null;
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.connect();
-            iStream = urlConnection.getInputStream();
-            builder = new StringBuilder();
-
-            JsonReader jsonReader = new JsonReader(new InputStreamReader(iStream,"UTF8"));
-            jsonReader.beginArray();
-            while(jsonReader.hasNext()){
-                jsonReader.beginObject();
-                while(jsonReader.hasNext()){
-                    builder.append(jsonReader.nextName());
-
-                }
-                jsonReader.endObject();
-            }
-            jsonReader.endArray();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        return builder.toString();
-    }
-    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -91,7 +54,7 @@ public abstract class AppBarActivity extends AppCompatActivity {
         return true;
     }
 
-    //Handles the chosen Action in the Toolbar
+    //Handles the chosen Action in the Toolbar and starts the corresponding Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -109,7 +72,7 @@ public abstract class AppBarActivity extends AppCompatActivity {
                 editor.apply();
 
                 //Stops the currently running Service
-                //TODO: stop Service
+                //TODO: stop CheckInvitationsService
 
                 //return to Login
                 startActivity(new Intent(AppBarActivity.this, LoginActivity.class));
@@ -145,6 +108,7 @@ public abstract class AppBarActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    //creates a Place-Object with a google places details-search
     protected Place getPlaceDetails(String placeID){
         Place place = new Place();
         try {
@@ -155,47 +119,37 @@ public abstract class AppBarActivity extends AppCompatActivity {
         return place;
     }
 
+    //creates a URL for the Google Places Web Service Details-Search
     protected String createDetailsRequest(String placeID){
-        StringBuilder builder = new StringBuilder();
-        builder.append("https://maps.googleapis.com/maps/api/place/details/json?");
-        builder.append("placeid=");
-        builder.append(placeID);
-        builder.append("&key=");
-        builder.append(getResources().getString(R.string.api_browser_key));
-        return builder.toString();
+        return "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + getResources().getString(R.string.api_browser_key);
     }
 
+    //gets the JSON-Result of a Google Places Search
     protected String getApiResult(final String request){
-//        JasonTask jasonTask = new JasonTask();
         String result = null;
 
-        //Thread that tries to login
+        //Thread that gets the result of a Google Places Search
         ExecutorService es = Executors.newSingleThreadExecutor();
         Future<String> future = es.submit(new Callable<String>() {
             public String call() throws IOException {
                 String resultFuture = null;
-                JSONObject jObj = null;
                 try {
                     URL url = new URL(request);
-                    InputStream iStream = null;
-                    HttpURLConnection urlConnection = null;
+                    InputStream iStream;
+                    HttpURLConnection urlConnection;
                     urlConnection = (HttpURLConnection) url.openConnection();
                     iStream = urlConnection.getInputStream();
                     urlConnection.connect();
                     BufferedReader reader = new BufferedReader(new InputStreamReader(iStream, "UTF-8"), 8);
                     StringBuilder sb = new StringBuilder();
-                    String line = null;
+                    String line;
                     while ((line = reader.readLine()) != null) {
                         sb.append(line + "\n");
                     }
                     resultFuture = sb.toString();
 
-                } catch (MalformedURLException e1) {
-                    e1.printStackTrace();
-                } catch (UnsupportedEncodingException e1) {
-                    e1.printStackTrace();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 return resultFuture;
             }
@@ -208,20 +162,12 @@ public abstract class AppBarActivity extends AppCompatActivity {
         } finally {
             es.shutdown();
         }
-
-
-//        try {
-//            result = jasonTask.execute(request).get();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        }
         return result;
     }
 
+    //creates all found Places based on the JSON-Result
     protected List<Place> createPlaces(String apiResult) throws JSONException {
-        List<Place> places = new ArrayList<Place>();
+        List<Place> places = new ArrayList<>();
         JSONObject object;
         if(apiResult != null) {
             object = new JSONObject(apiResult);
@@ -242,6 +188,7 @@ public abstract class AppBarActivity extends AppCompatActivity {
         return places;
     }
 
+    //goes through the JSON-Result and creates a single Place-Object
     private Place createPlace(JSONObject curObject) throws JSONException {
         Place place_act = new Place();
         if (curObject.has("geometry")) {
@@ -293,39 +240,4 @@ public abstract class AppBarActivity extends AppCompatActivity {
         }
         return place_act;
     }
-
-//    private class JasonTask extends AsyncTask<String, Integer, String> {
-//        JsonReader reader;
-//        StringBuilder builder = new StringBuilder();
-//
-//        @Override
-//        protected String doInBackground(String... params) {
-//            params.toString();
-//            String result = null;
-//            JSONObject jObj = null;
-//            try {
-//                URL url = new URL(params[0]);
-//                InputStream iStream = null;
-//                HttpURLConnection urlConnection = null;
-//                urlConnection = (HttpURLConnection) url.openConnection();
-//                iStream = urlConnection.getInputStream();
-//                urlConnection.connect();
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(iStream, "UTF-8"), 8);
-//                StringBuilder sb = new StringBuilder();
-//                String line = null;
-//                while ((line = reader.readLine()) != null) {
-//                    sb.append(line + "\n");
-//                }
-//                result = sb.toString();
-//
-//            } catch (MalformedURLException e1) {
-//                e1.printStackTrace();
-//            } catch (UnsupportedEncodingException e1) {
-//                e1.printStackTrace();
-//            } catch (IOException e1) {
-//                e1.printStackTrace();
-//            }
-//            return result;
-//        }
-//    }
 }

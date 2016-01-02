@@ -32,34 +32,34 @@
     <string name="iconRestaurant">https://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png</string>
 
     <string-array name="restaurant_types">
-        <item>Chinese</item>
-        <item>Japanese</item>
-        <item>Indian</item>
-        <item>Italian</item>
-        <item>Pizza</item>
-        <item>Mexican</item>
-        <item>Steak</item>
-        <item>Swiss</item>
-        <item>Tapas</item>
-        <item>Vegetarian</item>
-        <item>Hamburger</item>
-        <item>Brazilian</item>
-        <item>French</item>
+        <item>Chinese Restaurant</item>
+        <item>Japanese Restaurant</item>
+        <item>Indian Restaurant</item>
+        <item>Italian Restaurant</item>
+        <item>Pizza Restaurant</item>
+        <item>Mexican Restaurant</item>
+        <item>Steak House</item>
+        <item>Swiss Restaurant</item>
+        <item>Tapas Restaurant</item>
+        <item>Vegetarian Restaurant</item>
+        <item>Hamburger Restaurant</item>
+        <item>Brazilian Restaurant</item>
+        <item>French Restaurant</item>
         <item>Oyster Bar</item>
     </string-array>
 
     <string-array name="bar_types">
         <item>Pub</item>
-        <item>Irish-Pub</item>
+        <item>Irish Pub</item>
         <item>Tapas Bar</item>
-        <item>Sports-Bar</item>
+        <item>Sports Bar</item>
         <item>Nightclub</item>
-        <item>Cocktail-Bar</item>
-        <item>Karaoke-Bar</item>
-        <item>Wine-Bar</item>
+        <item>Cocktail Bar</item>
+        <item>Karaoke Bar</item>
+        <item>Wine Bar</item>
         <item>Brasserie</item>
-        <item>Gay-Bar</item>
-        <item>Jazz-Club</item>
+        <item>Gay Bar</item>
+        <item>Jazz Club</item>
         <item>Gastropub</item>
         <item>Live music venue</item>
         <item>Barbecue</item>

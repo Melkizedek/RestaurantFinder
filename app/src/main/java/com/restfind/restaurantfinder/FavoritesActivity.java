@@ -6,13 +6,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
-import android.widget.ListView;
 
 import java.util.List;
 
 public class FavoritesActivity extends AppBarActivity {
 
-    private ListView lvFavoriteList;
     private String username;
 
     @Override
@@ -27,9 +25,6 @@ public class FavoritesActivity extends AppBarActivity {
         //Get current logged-in username
         SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
         username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
-
-        //Set up UI-Elements
-        lvFavoriteList = (ListView) findViewById(R.id.lvFavoriteList);
 
         //Start task
         GetFavoritesTask task = new GetFavoritesTask();
@@ -47,7 +42,7 @@ public class FavoritesActivity extends AppBarActivity {
     private class GetFavoritesTask extends AsyncTask<String, Integer, List<String>> {
 
         /*
-        TODO: Gets Favorites of user from Database and displays them in ListView
+        TODO: Gets Favorites of user from Database and displays them in Map
          */
 
         @Override

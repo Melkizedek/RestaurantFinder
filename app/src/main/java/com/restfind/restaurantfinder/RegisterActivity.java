@@ -78,7 +78,7 @@ public class RegisterActivity extends AppBarActivity {
             SharedPreferences spLoginSaved = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_saved), Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = spLoginSaved.edit();
             editor.clear();
-            editor.commit();
+            editor.apply();
 
             //Start new Activity (back to Login)
             RegisterActivity.this.startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
