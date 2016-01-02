@@ -500,6 +500,8 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         List<String> cafeStringList = new ArrayList<>();
         List<String> takeawayStringList = new ArrayList<>();
 
+
+
         if(cbRestaurant.isChecked()){
             restaurantStringList.add(cbRestaurant.getText().toString());
         } else{
@@ -548,6 +550,84 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         options.setTypesTakeaway(takeawayStringList);
 
         return options;
+    }
+
+
+    String getKeyWordString(){
+        StringBuilder builder = new StringBuilder();
+        ArrayList<String> stringList = new ArrayList();
+        for(CheckBox cb: checkBoxesRest){
+            if(cb.isChecked()){
+                stringList.add(cb.getText().toString());
+            }
+        }
+        for(CheckBox cb: checkBoxesBar){
+            if(cb.isChecked()){
+                stringList.add(cb.getText().toString());
+            }
+        }
+        for(CheckBox cb: checkBoxesCafe){
+            if(cb.isChecked()){
+                stringList.add(cb.getText().toString());
+            }
+        }
+        for(CheckBox cb: checkBoxesTakeaway){
+            if(cb.isChecked()){
+                stringList.add(cb.getText().toString());
+            }
+        }
+        int counter = 0;
+        while(counter < stringList.size()){
+            if(counter != stringList.size()-1){
+                builder.append(stringList.get(counter));
+                builder.append(" OR ");
+            }else{
+                builder.append(stringList.get(counter));
+            }
+
+            counter++;
+        }
+        return builder.toString();
+    }
+
+    String checkTyp (){
+        boolean isFirst = true;
+        StringBuilder builderTyp = new StringBuilder();
+        if(cbBar.isChecked()) {
+            if(isFirst) {
+                builderTyp.append("bar");
+                isFirst = false;
+            }else {
+                builderTyp.append("|bar");
+            }
+
+        }if(cbTakeaway.isChecked()) {
+            if(isFirst) {
+                builderTyp.append("takeaway");
+                isFirst = false;
+            }else {
+                builderTyp.append("|takeaway");
+            }
+        }if(cbRestaurant.isChecked()) {
+            if(isFirst) {
+                builderTyp.append("restaurant");
+                isFirst = false;
+            }else {
+                builderTyp.append("|restaurant");
+            }
+        }if(cbCafe.isChecked()) {
+            if (isFirst) {
+                builderTyp.append("cafe");
+                isFirst = false;
+            } else {
+                builderTyp.append("|cafe");
+            }
+        }
+        return builderTyp.toString();
+    }
+
+    boolean isText(){
+        return etName.getText() != null;
     }
 
     private void startSearchResultsTask() {
@@ -686,6 +766,64 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         @Override
         protected List<Place> doInBackground(SearchOptions... params) {
             SearchOptions searchOptions = params[0];
+            StringBuilder builder = new StringBuilder();
+
+            //Nearby Search
+            if(searchOptions.getRadius() != 0){
+                String nearbySearch = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+                builder.append(nearbySearch);
+                String location = "location=";
+                builder.append(location);
+                // builder.append(searchOptions.getLongitude());
+                builder.append("48.306103");
+                builder.append(",");
+                // builder.append(searchOptions.getLatitude());
+                builder.append("14.286544");
+                String radius = "&radius=";
+                builder.append(radius);
+                builder.append(searchOptions.getRadius());
+                if(checkTyp() != null){
+                    builder.append("&type=");
+                    builder.append(checkTyp());
+
+                }
+                /*
+                if(getKeyWordString() != null){
+                    builder.append("&keyword=");
+                    builder.append(getKeyWordString());
+                }
+                */
+                builder.append("&key=");
+                builder.append(getResources().getString(R.string.api_browser_key));
+
+
+            }
+            Log.v("testString",builder.toString());
+            /*
+            // Place
+            if(checkTyp() != null || isText()) {
+                builder.append("https://maps.googleapis.com/maps/api/place/radarsearch/json?");
+                builder.append("location=");
+                builder.append(searchOptions.getLongitude());
+                builder.append(",");
+                builder.append(searchOptions.getLatitude());
+                builder.append("&radius=");
+                builder.append(searchOptions.getRadius());
+                if (checkTyp() != null) {
+                    builder.append("&type=");
+                    builder.append(checkTyp());
+
+                }
+                if(getKeyWordString() != null){
+                    builder.append("&keyword");
+                    builder.append(getKeyWordString());
+                }
+                builder.append("&key");
+                builder.append(R.string.api_browser_key);
+            }
+            */
+
+
 
 //            if(searchOptions != null){
 //                Log.v(LOG_TAG, "name: " + searchOptions.getName());
