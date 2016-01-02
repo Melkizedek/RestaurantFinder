@@ -582,7 +582,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         while(counter < stringList.size()){
             if(counter != stringList.size()-1){
                 builder.append(stringList.get(counter));
-                builder.append("OR");
+                builder.append(" OR ");
             }else{
                 builder.append(stringList.get(counter));
             }
@@ -773,14 +773,14 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             //Nearby Search
             if(searchOptions.getRadius() != 0){
                 String nearbySearch = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
-                builder.append("&key");
-                builder.append(R.string.api_browser_key);
                 builder.append(nearbySearch);
                 String location = "location=";
                 builder.append(location);
-                builder.append(searchOptions.getLongitude());
+                // builder.append(searchOptions.getLongitude());
+                builder.append("48.306103");
                 builder.append(",");
-                builder.append(searchOptions.getLatitude());
+                // builder.append(searchOptions.getLatitude());
+                builder.append("14.286544");
                 String radius = "&radius=";
                 builder.append(radius);
                 builder.append(searchOptions.getRadius());
@@ -789,20 +789,22 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                     builder.append(checkTyp());
 
                 }
+                /*
                 if(getKeyWordString() != null){
-                    builder.append("&keyword");
+                    builder.append("&keyword=");
                     builder.append(getKeyWordString());
                 }
-                builder.append("&key");
-                builder.append(R.string.api_browser_key);
+                */
+                builder.append("&key=");
+                builder.append(getResources().getString(R.string.api_browser_key));
 
 
             }
+            Log.v("testString",builder.toString());
+            /*
             // Place
             if(checkTyp() != null || isText()) {
-                builder.append("https://maps.googleapis.com/maps/api/place/radarsearch/");
-                builder.append("&key");
-                builder.append(R.string.api_browser_key);
+                builder.append("https://maps.googleapis.com/maps/api/place/radarsearch/json?");
                 builder.append("location=");
                 builder.append(searchOptions.getLongitude());
                 builder.append(",");
@@ -818,7 +820,10 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                     builder.append("&keyword");
                     builder.append(getKeyWordString());
                 }
+                builder.append("&key");
+                builder.append(R.string.api_browser_key);
             }
+            */
 
 
 
