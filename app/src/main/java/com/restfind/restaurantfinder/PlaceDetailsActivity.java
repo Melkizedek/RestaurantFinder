@@ -105,8 +105,7 @@ public class PlaceDetailsActivity extends AppBarActivity {
     }
 
     private void setNotFavorite(){
-        //TODO: Change Image to empty heart
-        btnFavorite.setImageResource(R.drawable.ic_star_border_black_48dp);
+        btnFavorite.setImageResource(R.drawable.ic_favorite_border_black_48dp);
         isFavorite = false;
     }
 
