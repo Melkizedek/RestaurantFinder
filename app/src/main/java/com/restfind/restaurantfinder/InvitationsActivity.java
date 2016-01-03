@@ -25,8 +25,7 @@ public class InvitationsActivity extends AppBarActivity {
         setSupportActionBar(toolbar);
 
         //Get current logged-in username
-        SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
-        username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
+        username = getCurrentUsername();
 
         //Set up UI-Elements
         lvInvitationList = (ListView) findViewById(R.id.lvInvitationList);

@@ -33,7 +33,7 @@
         </service>
 
         <receiver android:name=".service.NotificationEventReceiver" />
-        <receiver android:name=".service.NotificationServiceStarterReceiver">
+        <receiver android:name=".service.NotificationServiceStarterReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />

@@ -13,9 +13,9 @@ import java.util.Date;
 
 public class NotificationEventReceiver extends WakefulBroadcastReceiver {
 
-    private static final String ACTION_START_NOTIFICATION_SERVICE = "ACTION_START_NOTIFICATION_SERVICE";
-    private static final String ACTION_DELETE_NOTIFICATION = "ACTION_DELETE_NOTIFICATION";
-    private static final int NOTIFICATIONS_INTERVAL = 1000 * 60 * 5;
+    protected static final String ACTION_START_NOTIFICATION_SERVICE = "ACTION_START_NOTIFICATION_SERVICE";
+    protected static final String ACTION_DELETE_NOTIFICATION = "ACTION_DELETE_NOTIFICATION";
+    protected static final int NOTIFICATIONS_INTERVAL = 60 * 1000 * 5; //5 minutes
 
     public static void setupAlarm(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -43,19 +43,19 @@ public class NotificationEventReceiver extends WakefulBroadcastReceiver {
         }
     }
 
-    private static long getTriggerAt(Date now) {
+    protected static long getTriggerAt(Date now) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(now);
         return calendar.getTimeInMillis();
     }
 
-    private static PendingIntent getStartPendingIntent(Context context) {
+    protected static PendingIntent getStartPendingIntent(Context context) {
         Intent intent = new Intent(context, NotificationEventReceiver.class);
         intent.setAction(ACTION_START_NOTIFICATION_SERVICE);
         return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    public static PendingIntent getDeleteIntent(Context context) {
+    protected static PendingIntent getDeleteIntent(Context context) {
         Intent intent = new Intent(context, NotificationEventReceiver.class);
         intent.setAction(ACTION_DELETE_NOTIFICATION);
         return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

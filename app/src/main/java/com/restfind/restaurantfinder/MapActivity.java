@@ -82,13 +82,6 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             new GetFavoritesTask().execute();
         }
         setSupportActionBar(toolbar);
-
-//        buildApiClient();
-
-//         Obtain the SupportMapFragment and get notified when the map is ready to be used.
-//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-//                .findFragmentById(R.id.map);
-//        mapFragment.getMapAsync(this);
     }
 
     private void createMap(){
@@ -270,8 +263,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         @Override
         protected ArrayList<Place> doInBackground(Void... params) {
             //Get current logged-in username
-            SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
-            String username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
+            String username = getCurrentUsername();
 
             ArrayList<Place> placesTmp = new ArrayList<>();
             List<String> placeIDs;

@@ -1,12 +1,11 @@
 package com.restfind.restaurantfinder;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -43,8 +42,7 @@ public class PlaceDetailsActivity extends AppBarActivity {
         setSupportActionBar(toolbar);
 
         //Get current logged-in username
-        SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
-        username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
+        username = getCurrentUsername();
 
         btnFavorite = (ImageButton) findViewById(R.id.btnFavorite);
         btnFavorite.setOnClickListener(new View.OnClickListener() {
@@ -84,6 +82,16 @@ public class PlaceDetailsActivity extends AppBarActivity {
                         es.shutdown();
                     }
                 }
+            }
+        });
+
+        Button btnInviteFriends = (Button) findViewById(R.id.btnInviteFriends);
+        btnInviteFriends.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(PlaceDetailsActivity.this, CreateInvitationActivity.class);
+                intent.putExtra("username", username);
+                intent.putExtra("placeID", placeID);
+                startActivity(intent);
             }
         });
 

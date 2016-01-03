@@ -98,6 +98,12 @@ public abstract class AppBarActivity extends AppCompatActivity {
         }
     }
 
+    //Get current logged-in username
+    protected String getCurrentUsername(){
+        SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
+        return spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
+    }
+
     //creates an AlertDialog with the given text
     protected void showAlertDialog(String text){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
