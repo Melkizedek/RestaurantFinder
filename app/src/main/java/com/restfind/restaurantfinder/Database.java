@@ -29,7 +29,8 @@ public class Database {
         login, register,
         getFriendInvites, sendFriendInvite, acceptFriendInvite, declineFriendInvite,
         getFriends, deleteFriend,
-        favorite, deleteFavorite, getFavorites
+        favorite, deleteFavorite, getFavorites,
+        updateUserLocation, getUserLocations
     }
 
     private final static String serverUrl = "http://restfind.heliohost.org/";
@@ -79,6 +80,15 @@ public class Database {
 
     public static boolean deleteFavorite(String username, String locationID) throws IOException {
         return checkResult(Operation.deleteFavorite, username, locationID);
+    }
+
+    public static boolean updateUserLocation(String username, String latitude, String longitude) throws IOException{
+        return checkResult(Operation.updateUserLocation, username, latitude, longitude);
+    }
+
+    // Rückgabewert ist eine Liste mit Strings im folgenden Format: "Username;Latitude;Longitude"
+    public static List<String> getUserLocations(String invitation_id) throws IOException {
+        return execute(Operation.getUserLocations, invitation_id);
     }
 
     // Diese Methode überprüft, ob das Einfügen von Daten in die Tabelle oder das Löschen
