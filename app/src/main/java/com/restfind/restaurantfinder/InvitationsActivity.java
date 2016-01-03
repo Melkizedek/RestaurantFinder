@@ -47,7 +47,7 @@ public class InvitationsActivity extends AppBarActivity {
     private class GetInvitationsTask extends AsyncTask<String, Integer, List<String>> {
 
         /*
-        TODO: Gets Invitations of user from Database and displays them in ListView
+        TODO: Gets Invitations of user from Database and displays them in ListView?
          */
 
         @Override

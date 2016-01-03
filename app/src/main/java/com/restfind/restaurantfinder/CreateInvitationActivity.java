@@ -9,6 +9,6 @@ public class CreateInvitationActivity extends AppBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_invitation);
 
-        //TODO: Create New Invitation with Time, Friends,...
+        //TODO: Create New Invitation by choosing a Time, Friends,...
     }
 }

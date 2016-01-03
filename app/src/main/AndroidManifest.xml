@@ -4,6 +4,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -24,18 +27,25 @@
         </activity>
 
         <service
-            android:name=".CheckInvitationsService"
+            android:name=".service.CheckInvitationsService"
             android:enabled="true"
             android:exported="false" >
         </service>
+
+        <receiver android:name=".service.NotificationEventReceiver" />
+        <receiver android:name=".service.NotificationServiceStarterReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </receiver>
 
         <activity android:name=".RegisterActivity" >
         </activity>
         <activity android:name=".SearchOptionsActivity" >
         </activity>
         <activity android:name=".FriendsActivity" >
-        </activity>
-        <activity android:name=".FavoritesActivity" >
         </activity>
         <activity android:name=".InvitationsActivity" >
         </activity>

@@ -1,4 +1,4 @@
-package com.restfind.restaurantfinder;
+package com.restfind.restaurantfinder.assistant;
 
 import android.os.Parcel;
 import android.os.Parcelable;

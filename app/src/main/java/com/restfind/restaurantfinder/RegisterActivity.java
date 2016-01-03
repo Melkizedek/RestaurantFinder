@@ -3,6 +3,7 @@ package com.restfind.restaurantfinder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -10,12 +11,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
 public class RegisterActivity extends AppBarActivity {
+
+    private String username;
+    private String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +34,8 @@ public class RegisterActivity extends AppBarActivity {
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String username = username_Field.getText().toString();
-                final String password = password_Field.getText().toString();
+                username = username_Field.getText().toString();
+                password = password_Field.getText().toString();
 
                 //username or password contain illegal characters
                 if(username.contains(";") || password.contains(";")){
@@ -44,53 +43,63 @@ public class RegisterActivity extends AppBarActivity {
                 }else{
                     //username and password not empty -> register
                     if (!username.equals("") && !password.equals("")) {
-                        register(username, password);
+                        register();
                     }
                 }
             }
         });
     }
 
-    private void register(final String username, final String password) {
-        boolean registerSuccessful = false;
-
-        //Thread that tries to register
-        ExecutorService es = Executors.newSingleThreadExecutor();
-        Future<Boolean> result = es.submit(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                return Database.register(username, password);
-            }
-        });
-
-        try {
-            registerSuccessful = result.get();
-        } catch (Exception e) {
-            //Could not connect to Server with .php-files
-            showAlertDialog(getResources().getString(R.string.connection_error));
-            return;
-        } finally {
-            es.shutdown();
-        }
-
-        //Register successful
-        if (registerSuccessful) {
-            //delete saved login
-            SharedPreferences spLoginSaved = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_saved), Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = spLoginSaved.edit();
-            editor.clear();
-            editor.apply();
-
-            //Start new Activity (back to Login)
-            RegisterActivity.this.startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-        }
-        //Registration failed (Username already in use)
-        else {
-            showAlertDialog(getResources().getString(R.string.register_name_unavailable));
-        }
+    private void register() {
+        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+        new RegisterTask().execute();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return false;
+    }
+
+    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    private class RegisterTask extends AsyncTask<Void, Integer, DatabaseResultType> {
+
+        @Override
+        protected DatabaseResultType doInBackground(Void... params) {
+            boolean registerSuccessful;
+            try {
+                registerSuccessful = Database.register(username, password);
+            } catch (Exception e) {
+                //Could not connect to Server with .php-files
+                return DatabaseResultType.Connection_Error;
+            }
+            if(registerSuccessful) {
+                return DatabaseResultType.Success;
+            } else{
+                return DatabaseResultType.Register_Name_Unabailable;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(DatabaseResultType result) {
+            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
+            //Register successful
+            if (result == DatabaseResultType.Success) {
+                //delete saved login
+                SharedPreferences spLoginSaved = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_saved), Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = spLoginSaved.edit();
+                editor.clear();
+                editor.apply();
+
+                //Start new Activity (back to Login)
+                RegisterActivity.this.startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+            }
+            //Registration failed (Username already in use)
+            else if(result == DatabaseResultType.Register_Name_Unabailable){
+                showAlertDialog(getResources().getString(R.string.register_name_unavailable));
+            } else{
+                showAlertDialog(getResources().getString(R.string.connection_error));
+            }
+        }
     }
 }

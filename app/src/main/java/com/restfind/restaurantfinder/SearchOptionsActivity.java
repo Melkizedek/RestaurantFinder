@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
@@ -36,8 +35,7 @@ import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-
-import org.json.JSONException;
+import com.restfind.restaurantfinder.assistant.SearchOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -303,7 +301,8 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
                     showAlertDialog("You need to enter a Radius!");
                 }else {
                     if (chosenNewPosition && !rbCurrentPos.isChecked()) {
-                        startSearchResultsTask();
+                        Log.v(LOG_TAG, "CustomPos");
+                        startMapActivity();
                     } else {
                         //Get current Position and start MapActivity
                         operation = Operation.Search;
@@ -477,7 +476,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             }
             options.setRadius(radius);
         }
-        if(chosenNewPosition){
+        if(chosenNewPosition && !rbCurrentPos.isChecked()){
             options.setLongitude(chosenLongitude);
             options.setLatitude(chosenLatitude);
         } else{
@@ -496,8 +495,6 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         List<String> barStringList = new ArrayList<>();
         List<String> cafeStringList = new ArrayList<>();
         List<String> takeawayStringList = new ArrayList<>();
-
-
 
         if(cbRestaurant.isChecked()){
             restaurantStringList.add(cbRestaurant.getText().toString());
@@ -549,16 +546,14 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         return options;
     }
 
-    boolean isText(){
-        return etName.getText() != null;
-    }
-
-    private void startSearchResultsTask() {
+    private void startMapActivity() {
         SearchOptions options = createSearchOptions();
 
         if(options != null) {
-            GetSearchResultsTask task = new GetSearchResultsTask();
-            task.execute(options);
+            Intent intent = new Intent(SearchOptionsActivity.this, MapActivity.class);
+            intent.putExtra(getResources().getString(R.string.map_activity_type), MapActivityType.SearchResults);
+            intent.putExtra(getResources().getString(R.string.search_options), options);
+            startActivity(intent);
         }
     }
 
@@ -596,8 +591,6 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         longitude = location.getLongitude();
         latitude = location.getLatitude();
 
-        Log.v(LOG_TAG, "onLocationChanged");
-
         if(operation == Operation.ChangePosition){
             Intent intent = new Intent(SearchOptionsActivity.this, ChangePositionActivity.class);
             intent.putExtra(getResources().getString(R.string.longitude), longitude);
@@ -614,7 +607,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             startActivityForResult(intent, CHANGE_POSITION_REQUEST);
         }
         else if(operation == Operation.Search) {
-            startSearchResultsTask();
+            startMapActivity();
         }
     }
 
@@ -676,197 +669,5 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     @Override
     public void onBackPressed() {
         //Do nothing (don't go back to Login)
-    }
-
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
-    private class GetSearchResultsTask extends AsyncTask<SearchOptions, Integer, List<Place>> {
-
-        private List<String> typesRestaurant;
-        private List<String> typesBar;
-        private List<String> typesCafe;
-        private List<String> typesTakeaway;
-
-        private String checkTypes (){
-            boolean isFirst = true;
-            StringBuilder builderTyp = new StringBuilder();
-            if(!typesRestaurant.isEmpty()) {
-                builderTyp.append("restaurant");
-                isFirst = false;
-            }
-            if(!typesBar.isEmpty()) {
-                if(isFirst) {
-                    builderTyp.append("bar");
-                    isFirst = false;
-                }else {
-                    builderTyp.append("|bar");
-                }
-
-            }
-            if(!typesCafe.isEmpty()) {
-                if (isFirst) {
-                    builderTyp.append("cafe");
-                    isFirst = false;
-                } else {
-                    builderTyp.append("|cafe");
-                }
-            }
-            if(!typesTakeaway.isEmpty()) {
-                if(isFirst) {
-                    builderTyp.append("takeaway");
-                }else {
-                    builderTyp.append("|takeaway");
-                }
-            }
-            return builderTyp.toString();
-        }
-
-//        private String getKeyWordString(){
-//            StringBuilder builder = new StringBuilder();
-//            ArrayList<String> stringList = new ArrayList<>();
-//
-//            for(String s : typesRestaurant){
-//                if(!s.equals("Restaurant")){
-//                    stringList.add(s);
-//                }
-//            }
-//            for(String s : typesBar){
-//                if(!s.equals("Bar")){
-//                    stringList.add(s);
-//                }
-//            }
-//            for(String s : typesCafe){
-//                if(!s.equals("Cafe")){
-//                    stringList.add(s);
-//                }
-//            }
-//            for(String s : typesTakeaway){
-//                if(!s.equals("Takeaway")){
-//                    stringList.add(s);
-//                }
-//            }
-//            builder.append("&keyword");
-//            if(stringList.size() > 1){
-//                builder.append("s");
-//            }
-//            builder.append("=");
-//            for(int i = 0; i < stringList.size(); i++){
-//                if(stringList.size() > 1) {
-//                    builder.append("(%22" + stringList.get(i).replace(" ", "%20") + "%22)");
-//                } else{
-//                    builder.append(stringList.get(i).replace(" ", "%20"));
-//                }
-//                if(i != stringList.size() - 1){
-//                    builder.append("%20OR%20");
-//                }
-//            }
-//            return builder.toString();
-//        }
-
-        @Override
-        protected List<Place> doInBackground(SearchOptions... params) {
-            SearchOptions searchOptions = params[0];
-            typesRestaurant = searchOptions.getTypesRestaurant();
-            typesBar = searchOptions.getTypesBar();
-            typesCafe = searchOptions.getTypesCafe();
-            typesTakeaway = searchOptions.getTypesTakeaway();
-            StringBuilder builder = new StringBuilder();
-
-            //Nearby Search
-            if(searchOptions.getRadius() != 0){
-                builder.append("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-                builder.append("key=");
-                builder.append(getResources().getString(R.string.api_browser_key));
-                builder.append("&location=");
-                 builder.append(searchOptions.getLatitude());
-                builder.append(",");
-                builder.append(searchOptions.getLongitude());
-                builder.append("&radius=");
-                builder.append(searchOptions.getRadius());
-                builder.append("&sensor=true");
-//                if(checkTypes() != null){
-//                    builder.append("&types=");
-//                    builder.append(checkTypes());
-//                }
-//                if(getKeyWordString() != null){
-//                    builder.append(getKeyWordString());
-//                }
-            }
-
-            String requestPartOne = builder.toString();
-
-            List<Place> places = new ArrayList<>();
-            boolean searched = false;
-
-            if(!typesRestaurant.isEmpty() && !typesRestaurant.get(0).equals("Restaurant")) {
-                searched = true;
-                for(String s : typesRestaurant) {
-                    try {
-                        Log.v(LOG_TAG, "searched: " + s);
-                        Log.v(LOG_TAG, "searchURL: " + requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=restaurant");
-                        List<Place> placesTmp = createPlaces(getApiResult(requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=restaurant"));
-                        places.addAll(placesTmp);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            if(!typesBar.isEmpty() && !typesBar.get(0).equals("Bar")) {
-                searched = true;
-                for(String s : typesBar) {
-                    try {
-                        Log.v(LOG_TAG, "searched: " + s);
-                        Log.v(LOG_TAG, "searchURL: " + requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=bar");
-                        List<Place> placesTmp = createPlaces(getApiResult(requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=bar"));
-                        places.addAll(placesTmp);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            if(!typesCafe.isEmpty() && !typesCafe.get(0).equals("Cafe")) {
-                searched = true;
-                for(String s : typesCafe) {
-                    try {
-                        Log.v(LOG_TAG, "searched: " + s);
-                        Log.v(LOG_TAG, "searchURL: " + requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=cafe");
-                        List<Place> placesTmp = createPlaces(getApiResult(requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=cafe"));
-                        places.addAll(placesTmp);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            if(!typesTakeaway.isEmpty() && !typesTakeaway.get(0).equals("Restaurant")) {
-                searched = true;
-                for(String s : typesTakeaway) {
-                    try {
-                        Log.v(LOG_TAG, "searched: " + s);
-                        Log.v(LOG_TAG, "searchURL: " + requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=takeaway");
-                        List<Place> placesTmp = createPlaces(getApiResult(requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=takeaway"));
-                        places.addAll(placesTmp);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            if(!searched){
-                try {
-                    Log.v(LOG_TAG, "searchedAll: " + requestPartOne + "&types=" + checkTypes());
-                    places = createPlaces(getApiResult(requestPartOne + "&types=" + checkTypes()));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-            return places;
-        }
-
-        @Override
-        protected void onPostExecute(List<Place> places) {
-            Intent intent = new Intent(SearchOptionsActivity.this, MapActivity.class);
-            intent.putExtra(getResources().getString(R.string.map_activity_type), MapActivityType.SearchResults);
-            intent.putParcelableArrayListExtra("places", (ArrayList<Place>)places);
-
-            startActivity(intent);
-        }
     }
 }

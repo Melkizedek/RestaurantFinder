@@ -10,8 +10,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.restfind.restaurantfinder.assistant.Place;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -34,9 +35,8 @@ public class PlaceDetailsActivity extends AppBarActivity {
 
         isFavorite = false;
         intent = getIntent();
-        Place place = intent.getParcelableExtra("place");
+        placeID = intent.getStringExtra("placeID");
         comingFromFavoriteActivity = intent.getBooleanExtra("favorite", false);
-        placeID = place.getPlace_ID();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Place Details");
@@ -47,12 +47,6 @@ public class PlaceDetailsActivity extends AppBarActivity {
         username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
 
         btnFavorite = (ImageButton) findViewById(R.id.btnFavorite);
-
-        //TODO: list all needed fields of the given Place-Object
-
-        TextView tv = (TextView) findViewById(R.id.textView);
-        tv.setText(place.getName());
-
         btnFavorite.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (isFavorite) {
@@ -93,8 +87,8 @@ public class PlaceDetailsActivity extends AppBarActivity {
             }
         });
 
-        CheckFavoriteTask task = new CheckFavoriteTask();
-        task.execute(place.getPlace_ID());
+        new GetPlacesDetailsTask().execute();
+        new CheckFavoriteTask().execute();
     }
 
     private void setFavorite(){
@@ -109,40 +103,49 @@ public class PlaceDetailsActivity extends AppBarActivity {
     }
 
     //<Input for doInBackground, (Progress), Input for onPostExecute>
-    private class CheckFavoriteTask extends AsyncTask<String, Integer, Boolean> {
+    private class GetPlacesDetailsTask extends AsyncTask<Void, Integer, Place> {
 
         @Override
-        protected Boolean doInBackground(String... params) {
-            String placeID = params[0];
-            List<String> placeIDs = new ArrayList<>();
+        protected Place doInBackground(Void... params) {
+            return getPlaceDetails(placeID);
+        }
 
-            //Thread that tries to get favorites
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            Future<List<String>> result = es.submit(new Callable<List<String>>() {
-                public List<String> call() throws IOException {
-                    return Database.getFavorites(username);
-                }
-            });
+        //puts the friend-requests and friends into the listView
+        @Override
+        protected void onPostExecute(Place place) {
+            //TODO: list all needed fields of the given Place-Object
 
+            TextView tv = (TextView) findViewById(R.id.textView);
+            tv.setText(place.getName());
+        }
+    }
+
+    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    private class CheckFavoriteTask extends AsyncTask<Void, Integer, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            List<String> placeIDs;
             try {
-                placeIDs = result.get();
+                placeIDs = Database.getFavorites(username);
             } catch (Exception e) {
                 //Could not connect to Server with .php-files
-                showAlertDialog(getResources().getString(R.string.connection_error));
                 return null;
-            } finally {
-                es.shutdown();
             }
-            if(placeIDs.contains(placeID)){
+            if(placeIDs != null && placeIDs.contains(placeID)){
                 return true;
             }
             return false;
         }
 
-        //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(Boolean result) {
-            if(result){
+            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+            findViewById(R.id.btnFavorite).setVisibility(View.VISIBLE);
+            if(result == null){
+                showAlertDialog(getResources().getString(R.string.connection_error));
+            }
+            else if(result){
                 setFavorite();
             }
         }
@@ -150,9 +153,10 @@ public class PlaceDetailsActivity extends AppBarActivity {
 
     @Override
     public void onBackPressed() {
-        intent.putExtra("deleted", !isFavorite);
-        setResult(RESULT_OK, intent);
-
+        if(comingFromFavoriteActivity) {
+            intent.putExtra("deleted", !isFavorite);
+            setResult(RESULT_OK, intent);
+        }
         super.onBackPressed();
     }
 }

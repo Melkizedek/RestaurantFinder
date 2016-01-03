@@ -5,28 +5,24 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.restfind.restaurantfinder.assistant.Place;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 //handles almost all Toolbar-Actions, some methods used by multiple sub-Activities and can create a custom AlertDialog with String-Parameter
 public abstract class AppBarActivity extends AppCompatActivity {
@@ -40,6 +36,14 @@ public abstract class AppBarActivity extends AppCompatActivity {
         SearchResults,
         Invitations,
         Favorites
+    }
+
+    //enum to differentiate different success or errors, when accessing Database
+    protected enum DatabaseResultType{
+        Success,
+        Connection_Error,
+        Login_Incorrect,
+        Register_Name_Unabailable
     }
 
     @Override
@@ -72,9 +76,6 @@ public abstract class AppBarActivity extends AppCompatActivity {
                 editor.clear();
                 editor.apply();
 
-                //Stops the currently running Service
-                //TODO: stop CheckInvitationsService
-
                 //return to Login
                 startActivity(new Intent(AppBarActivity.this, LoginActivity.class));
                 return true;
@@ -82,13 +83,9 @@ public abstract class AppBarActivity extends AppCompatActivity {
                 startActivity(new Intent(AppBarActivity.this, InvitationsActivity.class));
                 return true;
             case R.id.action_favorites:
-                //Get current logged-in username
-                spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
-                String username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
-
-                GetFavoritesTask task = new GetFavoritesTask();
-                task.execute(username);
-
+                Intent intent = new Intent(AppBarActivity.this, MapActivity.class);
+                intent.putExtra(getResources().getString(R.string.map_activity_type), MapActivityType.Favorites);
+                startActivity(intent);
                 return true;
             case R.id.action_friends:
                 startActivity(new Intent(AppBarActivity.this, FriendsActivity.class));
@@ -127,47 +124,29 @@ public abstract class AppBarActivity extends AppCompatActivity {
     }
 
     //creates a URL for the Google Places Web Service Details-Search
-    protected String createDetailsRequest(String placeID){
+    private String createDetailsRequest(String placeID){
         return "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + getResources().getString(R.string.api_browser_key);
     }
 
     //gets the JSON-Result of a Google Places Search
     protected String getApiResult(final String request){
         String result = null;
-
-        //Thread that gets the result of a Google Places Search
-        ExecutorService es = Executors.newSingleThreadExecutor();
-        Future<String> future = es.submit(new Callable<String>() {
-            public String call() throws IOException {
-                String resultFuture = null;
-                try {
-                    URL url = new URL(request);
-                    InputStream iStream;
-                    HttpURLConnection urlConnection;
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    iStream = urlConnection.getInputStream();
-                    urlConnection.connect();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(iStream, "UTF-8"), 8);
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    resultFuture = sb.toString();
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return resultFuture;
+        try{
+            URL url = new URL(request);
+            InputStream iStream;
+            HttpURLConnection urlConnection;
+            urlConnection = (HttpURLConnection) url.openConnection();
+            iStream = urlConnection.getInputStream();
+            urlConnection.connect();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(iStream, "UTF-8"), 8);
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line + "\n");
             }
-        });
-
-        try {
-            result = future.get();
+            result = sb.toString();
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            es.shutdown();
         }
         return result;
     }
@@ -221,7 +200,6 @@ public abstract class AppBarActivity extends AppCompatActivity {
                     place_act.setOpeningHours(weekday.getString(j));
                 }
             }
-
         }
         if (curObject.has("place_id")) {
             place_act.setPlace_ID(curObject.getString("place_id"));
@@ -229,64 +207,21 @@ public abstract class AppBarActivity extends AppCompatActivity {
         if (curObject.has("rating")) {
             place_act.setRating(curObject.getDouble("rating"));
         }
-        if (curObject.has("reference")) {
-            place_act.setReference(curObject.getString("reference"));
-        }
         if (curObject.has("types")) {
             JSONArray types = new JSONArray();
             for (int j = 0; j < types.length(); j++) {
                 place_act.setTypes(types.getString(j));
             }
-
         }
         if (curObject.has("vicinity")) {
             place_act.setVicinity(curObject.getString("vicinity"));
         }
-        if (curObject.has("formatted_address")) {
-            place_act.setFormatted_address(curObject.getString("formatted_address"));
+        if(curObject.has("user_ratings_total")){
+            place_act.setUser_ratings_total(curObject.getInt("user_ratings_total"));
+        }
+        if(curObject.has("website")){
+            place_act.setWebsite(curObject.getString("website"));
         }
         return place_act;
-    }
-
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
-    private class GetFavoritesTask extends AsyncTask<String, Integer, ArrayList<Place>> {
-
-        @Override
-        protected ArrayList<Place> doInBackground(String... params) {
-            final String username = params[0];
-            ArrayList<Place> places = new ArrayList<>();
-            List<String> placeIDs;
-
-            //Thread that tries to get favorites
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            Future<List<String>> result = es.submit(new Callable<List<String>>() {
-                public List<String> call() throws IOException {
-                    return Database.getFavorites(username);
-                }
-            });
-
-            try {
-                placeIDs = result.get();
-            } catch (Exception e) {
-                //Could not connect to Server with .php-files
-                showAlertDialog(getResources().getString(R.string.connection_error));
-                return null;
-            } finally {
-                es.shutdown();
-            }
-            for(String s : placeIDs){
-                places.add(getPlaceDetails(s));
-            }
-            return places;
-        }
-
-        //puts the friend-requests and friends into the listView
-        @Override
-        protected void onPostExecute(ArrayList<Place> result) {
-            Intent intent = new Intent(AppBarActivity.this, MapActivity.class);
-            intent.putExtra(getResources().getString(R.string.map_activity_type), MapActivityType.Favorites);
-            intent.putParcelableArrayListExtra("places", result);
-            startActivity(intent);
-        }
     }
 }

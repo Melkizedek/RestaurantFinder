@@ -187,17 +187,8 @@ public class FriendsActivity extends AppBarActivity {
             //Map with <Friend-Name, invite or not>
             Map<String, Boolean> friendsMap = new TreeMap<>();
             List<String> friends;
-
-            //Thread that tries to get friend-requests
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            Future<List<String>> result = es.submit(new Callable<List<String>>() {
-                public List<String> call() throws IOException {
-                    return Database.getFriendInvites(username);
-                }
-            });
-
             try {
-                friends = result.get();
+                friends = Database.getFriendInvites(username);
 
                 if(friends != null){
                     for(int i = 0; i < friends.size(); i++){
@@ -206,22 +197,10 @@ public class FriendsActivity extends AppBarActivity {
                 }
             } catch (Exception e) {
                 //Could not connect to Server with .php-files
-                showAlertDialog(getResources().getString(R.string.connection_error));
                 return null;
-            } finally {
-                es.shutdown();
             }
-
-            //Thread that tries to get friends
-            es = Executors.newSingleThreadExecutor();
-            result = es.submit(new Callable<List<String>>() {
-                public List<String> call() throws IOException {
-                    return Database.getFriends(username);
-                }
-            });
-
             try {
-                friends = result.get();
+                friends = Database.getFriends(username);
 
                 if(friends != null){
                     for(int i = 0; i < friends.size(); i++){
@@ -230,23 +209,22 @@ public class FriendsActivity extends AppBarActivity {
                 }
             } catch (Exception e) {
                 //Could not connect to Server with .php-files
-                showAlertDialog(getResources().getString(R.string.connection_error));
                 return null;
-            } finally {
-                es.shutdown();
             }
-
             return friendsMap;
         }
 
         //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(Map<String, Boolean> result) {
+            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
             if(result != null){
                 lvFriendList = (ListView) findViewById(R.id.lvFriendList);
                 FriendAdapter adapter = new FriendAdapter(result);
                 lvFriendList.setAdapter(adapter);
                 registerForContextMenu(lvFriendList);
+            } else{
+                showAlertDialog(getResources().getString(R.string.connection_error));
             }
         }
     }

@@ -1,14 +1,18 @@
 package com.restfind.restaurantfinder;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,9 +28,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.restfind.restaurantfinder.assistant.Place;
+import com.restfind.restaurantfinder.assistant.SearchOptions;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapActivity extends AppBarActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -40,11 +49,13 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
     private final int FAVORITE_REQUEST = 1;
 
     private MapActivityType mapActivityType;
-    private ArrayList<Place> places;
+    private List<Place> places;
     private Map<Marker, Place> markerPlaces;
     private Map<Marker, Location> markerFriends;
     private Marker curMarker;
     private Marker curSelectedMarker;
+
+    //TODO: if(mapActivityType == MapActivityType.Invitations): Display friends on map, if time until invitation is close (new Service updates their locaation periodically this activity only displays them)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,29 +64,44 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
 
         Intent intent = getIntent();
         mapActivityType = (MapActivityType) intent.getSerializableExtra(getResources().getString(R.string.map_activity_type));
-        places = intent.getParcelableArrayListExtra("places");
+        SearchOptions searchOptions = intent.getParcelableExtra(getResources().getString(R.string.search_options));
+
+        markerPlaces = new HashMap<>();
+        markerFriends = new HashMap<>();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if(mapActivityType == MapActivityType.SearchResults) {
             toolbar.setTitle("Search Results");
+            new GetSearchResultsTask().execute(searchOptions);
         }
         else if(mapActivityType == MapActivityType.Invitations) {
             toolbar.setTitle("Invitations");
         }
         else if(mapActivityType == MapActivityType.Favorites) {
             toolbar.setTitle("Favorites");
+            new GetFavoritesTask().execute();
         }
         setSupportActionBar(toolbar);
 
-        markerPlaces = new HashMap<>();
-        markerFriends = new HashMap<>();
+//        buildApiClient();
 
-        buildApiClient();
+//         Obtain the SupportMapFragment and get notified when the map is ready to be used.
+//        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+//                .findFragmentById(R.id.map);
+//        mapFragment.getMapAsync(this);
+    }
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+    private void createMap(){
+        if(places == null || places.isEmpty()){
+            showAlertDialog("No Results found!");
+        } else {
+            buildApiClient();
+
+            //Obtain the SupportMapFragment and get notified when the map is ready to be used.
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+        }
     }
 
     /**
@@ -89,8 +115,6 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Log.v(LOG_TAG, "onMapReady");
-
         mMap = googleMap;
 
         for(Place p : places){
@@ -100,7 +124,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                     .title(p.getName())
                     .snippet("<Tap here for more Details and Options>");
 
-            //TODO: specific icons for different types
+            //TODO: specific icons for different types (restaurant, bar, cafe, takeaway
             if(p.getIcon().equals(getResources().getString(R.string.iconRestaurant))) {
                 m.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_star_black_24dp));
             }
@@ -120,7 +144,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
     @Override
     public void onInfoWindowClick(Marker marker) {
         Intent intent = new Intent(MapActivity.this, PlaceDetailsActivity.class);
-        intent.putExtra("place", markerPlaces.get(marker));
+        intent.putExtra("placeID", markerPlaces.get(marker).getPlace_ID());
 
         if(mapActivityType == MapActivityType.Favorites){
             curSelectedMarker = marker;
@@ -174,8 +198,6 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
     //starts a new Activity based on which operation is chosen
     @Override
     public void onLocationChanged(Location location) {
-        Log.v(LOG_TAG, "onLocationChanged (MapActivity)");
-
         LatLng currentPos = new LatLng(location.getLatitude(), location.getLongitude());
 
         if(mMap != null){
@@ -240,5 +262,167 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
+
+    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    private class GetFavoritesTask extends AsyncTask<Void, Integer, ArrayList<Place>> {
+
+        @Override
+        protected ArrayList<Place> doInBackground(Void... params) {
+            //Get current logged-in username
+            SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
+            String username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
+
+            ArrayList<Place> placesTmp = new ArrayList<>();
+            List<String> placeIDs;
+
+            try {
+                placeIDs = Database.getFavorites(username);
+            } catch (Exception e) {
+                //Could not connect to Server with .php-files
+                return null;
+            }
+            if(placeIDs == null){
+                return null;
+            }
+            for(String s : placeIDs){
+                placesTmp.add(getPlaceDetails(s));
+            }
+            return placesTmp;
+        }
+
+        //puts the friend-requests and friends into the listView
+        @Override
+        protected void onPostExecute(ArrayList<Place> result) {
+            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
+            if(result == null){
+                showAlertDialog(getResources().getString(R.string.connection_error));
+            }
+            places = result;
+            createMap();
+        }
+    }
+
+    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    private class GetSearchResultsTask extends AsyncTask<SearchOptions, Integer, List<Place>> {
+
+        private List<String> typesRestaurant;
+        private List<String> typesBar;
+        private List<String> typesCafe;
+        private List<String> typesTakeaway;
+
+        private boolean searched = false;
+        private String requestPartOne;
+        private List<Place> results;
+
+        private String checkTypes (){
+            boolean isFirst = true;
+            StringBuilder builderTyp = new StringBuilder();
+            if(!typesRestaurant.isEmpty()) {
+                builderTyp.append("restaurant");
+                isFirst = false;
+            }
+            if(!typesBar.isEmpty()) {
+                if(isFirst) {
+                    builderTyp.append("bar");
+                    isFirst = false;
+                }else {
+                    builderTyp.append("|bar");
+                }
+
+            }
+            if(!typesCafe.isEmpty()) {
+                if (isFirst) {
+                    builderTyp.append("cafe");
+                    isFirst = false;
+                } else {
+                    builderTyp.append("|cafe");
+                }
+            }
+            if(!typesTakeaway.isEmpty()) {
+                if(isFirst) {
+                    builderTyp.append("takeaway");
+                }else {
+                    builderTyp.append("|takeaway");
+                }
+            }
+            return builderTyp.toString();
+        }
+
+        private void searchByKeyword(List<String> subTypes, String mainType){
+            if(!subTypes.isEmpty() && !subTypes.get(0).equals(mainType)) {
+                searched = true;
+                for (String s : subTypes) {
+                    try {
+                        List<Place> placesTmp = createPlaces(getApiResult(requestPartOne + "&keyword=" + s.replace(" ", "%20") + "&types=" + mainType.toLowerCase()));
+
+                        if(placesTmp != null) {
+                            results.addAll(placesTmp);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected List<Place> doInBackground(SearchOptions... params) {
+            SearchOptions searchOptions = params[0];
+            typesRestaurant = searchOptions.getTypesRestaurant();
+            typesBar = searchOptions.getTypesBar();
+            typesCafe = searchOptions.getTypesCafe();
+            typesTakeaway = searchOptions.getTypesTakeaway();
+            StringBuilder builder = new StringBuilder();
+
+            //Nearby Search
+            builder.append("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+            builder.append("key=");
+            builder.append(getResources().getString(R.string.api_browser_key));
+            builder.append("&location=");
+            builder.append(searchOptions.getLatitude());
+            builder.append(",");
+            builder.append(searchOptions.getLongitude());
+            builder.append("&radius=");
+            builder.append(searchOptions.getRadius());
+            builder.append("&sensor=true");
+            if(!searchOptions.getName().isEmpty()){
+                builder.append("&name=" + searchOptions.getName());
+            }
+            if(searchOptions.isTimeNow()){
+                builder.append("&openNow=true");
+            }
+            requestPartOne = builder.toString();
+            results = new ArrayList<>();
+
+            searchByKeyword(typesRestaurant, "Restaurant");
+            searchByKeyword(typesBar, "Bar");
+            searchByKeyword(typesCafe, "Cafe");
+            searchByKeyword(typesTakeaway, "Takeaway");
+
+            if(!searched && !typesRestaurant.isEmpty() && !typesBar.isEmpty() && !typesCafe.isEmpty() && !typesTakeaway.isEmpty()){
+                try {
+                    results = createPlaces(getApiResult(requestPartOne + "&types=" + checkTypes()));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            return results;
+        }
+
+        @Override
+        protected void onPostExecute(List<Place> result) {
+            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
+            places = result;
+            createMap();
+
+//            Intent intent = new Intent(SearchOptionsActivity.this, MapActivity.class);
+//            intent.putExtra(getResources().getString(R.string.map_activity_type), MapActivityType.SearchResults);
+//            intent.putParcelableArrayListExtra("places", (ArrayList<Place>)places);
+//
+//            startActivity(intent);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.restfind.restaurantfinder;
+package com.restfind.restaurantfinder.assistant;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -14,25 +14,22 @@ public class Place implements Parcelable {
     private List<String> openingHours;
     private boolean openNow;
     private String place_ID;
-    private String reference;
     private String price_level;
     private Double rating;
     private List<String> types;
     private String vicinity;
-    private String formatted_address;
+    private String formatted_phone_number;
+    private int user_ratings_total;
+    private String website;
 
     public Place(){
         openingHours = new ArrayList<>();
         types = new ArrayList<>();
         price_level = "";
         rating = -1.0;
+        user_ratings_total = -1;
+        website = "";
     }
-
-    public String getReference() {
-        return reference;
-    }
-
-    public void setReference(String reference) { this.reference = reference; }
 
     public String getIcon() {
         return icon;
@@ -122,12 +119,36 @@ public class Place implements Parcelable {
         this.vicinity = vicinity;
     }
 
-    public String getFormatted_address() {
-        return formatted_address;
+    public int getUser_ratings_total() {
+        return user_ratings_total;
     }
 
-    public void setFormatted_address(String formatted_address) {
-        this.formatted_address = formatted_address;
+    public void setUser_ratings_total(int user_ratings_total) {
+        this.user_ratings_total = user_ratings_total;
+    }
+
+    public String getFormatted_phone_number() {
+        return formatted_phone_number;
+    }
+
+    public void setFormatted_phone_number(String formatted_phone_number) {
+        this.formatted_phone_number = formatted_phone_number;
+    }
+
+    public void setTypes(List<String> types) {
+        this.types = types;
+    }
+
+    public void setOpeningHours(List<String> openingHours) {
+        this.openingHours = openingHours;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 
 
@@ -142,13 +163,13 @@ public class Place implements Parcelable {
         in.readStringList(openingHours);
         openNow = in.readInt() != 0;
         place_ID = in.readString();
-        reference = in.readString();
         price_level = in.readString();
         rating = in.readDouble();
         types = new ArrayList<>();
         in.readStringList(types);
         vicinity = in.readString();
-        formatted_address = in.readString();
+        user_ratings_total = in.readInt();
+        website = in.readString();
     }
 
     public static final Creator<Place> CREATOR = new Creator<Place>() {
@@ -177,11 +198,11 @@ public class Place implements Parcelable {
         dest.writeStringList(openingHours);
         dest.writeInt(openNow ? 1 : 0);
         dest.writeString(place_ID);
-        dest.writeString(reference);
         dest.writeString(price_level);
         dest.writeDouble(rating);
         dest.writeStringList(types);
         dest.writeString(vicinity);
-        dest.writeString(formatted_address);
+        dest.writeInt(user_ratings_total);
+        dest.writeString(website);
     }
 }
