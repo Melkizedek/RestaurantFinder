@@ -30,6 +30,8 @@
 
     <string name="map_activity_type">MapActivityType</string>
     <string name="iconRestaurant">https://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png</string>
+    <string name="iconBar">https://maps.gstatic.com/mapfiles/place_api/icons/bar-71.png</string>
+    <string name="iconCafe">https://maps.gstatic.com/mapfiles/place_api/icons/cafe-71.png</string>
 
     <string-array name="restaurant_types">
         <item>Chinese Restaurant</item>

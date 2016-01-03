@@ -334,15 +334,18 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             }
             if(!typesTakeaway.isEmpty()) {
                 if(isFirst) {
-                    builderTyp.append("takeaway");
+                    builderTyp.append("meal_takeaway");
                 }else {
-                    builderTyp.append("|takeaway");
+                    builderTyp.append("|meal_takeaway");
                 }
             }
             return builderTyp.toString();
         }
 
         private void searchByKeyword(List<String> subTypes, String mainType){
+            if(mainType.equals("Takeaway")){
+                mainType = "meal_takeaway";
+            }
             if(!subTypes.isEmpty() && !subTypes.get(0).equals(mainType)) {
                 searched = true;
                 for (String s : subTypes) {

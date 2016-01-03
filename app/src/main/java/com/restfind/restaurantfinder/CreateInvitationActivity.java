@@ -2,7 +2,6 @@ package com.restfind.restaurantfinder;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,7 +12,6 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -21,7 +19,6 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -147,8 +144,6 @@ public class CreateInvitationActivity extends AppBarActivity {
                 }
             }
         });
-
-        //TODO: Create New Invitation by choosing a Time, Friends,...
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
         new GetFriendsTask().execute();
     }
