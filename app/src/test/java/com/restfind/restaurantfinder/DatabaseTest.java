@@ -214,4 +214,26 @@ public class DatabaseTest {
         assertEquals(true, Database.deleteFavorite("Pia", expected.get(1)));
         assertEquals(true, Database.deleteFavorite("Pia", expected.get(2)));
     }
+
+    @Test
+    public void updateUserLocation() throws IOException {
+        double latitude = 48.287596d;
+        double longitude = 14.294394d;
+
+        assertEquals(true, Database.updateUserLocation("Max", "10.0", "12.0"));
+        assertEquals(true, Database.updateUserLocation("Max", String.valueOf(latitude), String.valueOf(longitude)));
+    }
+
+    @Test
+    public void getUserLocations() throws IOException {
+        List<String> actual = Database.getUserLocations("1");
+
+        List<String> expected = new ArrayList<>();
+        expected.add("Max;48.287596;14.294394");
+        expected.add("Pia;20;30");
+
+        for(String s : expected) {
+            assertEquals(true, actual.contains(s));
+        }
+    }
 }
