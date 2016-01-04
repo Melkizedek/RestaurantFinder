@@ -121,9 +121,42 @@ public class PlaceDetailsActivity extends AppBarActivity {
         @Override
         protected void onPostExecute(Place place) {
             //TODO: list all needed fields of the given Place-Object
-
             TextView tv = (TextView) findViewById(R.id.textView);
+            if(place.getIcon().equals(getResources().getString(R.string.iconRestaurant))){
+                tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_dining_black_24dp, 0, 0, 0);
+
+            }
+            if(place.getIcon().equals(getResources().getString(R.string.iconBar))){
+                tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_bar_black_18dp, 0, 0, 0);
+
+            }
+            if(place.getIcon().equals(getResources().getString(R.string.iconCafe))){
+                tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_cafe_black_18dp, 0, 0, 0);
+
+            }
             tv.setText(place.getName());
+            TextView tv_textView_Vicinity = (TextView) findViewById(R.id.textView_Vicinity);
+            tv_textView_Vicinity.setText(place.getVicinity());
+            TextView textView_Website = (TextView) findViewById(R.id.textView_Website);
+            textView_Website.setText(place.getWebsite());
+            TextView textView_UserRating = (TextView) findViewById(R.id.textView_UserRating);
+            textView_UserRating.setText(place.getUser_ratings_total());
+            TextView textView_phone_number = (TextView) findViewById(R.id.phone_number);
+            textView_phone_number.setText(place.getFormatted_phone_number());
+            TextView openNow = (TextView) findViewById(R.id.openNow);
+            if(place.isOpenNow()){
+                openNow.setText("geöffnet");
+            }
+            if(!place.isOpenNow()){
+                openNow.setText("geschlossen");
+            }
+            TextView openTimes = (TextView) findViewById(R.id.openTimes);
+            for(int i = 0; i < place.getOpeningHours().size();i++){
+                openTimes.setText(place.getOpeningHours().get(i));
+            }
+            TextView priceLevel = (TextView) findViewById(R.id.priceLevel);
+            priceLevel.setText(place.getPrice_level());
+
         }
     }
 
