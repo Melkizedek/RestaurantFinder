@@ -37,28 +37,44 @@
         </fragment>
 
         <LinearLayout
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:id="@+id/llInvitationButtons"
-            android:layout_weight="0">
+            android:id="@+id/llInvitationButtons">
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:backgroundTint="@color/colorPrimary"
-                android:text="Decline"
-                android:layout_weight="1"
-                android:id="@+id/btnDecline" />
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Allow others to see your Location"
+                android:checked="true"
+                android:id="@+id/cbAllowTracking" />
 
-            <Button
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:backgroundTint="@color/colorPrimary"
-                android:text="Accept"
-                android:layout_weight="1"
-                android:id="@+id/btnAccept" />
+                android:layout_height="wrap_content"
+                android:layout_weight="0">
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:text="Decline"
+                    android:layout_weight="1"
+                    android:id="@+id/btnDecline" />
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:text="Accept"
+                    android:layout_weight="1"
+                    android:id="@+id/btnAccept" />
+
+            </LinearLayout>
+
         </LinearLayout>
+
     </LinearLayout>
 </RelativeLayout>

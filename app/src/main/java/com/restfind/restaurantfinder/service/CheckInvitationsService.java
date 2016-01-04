@@ -23,6 +23,7 @@ import com.restfind.restaurantfinder.InvitationsActivity;
 import com.restfind.restaurantfinder.R;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -79,7 +80,7 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
     protected void processStartNotification() {
         //TODO: check invitations, create notification if needed
 
-        //TODO: if close to invitation-deadline, use thread here, to send location every few seconds
+
 
         if(username == null || username == ""){
             //Get current logged-in username
@@ -90,7 +91,22 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
 
 //            Log.v("CheckInvitationsService" , "111");
 
-//            buildApiClient();
+            //Check if tracking is allowed
+            SharedPreferences spTracking = getApplicationContext().getSharedPreferences("tracking", Context.MODE_PRIVATE);
+            boolean allowed = spTracking.getBoolean("tracking", false);
+
+            if(allowed){
+                //TODO: if close to invitation-deadline
+
+                //TODO: if deadline was 1 hour ago and no new immediate deadline set sharedpreference to false
+//                timeTillDeadline = invitation.getTime() - Calendar.getInstance().getTimeInMillis();
+//                //until 1 hour after deadline
+//                if(timeTillDeadline > (-3600000)){
+
+//                buildApiClient();
+            }
+
+
 
 
 

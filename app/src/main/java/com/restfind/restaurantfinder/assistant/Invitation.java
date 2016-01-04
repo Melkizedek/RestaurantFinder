@@ -9,16 +9,18 @@ import java.util.Map;
 
 public class Invitation implements Parcelable{
     private int id;
-    private String inviter;
+    private String host;
     private String placeID;
     private long time;
-    private Map<String, Boolean> invitees;
+    private boolean received;
+    private Map<String, Integer> invitees;
 
-    public Invitation(int id, String inviter, String placeID, long time, Map<String, Boolean> invitees) {
+    public Invitation(int id, String host, String placeID, long time, boolean received, Map<String, Integer> invitees) {
         this.id = id;
-        this.inviter = inviter;
+        this.host = host;
         this.placeID = placeID;
         this.time = time;
+        this.received = received;
         this.invitees = invitees;
     }
 
@@ -30,12 +32,12 @@ public class Invitation implements Parcelable{
         this.id = id;
     }
 
-    public String getInviter() {
-        return inviter;
+    public String getHost() {
+        return host;
     }
 
-    public void setInviter(String inviter) {
-        this.inviter = inviter;
+    public void setHost(String host) {
+        this.host = host;
     }
 
     public String getPlaceID() {
@@ -54,11 +56,19 @@ public class Invitation implements Parcelable{
         this.time = time;
     }
 
-    public Map<String, Boolean> getInvitees() {
+    public boolean isReceived() {
+        return received;
+    }
+
+    public void setReceived(boolean received) {
+        this.received = received;
+    }
+
+    public Map<String, Integer> getInvitees() {
         return invitees;
     }
 
-    public void setInvitees(Map<String, Boolean> invitees) {
+    public void setInvitees(Map<String, Integer> invitees) {
         this.invitees = invitees;
     }
 
@@ -66,16 +76,17 @@ public class Invitation implements Parcelable{
 
     protected Invitation(Parcel in) {
         id = in.readInt();
-        inviter = in.readString();
+        host = in.readString();
         placeID = in.readString();
         time = in.readLong();
+        received = in.readInt() != 0;
 
         invitees = new HashMap<>();
         int size = in.readInt();
         for(int i = 0; i < size; i++){
             String key = in.readString();
-            boolean value = in.readInt() != 0;
-            invitees.put(key,value);
+            int value = in.readInt();
+            invitees.put(key, value);
         }
     }
 
@@ -99,14 +110,15 @@ public class Invitation implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
-        dest.writeString(inviter);
+        dest.writeString(host);
         dest.writeString(placeID);
         dest.writeLong(time);
+        dest.writeInt(received ? 1 : 0);
 
         dest.writeInt(invitees.size());
-        for(Map.Entry<String, Boolean> entry : invitees.entrySet()){
+        for(Map.Entry<String, Integer> entry : invitees.entrySet()){
             dest.writeString(entry.getKey());
-            dest.writeInt(entry.getValue() ? 1 : 0);
+            dest.writeInt(entry.getValue());
         }
     }
 }

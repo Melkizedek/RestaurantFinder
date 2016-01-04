@@ -1,7 +1,9 @@
 package com.restfind.restaurantfinder;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -15,6 +17,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -115,11 +118,18 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                 findViewById(R.id.llInvitationButtons).setVisibility(View.VISIBLE);
                 Button btnAccept = (Button) findViewById(R.id.btnAccept);
                 Button btnDecline = (Button) findViewById(R.id.btnDecline);
+                final CheckBox cbAllowTracking = (CheckBox) findViewById(R.id.cbAllowTracking);
 
                 btnAccept.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         //TODO: Accept Invitation
+
+                        SharedPreferences spTracking = getApplicationContext().getSharedPreferences("tracking", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = spTracking.edit();
+                        editor.putBoolean("tracking", cbAllowTracking.isChecked());
+                        editor.apply();
+
                         Toast.makeText(MapActivity.this, "Accepted", Toast.LENGTH_SHORT).show();
                         findViewById(R.id.llInvitationButtons).setVisibility(View.GONE);
                     }
@@ -128,6 +138,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                     @Override
                     public void onClick(View v) {
                         //TODO: Decline Invitation
+
                         Toast.makeText(MapActivity.this, "Declined", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(MapActivity.this, InvitationsActivity.class));
                     }
@@ -175,14 +186,16 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             if(mapActivityType == MapActivityType.Invitation){
                 builder.append("Time: " + new SimpleDateFormat("HH:mm, dd.MM.yy").format(new Timestamp(invitation.getTime())));
                 builder.append("\n\nParticipants:");
-                builder.append("\n" + invitation.getInviter() + " " + "(Inviter)");
+                builder.append("\n" + invitation.getHost() + " " + "(Inviter)");
 
-                for(Map.Entry<String, Boolean> e : invitation.getInvitees().entrySet()){
+                for(Map.Entry<String, Integer> e : invitation.getInvitees().entrySet()){
                     String acceptType = "";
-                    if(e.getValue()){
-                        acceptType = "(Accepted)";
+                    if(e.getValue() == 1){
+                        acceptType = "(accepted)";
+                    } else if(e.getValue() == 0){
+                        acceptType = "(undecided)";
                     } else{
-                        acceptType = "(Undecided)";
+                        acceptType = "(declined)";
                     }
                     builder.append("\n" + e.getKey() + " " + acceptType);
                 }
@@ -391,7 +404,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                     }
                 }
                 timeTillDeadline = invitation.getTime() - Calendar.getInstance().getTimeInMillis();
-                //until 2 hours after deadline
+                //until 1 hour after deadline
                 while(timeTillDeadline > (-3600000)){
                     Log.v(LOG_TAG, "timeTillDeadline: " + timeTillDeadline);
 
@@ -418,11 +431,11 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
 
             Map<String, LatLng> result = new HashMap<>();
             List<String> participants = new ArrayList<>();
-            participants.add(invitation.getInviter());
+            participants.add(invitation.getHost());
 
-            for (Map.Entry<String, Boolean> e : invitation.getInvitees().entrySet()) {
+            for (Map.Entry<String, Integer> e : invitation.getInvitees().entrySet()) {
                 //invitee is not current user && invitee has accepted
-                if (!e.getKey().equals(username) && invitation.getInvitees().get(e.getKey())) {
+                if (!e.getKey().equals(username) && invitation.getInvitees().get(e.getKey()) == 1) {
                     participants.add(e.getKey());
                 }
             }
@@ -436,7 +449,6 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             return result;
         }
 
-        //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(Map<String, LatLng> result) {
             for(Map.Entry<String, LatLng> e : result.entrySet()){
@@ -475,7 +487,6 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             return placesTmp;
         }
 
-        //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(ArrayList<Place> result) {
             findViewById(R.id.loadingPanel).setVisibility(View.GONE);

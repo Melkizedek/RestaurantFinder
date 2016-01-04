@@ -65,17 +65,23 @@ public class InvitationsActivity extends AppBarActivity {
 
             //TODO: get invitations of user
 
-            Map<String, Boolean> map = new HashMap<>();
-            map.put("friend1", true);
-            map.put("friend2", false);
-            Invitation invitation = new Invitation(1, "inviter1", "ChIJ8e5PJ4eXc0cRybSO-hsltRA", Calendar.getInstance().getTimeInMillis() + 1000000, map);
+            Map<String, Integer> map = new HashMap<>();
+            map.put("friend1", 1);
+            map.put("friend2", 0);
+            Invitation invitation = new Invitation(1, "inviter1", "ChIJ8e5PJ4eXc0cRybSO-hsltRA", Calendar.getInstance().getTimeInMillis() + 1000000, true, map);
             result.add(invitation);
 
             map = new HashMap<>();
-            map.put("friend1111", true);
-            map.put("friend2222", false);
-            map.put("friend3333", true);
-            invitation = new Invitation(1, "inviter2", "ChIJQTCNfYGXc0cRUeRPK6fpBk4", Calendar.getInstance().getTimeInMillis(), map);
+            map.put("afriend", 0);
+            map.put("bfriend", -1);
+            map.put("cfriend", 1);
+            map.put("dfriend", 0);
+            map.put("efriend", -1);
+            map.put("ffriend", 1);
+            map.put("gfriend", -1);
+            map.put("hfriend", -1);
+            map.put("ifriend", 0);
+            invitation = new Invitation(1, "inviter2", "ChIJQTCNfYGXc0cRUeRPK6fpBk4", Calendar.getInstance().getTimeInMillis(), true, map);
             result.add(invitation);
 
             return result;
@@ -148,7 +154,7 @@ public class InvitationsActivity extends AppBarActivity {
 
             //Handle TextView and display string from your list
             TextView listItemText = (TextView)view.findViewById(R.id.tvInvitation);
-            listItemText.setText(new SimpleDateFormat("HH:mm, dd.MM.yy").format(new Timestamp(item.getTime())) + " " + item.getInviter());
+            listItemText.setText(new SimpleDateFormat("HH:mm, dd.MM.yy").format(new Timestamp(item.getTime())) + " " + item.getHost());
 
             //Handle buttons and add onClickListeners
             ImageView imgArrow = (ImageView) findViewById(R.id.imgArrow);
