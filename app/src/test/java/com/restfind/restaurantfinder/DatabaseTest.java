@@ -222,6 +222,7 @@ public class DatabaseTest {
 
         assertEquals(true, Database.updateUserLocation("Max", "10.0", "12.0"));
         assertEquals(true, Database.updateUserLocation("Max", String.valueOf(latitude), String.valueOf(longitude)));
+        assertEquals(true, Database.updateUserLocation("Alex", "50.0", "256.5"));
     }
 
     @Test
@@ -231,6 +232,7 @@ public class DatabaseTest {
         List<String> expected = new ArrayList<>();
         expected.add("Max;48.287596;14.294394");
         expected.add("Pia;20;30");
+        expected.add("Alex;50;256.5");
 
         for(String s : expected) {
             assertEquals(true, actual.contains(s));
