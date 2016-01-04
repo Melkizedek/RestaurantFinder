@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,8 @@ public class Database {
         getFriendInvites, sendFriendInvite, acceptFriendInvite, declineFriendInvite,
         getFriends, deleteFriend,
         favorite, deleteFavorite, getFavorites,
-        updateUserLocation, getUserLocations
+        updateUserLocation, getUserLocations,
+        createInvitation, sendInvitationInvite
     }
 
     private final static String serverUrl = "http://restfind.heliohost.org/";
@@ -49,9 +51,10 @@ public class Database {
     }
 
     public static boolean sendFriendInvite(String username, String invitedUser) throws IOException {
-        if(username.equals(invitedUser))
-            return false;
-        return checkResult(Operation.sendFriendInvite, username, invitedUser);
+//        if(username.equals(invitedUser))
+//            return false;
+//        return checkResult(Operation.sendFriendInvite, username, invitedUser);
+        return !username.equals(invitedUser) && checkResult(Operation.sendFriendInvite, username, invitedUser);
     }
 
     public static boolean acceptFriendInvite(String username, String invitor) throws IOException {
@@ -89,6 +92,35 @@ public class Database {
     // Rückgabewert ist eine Liste mit Strings im folgenden Format: "Username;Latitude;Longitude"
     public static List<String> getUserLocations(String invitation_id) throws IOException {
         return execute(Operation.getUserLocations, invitation_id);
+    }
+
+    public static boolean createInvitation(String host, String placeID, Timestamp dateTime, List<String> invitees) throws IOException {
+        List<String> result = Database.execute(Operation.createInvitation, host, placeID, dateTime.toString());
+
+//        if (result == null || result.isEmpty() || result.get(0).equals(falseString))
+//            return false;
+//
+//        return sendInvitationInvite(result.get(0), invitees);
+        return !(result == null || result.isEmpty() || result.get(0).equals(falseString)) && sendInvitationInvite(result.get(0), invitees);
+    }
+
+    public static boolean sendInvitationInvite(String invitationID, List<String> invitees) throws IOException {
+        if(invitees == null || invitees.isEmpty())
+            return false;
+
+        String[] arguments = new String[invitees.size() + 1];
+        arguments[0] = invitationID;
+        int i = 1;
+
+        for(String s : invitees) {
+            arguments[i] = s;
+            i++;
+        }
+
+        Database.execute(Operation.sendInvitationInvite, arguments);
+        return true;
+        // TODO: Rückgabewert bei sendInvitationInvite.php Programm
+        // return checkResult(Operation.sendInvitationInvite, arguments);
     }
 
     // Diese Methode überprüft, ob das Einfügen von Daten in die Tabelle oder das Löschen

@@ -4,7 +4,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -222,18 +224,35 @@ public class DatabaseTest {
 
         assertEquals(true, Database.updateUserLocation("Max", "10.0", "12.0"));
         assertEquals(true, Database.updateUserLocation("Max", String.valueOf(latitude), String.valueOf(longitude)));
+        assertEquals(true, Database.updateUserLocation("Alex", "50.0", "256.5"));
+        assertEquals(true, Database.updateUserLocation("Veronika", "10", "20"));
     }
 
     @Test
     public void getUserLocations() throws IOException {
-        List<String> actual = Database.getUserLocations("1");
+        List<String> actual = Database.getUserLocations("22");
 
         List<String> expected = new ArrayList<>();
         expected.add("Max;48.287596;14.294394");
         expected.add("Pia;20;30");
+        expected.add("Alex;50;256.5");
+        expected.add("Veronika;10;20");
 
         for(String s : expected) {
             assertEquals(true, actual.contains(s));
         }
     }
+
+    @Test
+    public void createInvitation() throws IOException {
+        GregorianCalendar calendar = new GregorianCalendar();
+        List<String> invitees = new ArrayList<>();
+        invitees.add("Max");
+        invitees.add("Pia");
+        invitees.add("Alex");
+
+        assertEquals(true, Database.createInvitation("Veronika", "1", new Timestamp(calendar.getTimeInMillis() + (1000 * 3600 * 24)), invitees));
+
+    }
+
 }
