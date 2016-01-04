@@ -4,6 +4,18 @@
     android:layout_height="match_parent"
     tools:context="com.restfind.restaurantfinder.InvitationsActivity">
 
+    <RelativeLayout
+        android:id="@+id/loadingPanel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center" >
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+    </RelativeLayout>
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -14,17 +26,12 @@
             layout="@layout/toolbar">
         </include>
 
-        <ScrollView
+        <ListView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/scrollView2" >
-
-            <ListView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/lvInvitationList" />
-        </ScrollView>
+            android:drawSelectorOnTop="true"
+            android:id="@+id/lvInvitationList" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -10,6 +10,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -83,7 +84,7 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
 
         // Add a marker in current Position and move the camera
         LatLng currentPos = new LatLng(latitude, longitude);
-        mMap.addMarker(new MarkerOptions().position(currentPos).title("Current Position"));
+        mMap.addMarker(new MarkerOptions().position(currentPos).title("Current Position").icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_my_location_black_24dp)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPos));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
 

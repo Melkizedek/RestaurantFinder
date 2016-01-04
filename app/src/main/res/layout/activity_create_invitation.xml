@@ -88,7 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:text="Send Invitation"
-            android:background="@color/colorPrimary"
+            android:backgroundTint="@color/colorPrimary"
             android:textStyle="bold"
             android:id="@+id/btnInviteFriends" />
 

@@ -1,12 +1,9 @@
 package com.restfind.restaurantfinder.assistant;
 
 
-import android.app.IntentService;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 

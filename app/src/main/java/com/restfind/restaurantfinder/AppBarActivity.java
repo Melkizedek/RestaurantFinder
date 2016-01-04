@@ -34,7 +34,7 @@ public abstract class AppBarActivity extends AppCompatActivity {
     //enum to differentiate multiple different uses of the MapActivity
     protected enum MapActivityType{
         SearchResults,
-        Invitations,
+        Invitation,
         Favorites
     }
 

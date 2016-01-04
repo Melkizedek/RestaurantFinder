@@ -88,6 +88,8 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
         }
         if(username != null && !username.isEmpty()){
 
+//            Log.v("CheckInvitationsService" , "111");
+
 //            buildApiClient();
 
 
