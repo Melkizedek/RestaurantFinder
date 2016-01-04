@@ -1,14 +1,18 @@
 package com.restfind.restaurantfinder;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.widget.ListView;
 
+import com.restfind.restaurantfinder.assistant.Invitation;
+
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 public class InvitationsActivity extends AppBarActivity {
 
@@ -26,6 +30,17 @@ public class InvitationsActivity extends AppBarActivity {
 
         //Get current logged-in username
         username = getCurrentUsername();
+
+//        Intent intent = getIntent();
+//        Invitation inv = intent.getParcelableExtra("invitation");
+//        Log.v(LOG_TAG, "id: " + inv.getId());
+//        Log.v(LOG_TAG, "inviter: " + inv.getInviter());
+//        Log.v(LOG_TAG, "placeID: " + inv.getPlaceID());
+//        Timestamp time = new Timestamp(inv.getTime());
+//        Log.v(LOG_TAG, "time: " + time.toString());
+//        for(Map.Entry<String, Boolean> e : inv.getInvitees().entrySet()){
+//            Log.v(LOG_TAG, "invitee: " + e.getKey() + ", accepted: " + e.getValue());
+//        }
 
         //Set up UI-Elements
         lvInvitationList = (ListView) findViewById(R.id.lvInvitationList);
