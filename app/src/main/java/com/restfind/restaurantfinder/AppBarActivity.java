@@ -214,7 +214,7 @@ public abstract class AppBarActivity extends AppCompatActivity {
             place_act.setRating(curObject.getDouble("rating"));
         }
         if (curObject.has("types")) {
-            JSONArray types = new JSONArray();
+            JSONArray types = curObject.getJSONArray("types");
             for (int j = 0; j < types.length(); j++) {
                 place_act.setTypes(types.getString(j));
             }

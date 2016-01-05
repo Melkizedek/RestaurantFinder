@@ -51,7 +51,7 @@
                         android:paddingLeft="5dp"
                         android:paddingRight="10dp"
                         android:text="Time:"
-                        android:id="@+id/textView" />
+                        android:id="@+id/tvName" />
 
                     <TextView
                         android:layout_width="wrap_content"

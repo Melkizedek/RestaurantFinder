@@ -4,14 +4,17 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.restfind.restaurantfinder.assistant.Place;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -120,43 +123,85 @@ public class PlaceDetailsActivity extends AppBarActivity {
         //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(Place place) {
-            //TODO: list all needed fields of the given Place-Object
-            TextView tv = (TextView) findViewById(R.id.textView);
+            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
+            TextView tvName = (TextView) findViewById(R.id.tvName);
             if(place.getIcon().equals(getResources().getString(R.string.iconRestaurant))){
-                tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_dining_black_24dp, 0, 0, 0);
+                tvName.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_dining_black_24dp, 0, 0, 0);
 
             }
             if(place.getIcon().equals(getResources().getString(R.string.iconBar))){
-                tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_bar_black_18dp, 0, 0, 0);
+                tvName.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_bar_black_24dp, 0, 0, 0);
 
             }
             if(place.getIcon().equals(getResources().getString(R.string.iconCafe))){
-                tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_cafe_black_18dp, 0, 0, 0);
+                tvName.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_cafe_black_24dp, 0, 0, 0);
 
             }
-            tv.setText(place.getName());
-            TextView tv_textView_Vicinity = (TextView) findViewById(R.id.textView_Vicinity);
-            tv_textView_Vicinity.setText(place.getVicinity());
-            TextView textView_Website = (TextView) findViewById(R.id.textView_Website);
-            textView_Website.setText(place.getWebsite());
-            TextView textView_UserRating = (TextView) findViewById(R.id.textView_UserRating);
-            textView_UserRating.setText(place.getUser_ratings_total());
-            TextView textView_phone_number = (TextView) findViewById(R.id.phone_number);
-            textView_phone_number.setText(place.getFormatted_phone_number());
-            TextView openNow = (TextView) findViewById(R.id.openNow);
-            if(place.isOpenNow()){
-                openNow.setText("geöffnet");
-            }
-            if(!place.isOpenNow()){
-                openNow.setText("geschlossen");
-            }
-            TextView openTimes = (TextView) findViewById(R.id.openTimes);
-            for(int i = 0; i < place.getOpeningHours().size();i++){
-                openTimes.setText(place.getOpeningHours().get(i));
-            }
-            TextView priceLevel = (TextView) findViewById(R.id.priceLevel);
-            priceLevel.setText(place.getPrice_level());
+            tvName.setText(place.getName());
 
+            List<String> types = new ArrayList<>();
+            for(int i = 0; i < place.getTypes().size(); i++) {
+                if(place.getTypes().get(i).equals("restaurant")
+                        || place.getTypes().get(i).equals("bar")
+                        || place.getTypes().get(i).equals("cafe")
+                        || place.getTypes().get(i).equals("meal_takeaway")) {
+                    types.add(place.getTypes().get(i));
+                }
+            }
+            TextView tvTypes = (TextView) findViewById(R.id.tvTypes);
+            tvTypes.setText(types.toString());
+
+            TextView tvVicinity = (TextView) findViewById(R.id.tvVicinity);
+            tvVicinity.setText(place.getVicinity());
+
+            if(place.getFormatted_phone_number() != null && !place.getFormatted_phone_number().isEmpty()) {
+                TextView tvPhoneNumber = (TextView) findViewById(R.id.tvPhoneNumber);
+                tvPhoneNumber.setText(place.getFormatted_phone_number());
+            } else{
+                findViewById(R.id.tvPhoneNumber).setVisibility(View.GONE);
+            }
+            if(place.getWebsite() != null && !place.getWebsite().isEmpty()) {
+                TextView tvWebsite = (TextView) findViewById(R.id.tvWebsite);
+                tvWebsite.setText(place.getWebsite());
+            } else{
+                findViewById(R.id.tvWebsite).setVisibility(View.GONE);
+            }
+            if(place.getRating() >= 0) {
+                RatingBar ratingBar = (RatingBar) findViewById(R.id.ratingBar);
+                ratingBar.setRating(Float.parseFloat(place.getRating().toString()));
+
+                TextView tvUserRatingsTotal = (TextView) findViewById(R.id.tvUserRatingsTotal);
+                tvUserRatingsTotal.setText(" (" + place.getUser_ratings_total() + ")");
+            } else{
+                findViewById(R.id.ratingBar).setVisibility(View.GONE);
+                TextView tvUserRatingsTotal = (TextView) findViewById(R.id.tvUserRatingsTotal);
+                tvUserRatingsTotal.setText("(no ratings)");
+            }
+            if(place.getOpeningHours() != null && !place.getOpeningHours().isEmpty()) {
+                String text = "Opening hours ";
+                TextView tvOpenNow = (TextView) findViewById(R.id.tvOpenNow);
+                if (place.isOpenNow()) {
+                    text += "(open now)";
+                }
+                if (!place.isOpenNow()) {
+                    text += "(closed now)";
+                }
+                tvOpenNow.setText(text);
+
+                TextView tvOpeningHours = (TextView) findViewById(R.id.tvOpeningHours);
+                StringBuilder builder = new StringBuilder();
+
+                for (String s : place.getOpeningHours()) {
+                    int split = s.indexOf(":");
+
+                    builder.append(s.substring(0, split) + ":\n");
+                    builder.append(s.substring(split + 1, s.length()) + "\n");
+                }
+                tvOpeningHours.setText(builder.toString());
+            } else{
+                findViewById(R.id.tvOpenNow).setVisibility(View.GONE);
+            }
         }
     }
 

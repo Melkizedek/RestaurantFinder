@@ -14,7 +14,6 @@ public class Place implements Parcelable {
     private List<String> openingHours;
     private boolean openNow;
     private String place_ID;
-    private String price_level;
     private Double rating;
     private List<String> types;
     private String vicinity;
@@ -25,7 +24,6 @@ public class Place implements Parcelable {
     public Place(){
         openingHours = new ArrayList<>();
         types = new ArrayList<>();
-        price_level = "";
         rating = -1.0;
         user_ratings_total = -1;
         website = "";
@@ -85,14 +83,6 @@ public class Place implements Parcelable {
 
     public void setPlace_ID(String place_ID) {
         this.place_ID = place_ID;
-    }
-
-    public String getPrice_level() {
-        return price_level;
-    }
-
-    public void setPrice_level(String price_level) {
-        this.price_level = price_level;
     }
 
     public Double getRating() {
@@ -163,7 +153,6 @@ public class Place implements Parcelable {
         in.readStringList(openingHours);
         openNow = in.readInt() != 0;
         place_ID = in.readString();
-        price_level = in.readString();
         rating = in.readDouble();
         types = new ArrayList<>();
         in.readStringList(types);
@@ -198,7 +187,6 @@ public class Place implements Parcelable {
         dest.writeStringList(openingHours);
         dest.writeInt(openNow ? 1 : 0);
         dest.writeString(place_ID);
-        dest.writeString(price_level);
         dest.writeDouble(rating);
         dest.writeStringList(types);
         dest.writeString(vicinity);
