@@ -196,12 +196,11 @@ public class CreateInvitationActivity extends AppBarActivity {
             List<String> friends = params[0];
             Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
             try {
-                //TODO: Database invitation
+                return Database.createInvitation(username, placeID, timestamp, friends);
             } catch (Exception e) {
                 //Could not connect to Server with .php-files
                 return null;
             }
-            return false;
         }
 
         //puts the friend-requests and friends into the listView
