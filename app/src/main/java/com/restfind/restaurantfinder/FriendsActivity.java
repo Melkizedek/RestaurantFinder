@@ -18,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class FriendsActivity extends AppBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_friends, menu);
+        menu.getItem(0).setTitle("Logout" + " (" + username + ")");
         return true;
     }
 
@@ -93,9 +95,6 @@ public class FriendsActivity extends AppBarActivity {
                                     try {
                                         addingSuccessful = result.get();
                                     }
-//                                    catch (InviteAlreadyExistsException e){
-//                                        showAlertDialog("This User has already sent you an Invite!");
-//                                    }
                                     catch (Exception e) {
                                         //Could not connect to Server with .php-files
                                         showAlertDialog(getResources().getString(R.string.connection_error));
@@ -108,9 +107,10 @@ public class FriendsActivity extends AppBarActivity {
                                     if (!addingSuccessful) {
                                         showAlertDialog("This username does not exist!");
                                     } else{
+                                        Toast.makeText(FriendsActivity.this, "Invitation sent!", Toast.LENGTH_SHORT).show();
                                         //Start task
-                                        GetFriendsTask task = new GetFriendsTask();
-                                        task.execute(username);
+//                                        GetFriendsTask task = new GetFriendsTask();
+//                                        task.execute(username);
                                     }
                                 }
                             }
@@ -134,7 +134,7 @@ public class FriendsActivity extends AppBarActivity {
     //Creates a context menu to delete a friend
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        if (v.getId()==R.id.lvFriendList) {
+        if (v.getId() == R.id.lvFriendList) {
             menu.add("Delete");
         }
     }
@@ -216,8 +216,11 @@ public class FriendsActivity extends AppBarActivity {
         protected void onPostExecute(Map<String, Boolean> result) {
             findViewById(R.id.loadingPanel).setVisibility(View.GONE);
             if(result != null){
+                TreeMap<String, Boolean> tree = new TreeMap(result);
+                Map<String, Boolean> sorted = sortByValue(tree);
+
                 lvFriendList = (ListView) findViewById(R.id.lvFriendList);
-                FriendAdapter adapter = new FriendAdapter(result);
+                FriendAdapter adapter = new FriendAdapter(sorted);
                 lvFriendList.setAdapter(adapter);
                 registerForContextMenu(lvFriendList);
             } else{
@@ -280,6 +283,7 @@ public class FriendsActivity extends AppBarActivity {
                 btnAccept.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
                         boolean acceptSuccessful = false;
 
                         //Thread that tries to accept friend

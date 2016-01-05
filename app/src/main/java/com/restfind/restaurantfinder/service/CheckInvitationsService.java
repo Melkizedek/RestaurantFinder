@@ -78,7 +78,7 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
 
     //gets called every few minutes to check for new invitations and create a notification
     protected void processStartNotification() {
-        //TODO: check invitations, create notification if needed
+        //TODO: get invitations, create notification if needed
 
 
 

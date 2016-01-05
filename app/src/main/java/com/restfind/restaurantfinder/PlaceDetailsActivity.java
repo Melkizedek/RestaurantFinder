@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -38,6 +37,7 @@ public class PlaceDetailsActivity extends AppBarActivity {
         isFavorite = false;
         intent = getIntent();
         placeID = intent.getStringExtra("placeID");
+        Place place = intent.getParcelableExtra("place");
         comingFromFavoriteActivity = intent.getBooleanExtra("favorite", false);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -98,7 +98,7 @@ public class PlaceDetailsActivity extends AppBarActivity {
             }
         });
 
-        new GetPlacesDetailsTask().execute();
+        new GetPlacesDetailsTask().execute(place);
         new CheckFavoriteTask().execute();
     }
 
@@ -113,18 +113,19 @@ public class PlaceDetailsActivity extends AppBarActivity {
     }
 
     //<Input for doInBackground, (Progress), Input for onPostExecute>
-    private class GetPlacesDetailsTask extends AsyncTask<Void, Integer, Place> {
+    private class GetPlacesDetailsTask extends AsyncTask<Place, Integer, Place> {
 
         @Override
-        protected Place doInBackground(Void... params) {
+        protected Place doInBackground(Place... params) {
+            if(params[0] != null){
+                return params[0];
+            }
             return getPlaceDetails(placeID);
         }
 
         //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(Place place) {
-            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-
             TextView tvName = (TextView) findViewById(R.id.tvName);
             if(place.getIcon().equals(getResources().getString(R.string.iconRestaurant))){
                 tvName.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_local_dining_black_24dp, 0, 0, 0);
@@ -172,7 +173,7 @@ public class PlaceDetailsActivity extends AppBarActivity {
                 ratingBar.setRating(Float.parseFloat(place.getRating().toString()));
 
                 TextView tvUserRatingsTotal = (TextView) findViewById(R.id.tvUserRatingsTotal);
-                tvUserRatingsTotal.setText(" (" + place.getUser_ratings_total() + ")");
+                tvUserRatingsTotal.setText(" (" + place.getUser_ratings_total() + " ratings)");
             } else{
                 findViewById(R.id.ratingBar).setVisibility(View.GONE);
                 TextView tvUserRatingsTotal = (TextView) findViewById(R.id.tvUserRatingsTotal);
@@ -195,8 +196,10 @@ public class PlaceDetailsActivity extends AppBarActivity {
                 for (String s : place.getOpeningHours()) {
                     int split = s.indexOf(":");
 
-                    builder.append(s.substring(0, split) + ":\n");
-                    builder.append(s.substring(split + 1, s.length()) + "\n");
+                    builder.append(s.substring(0, split));
+                    builder.append(":\n");
+                    builder.append(s.substring(split + 1, s.length()));
+                    builder.append("\n");
                 }
                 tvOpeningHours.setText(builder.toString());
             } else{

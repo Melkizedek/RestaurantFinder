@@ -83,6 +83,14 @@
             </LinearLayout>
         </ScrollView>
 
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:text="Allow others to see your Location"
+            android:checked="true"
+            android:id="@+id/cbAllowTracking" />
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

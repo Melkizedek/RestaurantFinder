@@ -2,7 +2,9 @@ package com.restfind.restaurantfinder;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -138,6 +140,7 @@ public class CreateInvitationActivity extends AppBarActivity {
                         showAlertDialog("Choose at least one Friend!");
                     } else {
                         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
                         new InviteTask().execute(friends);
                     }
                 }
@@ -151,6 +154,7 @@ public class CreateInvitationActivity extends AppBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_logout_only, menu);
+        menu.getItem(0).setTitle("Logout" + " (" + username + ")");
         return true;
     }
 
@@ -208,6 +212,12 @@ public class CreateInvitationActivity extends AppBarActivity {
         protected void onPostExecute(Boolean result) {
             findViewById(R.id.loadingPanel).setVisibility(View.GONE);
             if(result != null){
+                final CheckBox cbAllowTracking = (CheckBox) findViewById(R.id.cbAllowTracking);
+                SharedPreferences spTracking = getApplicationContext().getSharedPreferences("tracking", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = spTracking.edit();
+                editor.putBoolean("tracking", cbAllowTracking.isChecked());
+                editor.apply();
+
                 Toast.makeText(CreateInvitationActivity.this, "Invitation sent!", Toast.LENGTH_SHORT).show();
             } else{
                 showAlertDialog(getResources().getString(R.string.connection_error));
