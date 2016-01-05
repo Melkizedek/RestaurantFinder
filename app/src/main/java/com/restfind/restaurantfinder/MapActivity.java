@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -13,11 +14,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,9 +31,11 @@ import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -46,9 +51,14 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -87,6 +97,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
 
         markerPlaces = new HashMap<>();
         markerParticipants = new HashMap<>();
+        places = new ArrayList<>();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if(mapActivityType == MapActivityType.SearchResults) {
@@ -95,55 +106,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
         else if(mapActivityType == MapActivityType.Invitation) {
             toolbar.setTitle("Invitations");
-            places = new ArrayList<>();
-
-            Place place = null;
-
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            Future<Place> result = es.submit(new Callable<Place>() {
-                public Place call() {
-                    return getPlaceDetails(invitation.getPlaceID());
-                }
-            });
-            try {
-                place = result.get();
-            }
-            catch (Exception e) {
-            }
-            if(place != null) {
-                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                places.add(place);
-                createMap();
-
-                findViewById(R.id.llInvitationButtons).setVisibility(View.VISIBLE);
-                Button btnAccept = (Button) findViewById(R.id.btnAccept);
-                Button btnDecline = (Button) findViewById(R.id.btnDecline);
-                final CheckBox cbAllowTracking = (CheckBox) findViewById(R.id.cbAllowTracking);
-
-                btnAccept.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //TODO: Accept Invitation
-
-                        SharedPreferences spTracking = getApplicationContext().getSharedPreferences("tracking", Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = spTracking.edit();
-                        editor.putBoolean("tracking", cbAllowTracking.isChecked());
-                        editor.apply();
-
-                        Toast.makeText(MapActivity.this, "Accepted", Toast.LENGTH_SHORT).show();
-                        findViewById(R.id.llInvitationButtons).setVisibility(View.GONE);
-                    }
-                });
-                btnDecline.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //TODO: Decline Invitation
-
-                        Toast.makeText(MapActivity.this, "Declined", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(MapActivity.this, InvitationsActivity.class));
-                    }
-                });
-            }
+            new GetInvitationTask().execute();
         }
         else if(mapActivityType == MapActivityType.Favorites) {
             toolbar.setTitle("Favorites");
@@ -180,26 +143,29 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
 
         for(Place p : places){
             LatLng pos = new LatLng(p.getLat(), p.getLng());
-            String snippet = "<Tap here for more Details and Options>";
+            String snippet = "&lt;Tap here for more details/options&gt;";
             StringBuilder builder = new StringBuilder();
 
             if(mapActivityType == MapActivityType.Invitation){
-                builder.append("Time: " + new SimpleDateFormat("HH:mm, dd.MM.yy").format(new Timestamp(invitation.getTime())));
-                builder.append("\n\nParticipants:");
-                builder.append("\n" + invitation.getHost() + " " + "(Inviter)");
+                builder.append("Time: " + new SimpleDateFormat("dd.MM.yyyy - HH:mm").format(new Timestamp(invitation.getTime())));
+                builder.append("<br><br>Participants:");
+                builder.append("<br>" + invitation.getHost() + " " + "(host)");
 
-                for(Map.Entry<String, Integer> e : invitation.getInvitees().entrySet()){
+                TreeMap<String, Integer> tree = new TreeMap(invitation.getInvitees());
+                Map<String, Integer> sorted = sortByValue(tree);
+
+                for(Map.Entry<String, Integer> e : sorted.entrySet()){
                     String acceptType = "";
                     if(e.getValue() == 1){
-                        acceptType = "(accepted)";
+                        acceptType = "<font color=#00FF00>(accepted)</font>";
                     } else if(e.getValue() == 0){
                         acceptType = "(undecided)";
                     } else{
-                        acceptType = "(declined)";
+                        acceptType = "<font color=#ff0000>(declined)</font>";
                     }
-                    builder.append("\n" + e.getKey() + " " + acceptType);
+                    builder.append("<br>" + e.getKey() + " " + acceptType);
                 }
-                builder.append("\n\n");
+                builder.append("<br><br>");
             }
             snippet = builder.toString() + snippet;
 
@@ -244,8 +210,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                 title.setText(marker.getTitle());
 
                 TextView snippet = new TextView(MapActivity.this);
-                snippet.setTextColor(Color.GRAY);
-                snippet.setText(marker.getSnippet());
+                snippet.setText(Html.fromHtml(marker.getSnippet()));
 
                 info.addView(title);
                 info.addView(snippet);
@@ -260,7 +225,6 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         if(mapActivityType == MapActivityType.Invitation){
             Marker m = markerPlaces.entrySet().iterator().next().getKey();
             m.showInfoWindow();
-
             displayParticipants();
         }
     }
@@ -408,7 +372,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                 while(timeTillDeadline > (-3600000)){
                     Log.v(LOG_TAG, "timeTillDeadline: " + timeTillDeadline);
 
-                    new GetInviteesLocationTask().execute();
+                    new GetParticipantsLocationTask().execute();
 
                     try {
                         Thread.sleep(10000);
@@ -423,7 +387,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
     }
 
     //<Input for doInBackground, (Progress), Input for onPostExecute>
-    private class GetInviteesLocationTask extends AsyncTask<Void, Integer, Map<String, LatLng>> {
+    private class GetParticipantsLocationTask extends AsyncTask<Void, Integer, Map<String, LatLng>> {
 
         @Override
         protected Map<String, LatLng> doInBackground(Void... params) {
@@ -457,6 +421,53 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                 } else{
                     markerParticipants.put(e.getKey(), mMap.addMarker(new MarkerOptions().position(e.getValue()).title(e.getKey()).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_directions_run_black_24dp))));
                 }
+            }
+        }
+    }
+
+    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    private class GetInvitationTask extends AsyncTask<Void, Integer, Place> {
+
+        @Override
+        protected Place doInBackground(Void... params) {
+            return getPlaceDetails(invitation.getPlaceID());
+        }
+
+        @Override
+        protected void onPostExecute(Place result) {
+            if(result != null) {
+                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                places.add(result);
+                createMap();
+
+                findViewById(R.id.llInvitationButtons).setVisibility(View.VISIBLE);
+                Button btnAccept = (Button) findViewById(R.id.btnAccept);
+                Button btnDecline = (Button) findViewById(R.id.btnDecline);
+                final CheckBox cbAllowTracking = (CheckBox) findViewById(R.id.cbAllowTracking);
+
+                btnAccept.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //TODO: Accept Invitation
+
+                        SharedPreferences spTracking = getApplicationContext().getSharedPreferences("tracking", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = spTracking.edit();
+                        editor.putBoolean("tracking", cbAllowTracking.isChecked());
+                        editor.apply();
+
+                        Toast.makeText(MapActivity.this, "Accepted", Toast.LENGTH_SHORT).show();
+                        findViewById(R.id.llInvitationButtons).setVisibility(View.GONE);
+                    }
+                });
+                btnDecline.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //TODO: Decline Invitation
+
+                        Toast.makeText(MapActivity.this, "Declined", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(MapActivity.this, InvitationsActivity.class));
+                    }
+                });
             }
         }
     }
@@ -625,5 +636,24 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             places = result;
             createMap();
         }
+    }
+
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue( Map<K, V> map )
+    {
+        List<Map.Entry<K, V>> list =
+                new LinkedList<>( map.entrySet() );
+        Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
+            @Override
+            public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
+                return (o2.getValue()).compareTo(o1.getValue());
+            }
+        });
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list)
+        {
+            result.put( entry.getKey(), entry.getValue() );
+        }
+        return result;
     }
 }

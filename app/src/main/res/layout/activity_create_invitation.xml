@@ -56,21 +56,21 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceLarge"
                         android:paddingRight="20dp"
-                        android:text="Choose Time"
-                        android:textColor="@color/colorAccent"
-                        android:textStyle="bold"
-                        android:id="@+id/tvTime" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceLarge"
                         android:text="Choose Date"
                         android:textColor="@color/colorAccent"
                         android:textStyle="bold"
                         android:id="@+id/tvDate" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge"
+                        android:text="Choose Time"
+                        android:textColor="@color/colorAccent"
+                        android:textStyle="bold"
+                        android:id="@+id/tvTime" />
 
                 </LinearLayout>
 

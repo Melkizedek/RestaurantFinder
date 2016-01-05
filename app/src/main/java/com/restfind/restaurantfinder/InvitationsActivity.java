@@ -27,9 +27,6 @@ import java.util.Map;
 
 public class InvitationsActivity extends AppBarActivity {
 
-    private ListView lvInvitationList;
-    private String username;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,12 +35,6 @@ public class InvitationsActivity extends AppBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Invitations");
         setSupportActionBar(toolbar);
-
-        //Get current logged-in username
-        username = getCurrentUsername();
-
-        //Set up UI-Elements
-        lvInvitationList = (ListView) findViewById(R.id.lvInvitationList);
 
         //Start task
         GetInvitationsTask task = new GetInvitationsTask();
@@ -68,7 +59,7 @@ public class InvitationsActivity extends AppBarActivity {
             Map<String, Integer> map = new HashMap<>();
             map.put("friend1", 1);
             map.put("friend2", 0);
-            Invitation invitation = new Invitation(1, "inviter1", "ChIJ8e5PJ4eXc0cRybSO-hsltRA", Calendar.getInstance().getTimeInMillis() + 1000000, true, map);
+            Invitation invitation = new Invitation(1, "host1", "ChIJ8e5PJ4eXc0cRybSO-hsltRA", Calendar.getInstance().getTimeInMillis() + 1000000, true, map);
             result.add(invitation);
 
             map = new HashMap<>();
@@ -81,7 +72,7 @@ public class InvitationsActivity extends AppBarActivity {
             map.put("gfriend", -1);
             map.put("hfriend", -1);
             map.put("ifriend", 0);
-            invitation = new Invitation(1, "inviter2", "ChIJQTCNfYGXc0cRUeRPK6fpBk4", Calendar.getInstance().getTimeInMillis(), true, map);
+            invitation = new Invitation(1, "host2", "ChIJQTCNfYGXc0cRUeRPK6fpBk4", Calendar.getInstance().getTimeInMillis(), true, map);
             result.add(invitation);
 
             return result;
@@ -152,9 +143,12 @@ public class InvitationsActivity extends AppBarActivity {
 
             final Invitation item = getItem(position);
 
-            //Handle TextView and display string from your list
-            TextView listItemText = (TextView)view.findViewById(R.id.tvInvitation);
-            listItemText.setText(new SimpleDateFormat("HH:mm, dd.MM.yy").format(new Timestamp(item.getTime())) + " " + item.getHost());
+            //Handle TextViews and display string from your list
+            TextView listItemDate = (TextView)view.findViewById(R.id.tvInvitationDate);
+            listItemDate.setText(new SimpleDateFormat("dd.MM.yyyy - HH:mm").format(new Timestamp(item.getTime())));
+
+            TextView listItemHost = (TextView)view.findViewById(R.id.tvInvitationHost);
+            listItemHost.setText(item.getHost());
 
             //Handle buttons and add onClickListeners
             ImageView imgArrow = (ImageView) findViewById(R.id.imgArrow);

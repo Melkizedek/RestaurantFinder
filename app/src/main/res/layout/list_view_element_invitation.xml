@@ -2,13 +2,25 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/tvInvitation" />
+        android:layout_alignParentLeft="true">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/tvInvitationDate" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/tvInvitationHost" />
+    </LinearLayout>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -18,4 +30,5 @@
         android:layout_marginRight="10dp"
         android:src="@drawable/ic_chevron_right_black_36dp"
         android:id="@+id/imgArrow" />
+
 </RelativeLayout>
