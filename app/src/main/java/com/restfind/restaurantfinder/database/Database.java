@@ -1,5 +1,9 @@
 package com.restfind.restaurantfinder.database;
 
+import android.util.Log;
+
+import com.restfind.restaurantfinder.assistant.Invitation;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,7 +13,9 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This static class handles the database access.
@@ -28,7 +34,8 @@ public class Database {
         favorite, deleteFavorite, getFavorites,
         updateUserLocation, getUserLocations, deleteUserLocation,
         createInvitation, sendInvitationInvite,
-        acceptInvitation, declineInvitation
+        acceptInvitation, declineInvitation,
+        getInvitations, receivedInvitation
     }
 
     private final static String serverUrl = "http://restfind.heliohost.org/";
@@ -129,6 +136,41 @@ public class Database {
 
     public static boolean declineInvitation(String id, String username) throws IOException {
         return checkResult(Operation.declineInvitation, id, username);
+    }
+
+    public static List<Invitation> getInvitations(String username) throws IOException {
+        List<String> result = execute(Operation.getInvitations, username);
+        List<Invitation> invitations = new ArrayList<>();
+        Map<String, Integer> curInvitees = null;
+        Invitation curInvitation = null;
+        String curId = "";
+
+        for(String s : result){
+            //0: id, 1: host, 2:placeID, 3: time, 4: user, 5: accepted, 6: received
+            String[] split = s.split(";");
+            if(!split[0].equals(curId)){
+                if(curInvitation != null){
+                    curInvitation.setInvitees(curInvitees);
+                    invitations.add(curInvitation);
+                }
+                curInvitation = new Invitation(Integer.parseInt(split[0]), split[1], split[2], Timestamp.valueOf(split[3]).getTime());
+
+                if(split[4].equals(username)){
+                    curInvitation.setReceived(Boolean.getBoolean(split[6]));
+                }
+                curInvitees = new HashMap<>();
+            }
+            curInvitees.put(split[4], Integer.parseInt(split[5]));
+            curId = split[0];
+        }
+        curInvitation.setInvitees(curInvitees);
+        invitations.add(curInvitation);
+
+        return invitations;
+    }
+
+    public static boolean receivedInvitation(int id, String username) throws IOException {
+        return checkResult(Operation.receivedInvitation, String.valueOf(id), username);
     }
 
     // Diese Methode überprüft, ob das Einfügen von Daten in die Tabelle oder das Löschen

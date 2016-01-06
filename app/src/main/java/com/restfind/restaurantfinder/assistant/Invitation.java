@@ -15,6 +15,10 @@ public class Invitation implements Parcelable{
     private boolean received;
     private Map<String, Integer> invitees;
 
+    public Invitation(int id, String host, String placeID, long time) {
+        this(id, host, placeID, time, false, null);
+    }
+
     public Invitation(int id, String host, String placeID, long time, boolean received, Map<String, Integer> invitees) {
         this.id = id;
         this.host = host;

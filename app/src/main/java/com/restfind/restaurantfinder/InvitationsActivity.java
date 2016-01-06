@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -16,7 +17,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.restfind.restaurantfinder.assistant.Invitation;
+import com.restfind.restaurantfinder.database.Database;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,18 +30,18 @@ import java.util.Map;
 
 public class InvitationsActivity extends AppBarActivity {
 
+    private String username;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invitations);
 
+        username = getCurrentUsername();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Invitations");
         setSupportActionBar(toolbar);
-
-//        //Start task
-//        GetInvitationsTask task = new GetInvitationsTask();
-//        task.execute();
     }
 
     @Override
@@ -54,7 +57,7 @@ public class InvitationsActivity extends AppBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_logout_only, menu);
-        menu.getItem(0).setTitle("Logout" + " (" + getCurrentUsername() + ")");
+        menu.getItem(0).setTitle("Logout" + " (" + username + ")");
         return true;
     }
 
@@ -62,31 +65,11 @@ public class InvitationsActivity extends AppBarActivity {
     private class GetInvitationsTask extends AsyncTask<Void, Integer, List<Invitation>> {
         @Override
         protected List<Invitation> doInBackground(Void... params) {
-            List<Invitation> invitations = new ArrayList<>();
-            List<Invitation> result = new ArrayList<>();
-
-            //TODO: get invitations of user (only where he is undecided or accepted)!
-
-            Map<String, Integer> map = new HashMap<>();
-            map.put("Alex", 1);
-            map.put("Pia", 0);
-            map.put("Max", 0);
-            map.put("Monika", 1);
-            map.put("Josef", -1);
-            Invitation invitation = new Invitation(1, "Thomas", "ChIJ8e5PJ4eXc0cRybSO-hsltRA", Calendar.getInstance().getTimeInMillis() + 600000, true, map);
-            invitations.add(invitation);
-
-            map = new HashMap<>();
-            map.put("Alex", -1);
-            map.put("Max", 1);
-            map.put("Monika", 1);
-            invitation = new Invitation(2, "Pia", "ChIJQTCNfYGXc0cRUeRPK6fpBk4", Calendar.getInstance().getTimeInMillis() + 100000, true, map);
-            invitations.add(invitation);
-
-            for(Invitation i : invitations){
-                if(i.getInvitees().get(getCurrentUsername()) >= 0){
-                    result.add(i);
-                }
+            List<Invitation> result;
+            try {
+                result = Database.getInvitations(username);
+            } catch (IOException e) {
+                return null;
             }
             return result;
         }
@@ -158,7 +141,7 @@ public class InvitationsActivity extends AppBarActivity {
 
             //Handle TextViews and display string from your list
             TextView listItemDate = (TextView)view.findViewById(R.id.tvInvitationDate);
-            listItemDate.setText(new SimpleDateFormat("dd.MM.yyyy - HH:mm").format(new Timestamp(item.getTime())));
+            listItemDate.setText(new SimpleDateFormat("dd.MM.yyyy - HH:mm").format(item.getTime()));
 
             TextView listItemHost = (TextView)view.findViewById(R.id.tvInvitationHost);
             listItemHost.setText(item.getHost());

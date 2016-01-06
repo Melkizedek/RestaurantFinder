@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -72,15 +73,14 @@ public class CreateInvitationActivity extends AppBarActivity {
                 DatePickerDialog dialog = new DatePickerDialog(CreateInvitationActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
-                        Calendar calNow = Calendar.getInstance();
-                        calendar = (Calendar) calNow.clone();
-
                         calendar.set(Calendar.DATE, selectedDay);
                         calendar.set(Calendar.MONTH, selectedMonth);
                         calendar.set(Calendar.YEAR, selectedYear);
 
-                        long time_val = calendar.getTimeInMillis();
-                        String formatted_date = (DateFormat.format("dd.MM.yyyy", time_val))
+                        Log.v(LOG_TAG, "Date: " + new Timestamp(calendar.getTimeInMillis()));
+
+                        long dateInMs = calendar.getTimeInMillis();
+                        String formatted_date = (DateFormat.format("dd.MM.yyyy", dateInMs))
                                 .toString();
                         tvDate.setText(formatted_date);
 
@@ -100,31 +100,18 @@ public class CreateInvitationActivity extends AppBarActivity {
             public void onClick(View v) {
                 Calendar c = Calendar.getInstance();
                 final int min = c.get(Calendar.MINUTE);
-                int hour = c.get(Calendar.HOUR);
-                if(c.get(Calendar.AM_PM) == Calendar.PM){
-                    hour += 12;
-                }
-                final int curHour = hour;
+                int hour = c.get(Calendar.HOUR_OF_DAY);
 
                 TimePickerDialog dialog;
                 dialog = new TimePickerDialog(CreateInvitationActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        calendar.set(Calendar.HOUR, selectedHour);
+                        calendar.set(Calendar.HOUR_OF_DAY, selectedHour);
                         calendar.set(Calendar.MINUTE, selectedMinute);
 
-                        String hourString = String.valueOf(selectedHour);
-                        String minString = String.valueOf(selectedMinute);
-
-                        if(selectedHour <= 9){
-                            hourString = "0" + hourString;
-                        }
-                        if(selectedMinute <= 9){
-                            minString = "0" + minString;
-                        }
-                        tvTime.setText(hourString + ":" + minString);
+                        tvTime.setText(DateFormat.format("HH:mm", calendar.getTimeInMillis()));
                     }
-                }, curHour, min, true);
+                }, hour, min, true);
 
                 dialog.setTitle("Select Time");
                 dialog.show();
@@ -146,7 +133,7 @@ public class CreateInvitationActivity extends AppBarActivity {
                     if(friends.isEmpty()){
                         showAlertDialog("Choose at least one Friend!");
                     } else {
-                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
                         new InviteTask().execute(friends);
                     }
@@ -155,14 +142,6 @@ public class CreateInvitationActivity extends AppBarActivity {
         });
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
         new GetFriendsTask().execute();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_logout_only, menu);
-        menu.getItem(0).setTitle("Logout" + " (" + username + ")");
-        return true;
     }
 
     //<Input for doInBackground, (Progress), Input for onPostExecute>

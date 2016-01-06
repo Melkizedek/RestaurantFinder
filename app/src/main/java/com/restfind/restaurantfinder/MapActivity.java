@@ -349,7 +349,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             @Override
             public void run() {
                 long timeTillDeadline = invitation.getTime() - Calendar.getInstance().getTimeInMillis();
-
+                Log.v(LOG_TAG, "timeTillDeadline: " + timeTillDeadline);
                 //Time till deadline <= 15 minutes
                 if(timeTillDeadline > 900000){
                     try {
@@ -427,18 +427,18 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         protected void onPostExecute(Place result) {
             if(result != null) {
                 findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                //after accept
                 if(!places.isEmpty()) {
                     places = new ArrayList<>();
                     markerPlaces.keySet().iterator().next().hideInfoWindow();
                     markerPlaces.keySet().iterator().next().remove();
                     markerPlaces = new HashMap<>();
-                    //TODO: invitation = getInvitations where invitation.getId() == new Id;
                     invitation.getInvitees().put(username, 1);
                 }
                 places.add(result);
                 createMap();
 
-                if(invitation.getInvitees().get(username) == 0) {
+                if(invitation.getInvitees().get(username) != null && invitation.getInvitees().get(username) == 0) {
                     findViewById(R.id.llInvitationButtons).setVisibility(View.VISIBLE);
                     Button btnAccept = (Button) findViewById(R.id.btnAccept);
                     Button btnDecline = (Button) findViewById(R.id.btnDecline);

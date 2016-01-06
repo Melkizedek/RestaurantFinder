@@ -119,7 +119,7 @@
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_star_border_black_48dp"
+                android:src="@drawable/ic_favorite_border_black_48dp"
                 android:background="@color/colorBackgroundWhite"
                 android:id="@+id/btnFavorite"
                 android:visibility="invisible"/>

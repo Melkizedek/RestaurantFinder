@@ -86,6 +86,8 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
             if(allowed){
                 //TODO: if close to invitation-deadline
 
+                //TODO: received if not host
+
                 //TODO: if deadline was 1 hour ago and no new immediate deadline set sharedpreference to false
 //                timeTillDeadline = invitation.getTime() - Calendar.getInstance().getTimeInMillis();
 //                //until 1 hour after deadline
