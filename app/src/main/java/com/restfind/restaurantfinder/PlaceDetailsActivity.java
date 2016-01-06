@@ -11,6 +11,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.restfind.restaurantfinder.assistant.Place;
+import com.restfind.restaurantfinder.database.Database;
 
 import java.io.IOException;
 import java.util.ArrayList;

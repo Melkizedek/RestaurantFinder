@@ -36,6 +36,15 @@ public class InvitationsActivity extends AppBarActivity {
         toolbar.setTitle("Invitations");
         setSupportActionBar(toolbar);
 
+//        //Start task
+//        GetInvitationsTask task = new GetInvitationsTask();
+//        task.execute();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
         //Start task
         GetInvitationsTask task = new GetInvitationsTask();
         task.execute();

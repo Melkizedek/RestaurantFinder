@@ -19,10 +19,17 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.restfind.restaurantfinder.database.Database;
+
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class CreateInvitationActivity extends AppBarActivity {
 
@@ -173,7 +180,6 @@ public class CreateInvitationActivity extends AppBarActivity {
             return friends;
         }
 
-        //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(List<String> friends) {
             findViewById(R.id.loadingPanel).setVisibility(View.GONE);
@@ -217,6 +223,27 @@ public class CreateInvitationActivity extends AppBarActivity {
                 SharedPreferences.Editor editor = spTracking.edit();
                 editor.putBoolean("tracking", cbAllowTracking.isChecked());
                 editor.apply();
+
+                if (!cbAllowTracking.isChecked()) {
+                    findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+                    //Thread that tries to delete user_location in the database
+                    ExecutorService es = Executors.newSingleThreadExecutor();
+                    Future<Boolean> resultFuture = es.submit(new Callable<Boolean>() {
+                        public Boolean call() throws IOException {
+                            return Database.deleteUserLocation(username);
+                        }
+                    });
+                    try {
+                        resultFuture.get();
+                    } catch (Exception e) {
+                        //Could not connect to Server with .php-files
+                        showAlertDialog(getResources().getString(R.string.connection_error));
+                        return;
+                    } finally {
+                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                        es.shutdown();
+                    }
+                }
 
                 Toast.makeText(CreateInvitationActivity.this, "Invitation sent!", Toast.LENGTH_SHORT).show();
             } else{

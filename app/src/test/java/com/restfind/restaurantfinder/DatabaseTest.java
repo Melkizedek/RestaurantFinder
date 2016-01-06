@@ -1,9 +1,10 @@
 package com.restfind.restaurantfinder;
 
+import com.restfind.restaurantfinder.database.Database;
+
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;

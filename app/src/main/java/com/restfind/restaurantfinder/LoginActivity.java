@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
+import com.restfind.restaurantfinder.database.Database;
 import com.restfind.restaurantfinder.service.NotificationEventReceiver;
 
 public class LoginActivity extends AppBarActivity {

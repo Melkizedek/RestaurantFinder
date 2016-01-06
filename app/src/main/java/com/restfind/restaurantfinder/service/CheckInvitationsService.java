@@ -1,15 +1,12 @@
 package com.restfind.restaurantfinder.service;
 
 import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.content.WakefulBroadcastReceiver;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -18,16 +15,7 @@ import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.restfind.restaurantfinder.Database;
-import com.restfind.restaurantfinder.InvitationsActivity;
 import com.restfind.restaurantfinder.R;
-
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class CheckInvitationsService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     protected static final int NOTIFICATION_ID = 1;

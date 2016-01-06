@@ -1,17 +1,12 @@
-package com.restfind.restaurantfinder;
-
-import android.provider.ContactsContract;
-import android.util.Log;
+package com.restfind.restaurantfinder.database;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +26,9 @@ public class Database {
         getFriendInvites, sendFriendInvite, acceptFriendInvite, declineFriendInvite,
         getFriends, deleteFriend,
         favorite, deleteFavorite, getFavorites,
-        updateUserLocation, getUserLocations,
-        createInvitation, sendInvitationInvite
+        updateUserLocation, getUserLocations, deleteUserLocation,
+        createInvitation, sendInvitationInvite,
+        acceptInvitation, declineInvitation
     }
 
     private final static String serverUrl = "http://restfind.heliohost.org/";
@@ -94,6 +90,10 @@ public class Database {
         return execute(Operation.getUserLocations, invitation_id);
     }
 
+    public static boolean deleteUserLocation(String username) throws IOException {
+        return checkResult(Operation.deleteUserLocation, username);
+    }
+
     public static boolean createInvitation(String host, String placeID, Timestamp dateTime, List<String> invitees) throws IOException {
         List<String> result = Database.execute(Operation.createInvitation, host, placeID, dateTime.toString());
 
@@ -121,6 +121,14 @@ public class Database {
         return true;
         // TODO: Rückgabewert bei sendInvitationInvite.php Programm
         // return checkResult(Operation.sendInvitationInvite, arguments);
+    }
+
+    public static boolean acceptInvitation(String id, String username) throws IOException {
+        return checkResult(Operation.acceptInvitation, id, username);
+    }
+
+    public static boolean declineInvitation(String id, String username) throws IOException {
+        return checkResult(Operation.declineInvitation, id, username);
     }
 
     // Diese Methode überprüft, ob das Einfügen von Daten in die Tabelle oder das Löschen

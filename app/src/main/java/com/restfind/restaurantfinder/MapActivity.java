@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.restfind.restaurantfinder.assistant.Invitation;
 import com.restfind.restaurantfinder.assistant.Place;
 import com.restfind.restaurantfinder.assistant.SearchOptions;
+import com.restfind.restaurantfinder.database.Database;
 
 import org.json.JSONException;
 
@@ -52,10 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class MapActivity extends AppBarActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -75,6 +72,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
     private Marker curSelectedMarker;
     private Invitation invitation;
     private String username;
+    private CheckBox cbAllowTracking;
+
+    private LinearLayout info;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,7 +193,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
 
             @Override
             public View getInfoContents(Marker marker) {
-                LinearLayout info = new LinearLayout(MapActivity.this);
+                info = new LinearLayout(MapActivity.this);
                 info.setOrientation(LinearLayout.VERTICAL);
 
                 TextView title = new TextView(MapActivity.this);
@@ -219,6 +219,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         if(mapActivityType == MapActivityType.Invitation){
             Marker m = markerPlaces.entrySet().iterator().next().getKey();
             m.showInfoWindow();
+
             displayParticipants();
         }
     }
@@ -385,9 +386,8 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             Map<String, LatLng> result = new HashMap<>();
             try {
                 List<String> userLocations = Database.getUserLocations(String.valueOf(invitation.getId()));
-                Log.v(LOG_TAG, "size: " + userLocations.size());
                 for(String s : userLocations){
-                    Log.v(LOG_TAG, s);
+//                    Log.v(LOG_TAG, s);
                     String[] split = s.split(";");
                     if(split.length == 3 && !split[0].equals(username)) {
                         result.put(split[0], new LatLng(Double.parseDouble(split[1]), Double.parseDouble(split[2])));
@@ -410,7 +410,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                     }
                 }
             } else{
-                showAlertDialog(getResources().getString(R.string.connection_error));
+//                showAlertDialog(getResources().getString(R.string.connection_error));
             }
         }
     }
@@ -427,6 +427,14 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         protected void onPostExecute(Place result) {
             if(result != null) {
                 findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                if(!places.isEmpty()) {
+                    places = new ArrayList<>();
+                    markerPlaces.keySet().iterator().next().hideInfoWindow();
+                    markerPlaces.keySet().iterator().next().remove();
+                    markerPlaces = new HashMap<>();
+                    //TODO: invitation = getInvitations where invitation.getId() == new Id;
+                    invitation.getInvitees().put(username, 1);
+                }
                 places.add(result);
                 createMap();
 
@@ -434,53 +442,90 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                     findViewById(R.id.llInvitationButtons).setVisibility(View.VISIBLE);
                     Button btnAccept = (Button) findViewById(R.id.btnAccept);
                     Button btnDecline = (Button) findViewById(R.id.btnDecline);
-                    final CheckBox cbAllowTracking = (CheckBox) findViewById(R.id.cbAllowTracking);
+                    cbAllowTracking = (CheckBox) findViewById(R.id.cbAllowTracking);
 
                     btnAccept.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            //TODO: Accept Invitation
-
-                            SharedPreferences spTracking = getApplicationContext().getSharedPreferences("tracking", Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = spTracking.edit();
-                            editor.putBoolean("tracking", cbAllowTracking.isChecked());
-                            editor.apply();
-
-                            if (!cbAllowTracking.isChecked()) {
-                                //Thread that tries to delete user_location in the database
-                                ExecutorService es = Executors.newSingleThreadExecutor();
-                                Future<Boolean> result = es.submit(new Callable<Boolean>() {
-                                    public Boolean call() throws IOException {
-                                        //TODO: Database.deleteUserLocation(username);
-                                        return true;
-                                    }
-                                });
-
-                                try {
-                                    result.get();
-                                } catch (Exception e) {
-                                    //Could not connect to Server with .php-files
-                                    showAlertDialog(getResources().getString(R.string.connection_error));
-                                    return;
-                                } finally {
-                                    es.shutdown();
-                                }
-                            }
-
-                            Toast.makeText(MapActivity.this, "Accepted", Toast.LENGTH_SHORT).show();
-                            findViewById(R.id.llInvitationButtons).setVisibility(View.GONE);
+                            findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+                            new AcceptInvitationTask().execute(cbAllowTracking.isChecked());
                         }
                     });
                     btnDecline.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            //TODO: Decline Invitation
-
-                            Toast.makeText(MapActivity.this, "Declined", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(MapActivity.this, InvitationsActivity.class));
+                            findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+                            new DeclineInvitationTask().execute(cbAllowTracking.isChecked());
                         }
                     });
                 }
+            }
+        }
+    }
+
+    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    private class AcceptInvitationTask extends AsyncTask<Boolean, Integer, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Boolean... params) {
+            try {
+                Database.acceptInvitation(String.valueOf(invitation.getId()), username);
+            } catch (Exception e) {
+                return null;
+            }
+
+            SharedPreferences spTracking = getApplicationContext().getSharedPreferences("tracking", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = spTracking.edit();
+            editor.putBoolean("tracking", params[0]);
+            editor.apply();
+
+            if (!params[0]) {
+                try {
+                    Database.deleteUserLocation(username);
+                } catch (Exception e) {
+                    //Could not connect to Server with .php-files
+                    return null;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
+            if(result != null){
+                Toast.makeText(MapActivity.this, "Accepted", Toast.LENGTH_SHORT).show();
+                findViewById(R.id.llInvitationButtons).setVisibility(View.GONE);
+                new GetInvitationTask().execute();
+            } else{
+                showAlertDialog(getResources().getString(R.string.connection_error));
+            }
+        }
+    }
+
+    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    private class DeclineInvitationTask extends AsyncTask<Boolean, Integer, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Boolean... params) {
+            try {
+                Database.declineInvitation(String.valueOf(invitation.getId()), username);
+            } catch (Exception e) {
+                return null;
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
+            if (result != null){
+                Toast.makeText(MapActivity.this, "Declined", Toast.LENGTH_SHORT).show();
+                finish();
+            } else{
+                showAlertDialog(getResources().getString(R.string.connection_error));
             }
         }
     }
