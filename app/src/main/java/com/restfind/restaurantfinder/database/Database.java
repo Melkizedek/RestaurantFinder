@@ -1,7 +1,5 @@
 package com.restfind.restaurantfinder.database;
 
-import android.util.Log;
-
 import com.restfind.restaurantfinder.assistant.Invitation;
 
 import java.io.BufferedReader;
@@ -155,10 +153,14 @@ public class Database {
                 }
                 curInvitation = new Invitation(Integer.parseInt(split[0]), split[1], split[2], Timestamp.valueOf(split[3]).getTime());
 
-                if(split[4].equals(username)){
-                    curInvitation.setReceived(Boolean.getBoolean(split[6]));
-                }
                 curInvitees = new HashMap<>();
+            }
+            if(split[4].equals(username)){
+                if(split[6].equals("1")) {
+                    curInvitation.setReceived(true);
+                }else{
+                    curInvitation.setReceived(false);
+                }
             }
             curInvitees.put(split[4], Integer.parseInt(split[5]));
             curId = split[0];

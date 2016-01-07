@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -119,6 +120,20 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                     .findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        if(mapActivityType == MapActivityType.Favorites){
+            getMenuInflater().inflate(R.menu.menu_favorites, menu);
+        } else if(mapActivityType == MapActivityType.Invitation){
+            getMenuInflater().inflate(R.menu.menu_invitations, menu);
+        } else{
+            getMenuInflater().inflate(R.menu.menu_main, menu);
+        }
+        menu.getItem(0).setTitle("Logout" + " (" + username + ")");
+        return true;
     }
 
     /**
@@ -360,8 +375,8 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                     }
                 }
                 timeTillDeadline = invitation.getTime() - Calendar.getInstance().getTimeInMillis();
-                //until 1 hour after deadline
-                while(timeTillDeadline > (-3600000)){
+                //until 10 minutes after deadline
+                while(timeTillDeadline > (-600000)){
                     Log.v(LOG_TAG, "timeTillDeadline: " + timeTillDeadline);
 
                     new GetParticipantsLocationTask().execute();

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -20,13 +19,8 @@ import com.restfind.restaurantfinder.assistant.Invitation;
 import com.restfind.restaurantfinder.database.Database;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class InvitationsActivity extends AppBarActivity {
 
@@ -56,7 +50,7 @@ public class InvitationsActivity extends AppBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_logout_only, menu);
+        getMenuInflater().inflate(R.menu.menu_invitations, menu);
         menu.getItem(0).setTitle("Logout" + " (" + username + ")");
         return true;
     }

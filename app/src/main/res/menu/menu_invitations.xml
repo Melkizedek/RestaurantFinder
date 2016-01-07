@@ -6,19 +6,13 @@
         android:title="Logout"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_add_friend"
-        android:icon="@drawable/ic_group_add_black_36dp"
-        android:title="Add Friend"
+        android:id="@+id/action_friends"
+        android:icon="@drawable/ic_people_black_24dp"
+        android:title="Friends"
         app:showAsAction="always"/>
     <item
         android:id="@+id/action_favorites"
         android:icon="@drawable/ic_favorite_black_24dp"
         android:title="Favorite Restaurants"
         app:showAsAction="always"/>
-    <item
-        android:id="@+id/action_invitations"
-        android:icon="@drawable/ic_sms_failed_black_24dp"
-        android:title="Restaurant Invitations"
-        app:showAsAction="always"/>
-
 </menu>
