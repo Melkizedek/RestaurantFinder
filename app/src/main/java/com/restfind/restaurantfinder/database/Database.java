@@ -22,9 +22,11 @@ import java.util.Map;
 
 public class Database {
 
+    // constants for the boolean return values of the php programs
     private static final String trueString = "TRUE";
     private static final String falseString = "FALSE";
 
+    // database operations; must have the same name as the corresponding *.php file
     private enum Operation {
         login, register,
         getFriendInvites, sendFriendInvite, acceptFriendInvite, declineFriendInvite,
@@ -36,9 +38,10 @@ public class Database {
         getInvitations, receivedInvitation
     }
 
+    // the url to the server
     private final static String serverUrl = "http://restfind.heliohost.org/";
 
-    // *********** Methoden für die einzelnen SQL-Statements **************
+    // *********** methods for the database operations **************
     public static boolean register(String username, String password) throws IOException {
         return checkResult(Operation.register, username, password);
     }
@@ -52,9 +55,6 @@ public class Database {
     }
 
     public static boolean sendFriendInvite(String username, String invitedUser) throws IOException {
-//        if(username.equals(invitedUser))
-//            return false;
-//        return checkResult(Operation.sendFriendInvite, username, invitedUser);
         return !username.equals(invitedUser) && checkResult(Operation.sendFriendInvite, username, invitedUser);
     }
 
@@ -90,7 +90,6 @@ public class Database {
         return checkResult(Operation.updateUserLocation, username, latitude, longitude);
     }
 
-    // Rückgabewert ist eine Liste mit Strings im folgenden Format: "Username;Latitude;Longitude"
     public static List<String> getUserLocations(String invitation_id) throws IOException {
         return execute(Operation.getUserLocations, invitation_id);
     }
@@ -102,10 +101,6 @@ public class Database {
     public static boolean createInvitation(String host, String placeID, Timestamp dateTime, List<String> invitees) throws IOException {
         List<String> result = Database.execute(Operation.createInvitation, host, placeID, dateTime.toString());
 
-//        if (result == null || result.isEmpty() || result.get(0).equals(falseString))
-//            return false;
-//
-//        return sendInvitationInvite(result.get(0), invitees);
         return !(result == null || result.isEmpty() || result.get(0).equals(falseString)) && sendInvitationInvite(result.get(0), invitees);
     }
 
@@ -117,6 +112,7 @@ public class Database {
         arguments[0] = invitationID;
         int i = 1;
 
+        // filling the array with the arguments (friends to invite)
         for(String s : invitees) {
             arguments[i] = s;
             i++;
@@ -124,8 +120,6 @@ public class Database {
 
         Database.execute(Operation.sendInvitationInvite, arguments);
         return true;
-        // TODO: Rückgabewert bei sendInvitationInvite.php Programm
-        // return checkResult(Operation.sendInvitationInvite, arguments);
     }
 
     public static boolean acceptInvitation(String id, String username) throws IOException {
@@ -175,25 +169,21 @@ public class Database {
         return checkResult(Operation.receivedInvitation, String.valueOf(id), username);
     }
 
-    // Diese Methode überprüft, ob das Einfügen von Daten in die Tabelle oder das Löschen
-    // von Daten aus der Tabelle erfolgreich ist.
+    // This method checks, if a non-select operation was successful. To achive this, we
+    // compare the return value of the php program with the boolean constants trueString and
+    // falseString.
     private static boolean checkResult(Operation operation, String... arguments) throws IOException {
         List<String> result = Database.execute(operation, arguments);
         return !(result == null || result.isEmpty()) && result.get(0).equals(trueString);
     }
 
-    // Diese Methode führt die jeweilige .php Datei aus, die den Zugriff auf die Datenbank
-    // ausführt. Dazu müssen die Parameter für das SQL Statement mit übergeben werden.
-    // Das Ergebnis wird als eine Liste aus Strings zurückgegeben, wobei ein String für
-    // einen Datensatz in der Tabelle steht. Die Spalten einer Tabelle sind mittels ";"
-    // im String geteilt. Bei Insert und Delete SQL Statements beinhaltet die Liste nur
-    // einen String, der die beiden Werte "TRUE" oder "FALSE" haben kann.
+    // The execute method starts the php program, which is defined by the operation parameter,
+    // on the server. The php program does the actual access to the database.
     private static List<String> execute(Operation operation, String... arguments) throws IOException {
-        // erzeuge URL zur *.php Datei auf Server
+        // concatenate the server url and the .php filename together
         String urlString = serverUrl + operation.toString() + ".php";
 
-        // Parameter (arguments) werden zu einem String zusammen gefügt, der später
-        // an PHP gesendet wird.
+        // preparing the arguments as parameters for the php program
         String data = "";
         if (arguments.length > 0) {
             data = data + URLEncoder.encode("arg0", "UTF-8") +
@@ -206,14 +196,13 @@ public class Database {
                     URLEncoder.encode(arguments[i], "UTF-8");
         }
 
-        // Verbindung zu Server wird aufgebaut
+        // connect to url
         URL url = new URL(urlString);
         URLConnection conn = url.openConnection();
-
         conn.setDoOutput(true);
-        OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
 
-        // String mit Parametern wird an die PHP Datei als Stream gesendet
+        // writing the parameter string to the stream
+        OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
         wr.write(data);
         wr.close();
 
@@ -223,12 +212,11 @@ public class Database {
         List<String> result = new ArrayList<>();
         String line;
 
-        // Ergebnis der SQL-Abfrage wird vom Input Stream gelesen
+        // reading result from the php program (result from sql-statement)
         while ((line = reader.readLine()) != null) {
             result.add(line);
         }
 
-        // BufferedReader und InputStreamWriter werden geschlossen
         reader.close();
         isr.close();
 
