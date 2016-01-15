@@ -17,16 +17,23 @@ import java.util.Map;
 
 /**
  * This static class handles the database access.
- * Created by gabriel on 04.12.15.
  */
 
 public class Database {
 
-    // constants for the boolean return values of the php programs
+    /**
+     * constant string for the boolean return value "true" of the php program
+     */
     private static final String trueString = "TRUE";
+    /**
+     * constant string for the boolean return value "false" of the php program
+     */
     private static final String falseString = "FALSE";
 
-    // database operations; must have the same name as the corresponding *.php file
+
+    /**
+     * The available database operations.
+     */
     private enum Operation {
         login, register,
         getFriendInvites, sendFriendInvite, acceptFriendInvite, declineFriendInvite,
@@ -38,7 +45,9 @@ public class Database {
         getInvitations, receivedInvitation
     }
 
-    // the url to the server
+    /**
+     * url to server
+     */
     private final static String serverUrl = "http://restfind.heliohost.org/";
 
     // *********** methods for the database operations **************
@@ -169,9 +178,14 @@ public class Database {
         return checkResult(Operation.receivedInvitation, String.valueOf(id), username);
     }
 
-    // This method checks, if a non-select operation was successful. To achive this, we
-    // compare the return value of the php program with the boolean constants trueString and
-    // falseString.
+
+    /**
+     * This method checks the success of an insert, update or delete operation.
+     * @param operation the database operation
+     * @param arguments the parameters for the php program
+     * @return true, if the execution of the database operation was successful, otherwise false
+     * @throws IOException
+     */
     private static boolean checkResult(Operation operation, String... arguments) throws IOException {
         List<String> result = Database.execute(operation, arguments);
         return !(result == null || result.isEmpty()) && result.get(0).equals(trueString);
@@ -179,6 +193,16 @@ public class Database {
 
     // The execute method starts the php program, which is defined by the operation parameter,
     // on the server. The php program does the actual access to the database.
+
+    /**
+     * Executes the database operation by starting the corresponding php program on the server.
+     * @param operation the database operation
+     * @param arguments the parameter for the php program (respectively the values for the
+     *                  sql statements)
+     * @return list of strings, which represents lines of the result of the sql query (columns
+     * are seperated by semicolon)
+     * @throws IOException is thrown, if there is no connection to the server
+     */
     private static List<String> execute(Operation operation, String... arguments) throws IOException {
         // concatenate the server url and the .php filename together
         String urlString = serverUrl + operation.toString() + ".php";
