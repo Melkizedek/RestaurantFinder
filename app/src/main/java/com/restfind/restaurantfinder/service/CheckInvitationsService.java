@@ -26,7 +26,6 @@ import com.restfind.restaurantfinder.database.Database;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -81,9 +80,7 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
 
     //gets called every few minutes to check for new invitations and create a notification
     protected void processStartNotification() {
-        //TODO: get invitations, create notification if needed
-
-
+        Log.v("Service_Log", "Service started");
 
         if(username == null || username.isEmpty()){
             //Get current logged-in username
@@ -95,7 +92,6 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
             SharedPreferences spTracking = getApplicationContext().getSharedPreferences("tracking", Context.MODE_PRIVATE);
             boolean trackingAllowed = spTracking.getBoolean("tracking", false);
 
-            //Thread that tries to add friend
             ExecutorService es = Executors.newSingleThreadExecutor();
             Future<List<Invitation>> result = es.submit(new Callable<List<Invitation>>() {
                 public List<Invitation> call() throws IOException {
@@ -141,8 +137,11 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
 
                     double timeTillDeadline = i.getTime() - Calendar.getInstance().getTimeInMillis();
 
+                    Log.v("Service_Log", "Invitation: " + i.getId());
+                    Log.v("Service_Log", "timeTillDeadline: " + timeTillDeadline);
+
                     //between 15 minutes before and 10 minutes after deadline
-                    if(!startedLocation && timeTillDeadline > (-600000) && timeTillDeadline <= 900000 && trackingAllowed && i.getInvitees().get(username) == 1){
+                    if(!startedLocation && timeTillDeadline > (-600000) && timeTillDeadline <= 900000 && trackingAllowed && (i.getHost().equals(username) || i.getInvitees().get(username) == 1)){
                         Log.v("Service_Log", "Deadline: " + i.getId());
                         startedLocation = true;
                         buildApiClient();
@@ -162,7 +161,8 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(10000); //every 10 seconds
-        locationRequest.setNumUpdates(30); //for 5 minutes
+//        locationRequest.setNumUpdates(30); //for 5 minutes
+        locationRequest.setNumUpdates(1); //for 30 seconds
         fusedLocationProviderApi = LocationServices.FusedLocationApi;
 
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -180,22 +180,10 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
         fusedLocationProviderApi.requestLocationUpdates(googleApiClient, locationRequest, this);
     }
 
-//    double longitude = -1;
-//    double latitude = -1;
-
-    //starts a new Activity based on which operation is chosen
     @Override
     public void onLocationChanged(Location location) {
         final double longitude = location.getLongitude();
         final double latitude = location.getLatitude();
-
-//        if(latitude < 0){
-//            latitude = location.getLatitude();
-//            longitude = location.getLongitude();
-//        } else{
-//            latitude += 0.0005;
-//            longitude += 0.005;
-//        }
 
         Log.v("Service_Log", "latitude: " + latitude + ", " + "longitude: " + longitude);
 
