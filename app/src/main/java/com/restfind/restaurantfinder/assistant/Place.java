@@ -6,6 +6,9 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Helper class that represents a Place of a Google Places Api - Search-Result
+ */
 public class Place implements Parcelable {
     private String icon;
     private Double lat;

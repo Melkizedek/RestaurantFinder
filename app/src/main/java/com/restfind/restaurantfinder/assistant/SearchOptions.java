@@ -6,7 +6,9 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-//Saves all Search Options that are used to Search Locations
+/**
+ * Helper class that represents all Search Options that are used to Search Locations
+ */
 public class SearchOptions implements Parcelable {
     private String name;
     private int radius;

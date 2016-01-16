@@ -13,10 +13,37 @@ import android.widget.EditText;
 
 import com.restfind.restaurantfinder.database.Database;
 
+/**
+ * Lets the user register a new username with password
+ */
 public class RegisterActivity extends AppBarActivity {
 
     private String username;
     private String password;
+
+    private EditText username_Field;
+    private EditText password_Field;
+
+    /**
+     * After tapping the "Register"-Button register() is called
+     */
+    private View.OnClickListener onClickListenerRegister = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            username = username_Field.getText().toString();
+            password = password_Field.getText().toString();
+
+            //username or password contain illegal characters
+            if(username.contains(";") || password.contains(";")){
+                showAlertDialog("Username or Password contain illegal Characters");
+            }else{
+                //username and password not empty -> register
+                if (!username.equals("") && !password.equals("")) {
+                    register();
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,41 +55,34 @@ public class RegisterActivity extends AppBarActivity {
         setSupportActionBar(toolbar);
 
         //create UI Elements
-        final EditText username_Field = (EditText) findViewById(R.id.etUsername);
-        final EditText password_Field = (EditText) findViewById(R.id.etPassword);
+        username_Field = (EditText) findViewById(R.id.etUsername);
+        password_Field = (EditText) findViewById(R.id.etPassword);
         Button registerButton = (Button) findViewById(R.id.btnRegister);
 
         //Register Button
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                username = username_Field.getText().toString();
-                password = password_Field.getText().toString();
-
-                //username or password contain illegal characters
-                if(username.contains(";") || password.contains(";")){
-                    showAlertDialog("Username or Password contain illegal Characters");
-                }else{
-                    //username and password not empty -> register
-                    if (!username.equals("") && !password.equals("")) {
-                        register();
-                    }
-                }
-            }
-        });
+        registerButton.setOnClickListener(onClickListenerRegister);
     }
 
+    /**
+     * Executes RegisterTask
+     */
     private void register() {
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
         new RegisterTask().execute();
     }
 
+    /**
+     * This Activity doesn't show any Toolbar-Actions
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return false;
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Registers the new username and password in the Database if available
+     * and then returns to the LoginActivity
+     */
     private class RegisterTask extends AsyncTask<Void, Integer, DatabaseResultType> {
 
         @Override

@@ -29,7 +29,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-//handles almost all Toolbar-Actions, some methods used by multiple sub-Activities and can create a custom AlertDialog with String-Parameter
+/**
+ * An abstract Activity that every other Activity extends
+ * It contains several Methods that are used in multiple Activities
+ */
 public abstract class AppBarActivity extends AppCompatActivity {
 
     protected final String LOG_TAG = "RESTFIND_LOG";
@@ -57,15 +60,24 @@ public abstract class AppBarActivity extends AppCompatActivity {
         setContentView(R.layout.activity_app_bar);
     }
 
+    /**
+     * Inflates the menu; this adds all items to the action bar if it is present.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         menu.getItem(0).setTitle("Logout" + " (" + getCurrentUsername() + ")");
         return true;
     }
 
-    //Handles the chosen Action in the Toolbar and starts the corresponding Activity
+    /**
+     * Handles the chosen Action in the Toolbar and starts the corresponding Activity
+     * Logout -> LoginActivity
+     * Friends -> FriendsActivity
+     * Favorites -> MapActivity with MapActivityType.Favorites
+     * Invitations -> InvitationsActivity
+     * @param item chosen MenuItem
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -104,13 +116,18 @@ public abstract class AppBarActivity extends AppCompatActivity {
         }
     }
 
-    //Get current logged-in username
+    /**
+     * Get current logged-in username
+     */
     protected String getCurrentUsername(){
         SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
         return spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
     }
 
-    //creates an AlertDialog with the given text
+    /**
+     * creates an AlertDialog with the given text
+     * @param text The text that the AlertDialog shows
+     */
     protected void showAlertDialog(String text){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Error!");
@@ -124,7 +141,9 @@ public abstract class AppBarActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    //creates a Place-Object with a google places details-search
+    /**
+     * creates a detailed Place-Object with a google places details-search
+     */
     protected Place getPlaceDetails(String placeID){
         Place place = new Place();
         try {
@@ -135,12 +154,19 @@ public abstract class AppBarActivity extends AppCompatActivity {
         return place;
     }
 
-    //creates a URL for the Google Places Web Service Details-Search
+    /**
+     * creates a URL for the Google Places Web Service Details-Search
+     * @return URL as String
+     */
     private String createDetailsRequest(String placeID){
         return "https://maps.googleapis.com/maps/api/place/details/json?placeid=" + placeID + "&key=" + getResources().getString(R.string.api_browser_key);
     }
 
-    //gets the JSON-Result of a Google Places Search
+    /**
+     * gets the JSON-Result of a Google Places Search
+     * @param request Request-URL as String
+     * @return JSON-Result as String
+     */
     protected String getApiResult(final String request){
         String result = null;
         try{
@@ -164,7 +190,12 @@ public abstract class AppBarActivity extends AppCompatActivity {
         return result;
     }
 
-    //creates all found Places based on the JSON-Result
+    /**
+     * creates all found Places based on the JSON-Result (can call createPlace multiple times)
+     * @param apiResult JSON-Result of a Google Places Web Service Request
+     * @return List of all found Places
+     * @throws JSONException
+     */
     protected List<Place> createPlaces(String apiResult) throws JSONException {
         List<Place> places = new ArrayList<>();
         JSONObject object;
@@ -187,7 +218,10 @@ public abstract class AppBarActivity extends AppCompatActivity {
         return places;
     }
 
-    //goes through the JSON-Result and creates a single Place-Object
+    /**
+     * goes through the JSON-Result and creates a single Place-Object based on all found tags
+     * @throws JSONException
+     */
     private Place createPlace(JSONObject curObject) throws JSONException {
         Place place_act = new Place();
         if (curObject.has("geometry")) {
@@ -238,6 +272,9 @@ public abstract class AppBarActivity extends AppCompatActivity {
         return place_act;
     }
 
+    /**
+     * sorts a Map by its Value
+     */
     public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue( Map<K, V> map )
     {
         List<Map.Entry<K, V>> list =

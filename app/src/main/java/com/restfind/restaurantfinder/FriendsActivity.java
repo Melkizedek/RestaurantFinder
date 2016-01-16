@@ -32,6 +32,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * Shows all friends and pending friend-invites
+ * Shows new Toolbar-Action: Add new friend
+ */
 public class FriendsActivity extends AppBarActivity {
 
     private ListView lvFriendList;
@@ -39,31 +43,43 @@ public class FriendsActivity extends AppBarActivity {
     private AlertDialog dialogAddFriend;
     private GetFriendsTask task;
 
+    /**
+     * starts GetFriendsTask()
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
 
+        //Get current logged-in username
+        username = getCurrentUsername();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Friends");
         setSupportActionBar(toolbar);
-
-        //Get current logged-in username
-        username = getCurrentUsername();
 
         //Start task
         task = new GetFriendsTask();
         task.execute(username);
     }
 
+    /**
+     * Creates these Toolbar-Actions:
+     * Add new Friend, Favorites, Invitations, Logout
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_friends, menu);
         menu.getItem(0).setTitle("Logout" + " (" + username + ")");
         return true;
     }
 
+    /**
+     * Handles the "Add new Friend"-Action, which opens a Dialog-Window, where you input the name of the friend
+     * Accept sends a Friend-Invite to the user
+     * If another Toolbar-Action is pressed, the onOptionsItemSelected-method of AppBarActivity is called
+     * @param item chosen MenuItem
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -110,9 +126,6 @@ public class FriendsActivity extends AppBarActivity {
                                         showAlertDialog("This username does not exist!");
                                     } else{
                                         Toast.makeText(FriendsActivity.this, "Invitation sent!", Toast.LENGTH_SHORT).show();
-                                        //Start task
-//                                        GetFriendsTask task = new GetFriendsTask();
-//                                        task.execute(username);
                                     }
                                 }
                             }
@@ -128,12 +141,13 @@ public class FriendsActivity extends AppBarActivity {
                 return true;
 
             default:
-                // Logout
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    //Creates a context menu to delete a friend
+    /**
+     * Creates a context menu to delete a friend (Long press on a Friend)
+     */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         if (v.getId() == R.id.lvFriendList) {
@@ -141,6 +155,10 @@ public class FriendsActivity extends AppBarActivity {
         }
     }
 
+    /**
+     * Gets called when you delete a friend from the list -> removes the friend from the Database
+     * @param item The chosen Friend to delete
+     */
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
@@ -178,7 +196,9 @@ public class FriendsActivity extends AppBarActivity {
         return true;
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Gets friends and friend-invites from the Database and displays them in the listView
+     */
     private class GetFriendsTask extends AsyncTask<String, Integer, Map<String, Boolean>> {
 
         @Override
@@ -231,6 +251,12 @@ public class FriendsActivity extends AppBarActivity {
         }
     }
 
+    /**
+     * Custom ListAdapter for the friend-listView,
+     * where a friend shows only their name,
+     * but a pending friend-invite displays two Image-Buttons next to the name:
+     * Accept and Decline the friend-invite
+     */
     public class FriendAdapter extends BaseAdapter implements ListAdapter {
         private final ArrayList mData;
 
@@ -312,8 +338,6 @@ public class FriendsActivity extends AppBarActivity {
                             task = new GetFriendsTask();
                             task.execute(username);
                         }
-
-//                        notifyDataSetChanged();
                     }
                 });
                 btnDecline.setOnClickListener(new View.OnClickListener() {
@@ -355,4 +379,6 @@ public class FriendsActivity extends AppBarActivity {
             return view;
         }
     }
+
+
 }

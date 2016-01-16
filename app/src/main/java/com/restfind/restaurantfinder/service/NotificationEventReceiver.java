@@ -11,12 +11,14 @@ import android.util.Log;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * WakefulBroadcastReceiver which creates or wakes up the CheckInvitationsService every 5 Minutes
+ */
 public class NotificationEventReceiver extends WakefulBroadcastReceiver {
 
     protected static final String ACTION_START_NOTIFICATION_SERVICE = "ACTION_START_NOTIFICATION_SERVICE";
     protected static final String ACTION_DELETE_NOTIFICATION = "ACTION_DELETE_NOTIFICATION";
-//    protected static final int NOTIFICATIONS_INTERVAL = 60 * 1000 * 5; //5 minutes
-    protected static final int NOTIFICATIONS_INTERVAL = 10 * 1000; //1 minutes
+    protected static final int NOTIFICATIONS_INTERVAL = 60 * 1000 * 5; //5 minutes
 
     public static void setupAlarm(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

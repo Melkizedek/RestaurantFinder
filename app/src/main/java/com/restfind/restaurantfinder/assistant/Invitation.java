@@ -7,11 +7,17 @@ import android.os.Parcelable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Helper class that represents an Invitation to a Restaurant
+ */
 public class Invitation implements Parcelable{
     private int id;
     private String host;
     private String placeID;
     private long time;
+    /*
+    received: boolean if the user has already received the notification for this invitation
+     */
     private boolean received;
     private Map<String, Integer> invitees;
 

@@ -55,6 +55,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * There are 3 different ways this Activity can be started, which enables different features:
+ * 1) After pressing "Search" in the SearchOptionsActivity:
+ * It shows all Search-Results, given the chosen Search-Options
+ *
+ * 2) After pressing the "Favorites"-Action in the Toolbar:
+ * It shows all favorites the user has
+ *
+ * 3) After pressing an Invitation in the InvitationsActivity:
+ * The Place of the Invitation gets shown with an InfoWindow, which contains the Date, Time,
+ * the host and all invitees and if they already accepted, are still undecided, or declined
+ * Additionally it shows the location of all users, that accepted on the map, when the deadline of the invitation
+ * is in less than 15 minutes or was less than 10 minutes ago
+ *
+ * In all variants the user's own location is also shown on the map
+ * Also when pressing in the InfoWindow of a place, the PlaceDetailsActivity corresponding to the Place gets started
+ */
 public class MapActivity extends AppBarActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private FusedLocationProviderApi fusedLocationProviderApi;
@@ -77,6 +94,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
 
     private LinearLayout info;
 
+    /**
+     * Starts a different Task based on how this Activity was called
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,14 +114,18 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         places = new ArrayList<>();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        //Map has to show Search-Results: execute GetSearchResultsTask
         if(mapActivityType == MapActivityType.SearchResults) {
             toolbar.setTitle("Search Results");
             new GetSearchResultsTask().execute(searchOptions);
         }
+        //Map has to show an Invitation: execute GetInvitationTask
         else if(mapActivityType == MapActivityType.Invitation) {
             toolbar.setTitle("Invitations");
             new GetInvitationTask().execute();
         }
+        //Map has to show Favorites: execute GetFavoritesTask
         else if(mapActivityType == MapActivityType.Favorites) {
             toolbar.setTitle("Favorites");
             new GetFavoritesTask().execute();
@@ -109,6 +133,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         setSupportActionBar(toolbar);
     }
 
+    /**
+     * calls onMapReady(), if there is at least one Place to show
+     */
     private void createMap(){
         if(places == null || places.isEmpty()){
             showAlertDialog("No Results found!");
@@ -122,6 +149,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
     }
 
+    /**
+     * Shows a Toolbar with Actions based on what Type this MapActivity currently shows
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -137,7 +167,12 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
     }
 
     /**
-     * Manipulates the map once available.
+     * Places a Marker with the name for every Place on the Map
+     * The Icon for the Marker is based on what type the Place is (Restaurant, Bar,...)
+     *
+     * If the one single Place is an Invitation,
+     * it will show the Invitation-Time and all Participants in the InfoWindow
+     * Also displayParticipants() is called
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -239,6 +274,10 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
     }
 
+    /**
+     * When tapping into the InfoWindow of a Place PlaceDetailsActivity is started
+     * @param marker The Marker of the chosen Place
+     */
     @Override
     public void onInfoWindowClick(Marker marker) {
         Intent intent = new Intent(MapActivity.this, PlaceDetailsActivity.class);
@@ -256,6 +295,10 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
     }
 
+    /**
+     * If this Map shows Favorites and the PlaceDetailsActivity returns,
+     * after deleting the chosen Favorite, it gets removed from the Map
+     */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == FAVORITE_REQUEST) {
             if (resultCode == RESULT_OK) {
@@ -273,7 +316,6 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
     buildApiClient() is the first method called
     onLocationChanged() is the last method called
      */
-
     private void buildApiClient(){
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -295,7 +337,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         fusedLocationProviderApi.requestLocationUpdates(googleApiClient, locationRequest, this);
     }
 
-    //starts a new Activity based on which operation is chosen
+    /**
+     * Updates the user's current location on the Map
+     */
     @Override
     public void onLocationChanged(Location location) {
         LatLng currentPos = new LatLng(location.getLatitude(), location.getLongitude());
@@ -309,7 +353,10 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
     }
 
-    //called by googleApiClient.connect()
+    /**
+     * If user hasn't granted permission for location access, he will be asked to
+     * If permission is already granted, getLocation() is called
+     */
     @Override
     public void onConnected(Bundle bundle) {
         //Check permission
@@ -332,6 +379,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
     }
 
+    /**
+     * If user has granted permission for location-service getLocation() gets called
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -359,6 +409,10 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
     public void onConnectionFailed(ConnectionResult connectionResult) {
     }
 
+    /**
+     * If the Map shows an Invitation and its deadline is in less than 15 minutes
+     * or was less than 10 minutes ago, it will show all participants, that accepted, on the map
+     */
     private void displayParticipants(){
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -393,7 +447,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         thread.start();
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * This Task gets the locations of all users of this invitations and shows them on the map
+     */
     private class GetParticipantsLocationTask extends AsyncTask<Void, Integer, Map<String, LatLng>> {
 
         @Override
@@ -402,7 +458,6 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             try {
                 List<String> userLocations = Database.getUserLocations(String.valueOf(invitation.getId()));
                 for(String s : userLocations){
-//                    Log.v(LOG_TAG, s);
                     String[] split = s.split(";");
                     if(split.length == 3 && !split[0].equals(username)) {
                         result.put(split[0], new LatLng(Double.parseDouble(split[1]), Double.parseDouble(split[2])));
@@ -424,13 +479,18 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                         markerParticipants.put(e.getKey(), mMap.addMarker(new MarkerOptions().position(e.getValue()).title(e.getKey()).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_directions_run_black_24dp))));
                     }
                 }
-            } else{
-//                showAlertDialog(getResources().getString(R.string.connection_error));
             }
         }
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Gets the Details of the Invitation from the Google Places Api
+     * and calls createMap()
+     * If the user hasn't already accepted the invitation it shows two buttons at the bottom:
+     * "Accept" and "Decline"
+     * The Accept-Button executes AcceptInvitationTask
+     * The Decline-Button executes DeclineInvitationTask
+     */
     private class GetInvitationTask extends AsyncTask<Void, Integer, Place> {
 
         @Override
@@ -478,7 +538,10 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Sets the Invitation as accepted in the Database
+     * and if the checkbox was checked, it enables other users to see the location of the current user
+     */
     private class AcceptInvitationTask extends AsyncTask<Boolean, Integer, Boolean> {
 
         @Override
@@ -519,7 +582,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Sets the invitation in the Database as declined and returns to InvitationsActivity
+     */
     private class DeclineInvitationTask extends AsyncTask<Boolean, Integer, Boolean> {
 
         @Override
@@ -545,7 +610,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Gets all Favorites from the Database and gets their Details from the Google Places Api Details-Search
+     */
     private class GetFavoritesTask extends AsyncTask<Void, Integer, ArrayList<Place>> {
 
         @Override
@@ -583,7 +650,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         }
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Searches for Places with the gives SearchOptions
+     */
     private class GetSearchResultsTask extends AsyncTask<SearchOptions, Integer, List<Place>> {
 
         private List<String> typesRestaurant;
@@ -594,6 +663,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
         private String requestPartOne;
         private List<Place> results;
 
+        /**
+         * Creates a String with all types this Places Api-Search needs
+         */
         private String checkTypes (){
             boolean isFirst = true;
             StringBuilder builderTyp = new StringBuilder();
@@ -628,6 +700,9 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             return builderTyp.toString();
         }
 
+        /**
+         * Searches for Places with possibly multiple keywords (like "Chinese Restaurant")
+         */
         private void searchByKeyword(List<String> subTypes, String mainType){
             if(mainType.equals("Takeaway")){
                 mainType = "meal_takeaway";
@@ -663,7 +738,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             typesTakeaway = searchOptions.getTypesTakeaway();
             StringBuilder builder = new StringBuilder();
 
-            //Nearby Search
+            //creates a URL for the Google Places Api Search-Request
             builder.append("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
             builder.append("key=");
             builder.append(getResources().getString(R.string.api_browser_key));
@@ -684,6 +759,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
             requestPartOne = builder.toString();
             results = new ArrayList<>();
 
+            //The SearchOptions contain Sub-Types (like "Chinese-Restaurant" of "Restuarant")
             if((!typesRestaurant.isEmpty() && !typesRestaurant.get(0).equals("Restaurant"))
                     || (!typesBar.isEmpty() && !typesBar.get(0).equals("Bar"))
                     || (!typesCafe.isEmpty() && !typesCafe.get(0).equals("Cafe"))
@@ -693,6 +769,7 @@ public class MapActivity extends AppBarActivity implements OnMapReadyCallback, G
                 searchByKeyword(typesCafe, "Cafe");
                 searchByKeyword(typesTakeaway, "Takeaway");
             }else {
+                //perform a search without any keywords/sub-types
                 try {
                     Log.v(LOG_TAG, requestPartOne + "&types=" + checkTypes());
                     results = createPlaces(getApiResult(requestPartOne + "&types=" + checkTypes()));

@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+/**
+ * Shows all Restaurant-Invitation, that the user is a part of (eiter host or invitee), as a list
+ */
 public class InvitationsActivity extends AppBarActivity {
 
     private String username;
@@ -38,6 +41,10 @@ public class InvitationsActivity extends AppBarActivity {
         setSupportActionBar(toolbar);
     }
 
+    /**
+     * Everytime, the Activity gets resumed, it executes GetInvitationsTask()
+     * to refresh the Invitation-List
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -47,15 +54,20 @@ public class InvitationsActivity extends AppBarActivity {
         task.execute();
     }
 
+    /**
+     * Inflates the menu with all Actions except the Invitations-Action
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_invitations, menu);
         menu.getItem(0).setTitle("Logout" + " (" + username + ")");
         return true;
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Gets all Invitations from the Database and displays them in a list
+     * When an Invitation gets pressed, the MapActivity gets started to show this Invitation on a Map
+     */
     private class GetInvitationsTask extends AsyncTask<Void, Integer, List<Invitation>> {
         @Override
         protected List<Invitation> doInBackground(Void... params) {
@@ -93,6 +105,11 @@ public class InvitationsActivity extends AppBarActivity {
         }
     }
 
+    /**
+     * Custom ListAdapter for the Invitation-ListView,
+     * that shows the date and time in the first line
+     * and the host-name in the second line
+     */
     public class InvitationAdapter extends BaseAdapter implements ListAdapter {
         private final List mData;
 

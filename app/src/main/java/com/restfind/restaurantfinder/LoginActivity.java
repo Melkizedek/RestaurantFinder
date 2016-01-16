@@ -15,6 +15,10 @@ import android.widget.EditText;
 import com.restfind.restaurantfinder.database.Database;
 import com.restfind.restaurantfinder.service.NotificationEventReceiver;
 
+/**
+ * Starting Activity where the user logs in with a username and password
+ * The user can choose to enable the checkbox to log in automatically every time in the future
+ */
 public class LoginActivity extends AppBarActivity {
 
     private SharedPreferences spLoginSaved;
@@ -22,6 +26,42 @@ public class LoginActivity extends AppBarActivity {
     private String usernameChosen;
     private String passwordChosen;
 
+    private EditText username_Field;
+    private EditText password_Field;
+
+    /**
+     * When the Button "Register" is tapped the Register-Activity is started
+     */
+    private View.OnClickListener onClickListenerRegister = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+        }
+    };
+
+    /**
+     * When the Button "Login" is tapped login() is called
+     */
+    private View.OnClickListener onClickListenerLogin = new View.OnClickListener() {
+        public void onClick(View v) {
+            final String username = username_Field.getText().toString();
+            final String password = password_Field.getText().toString();
+
+            //username or password contain illegal characters
+            if(username.contains(";") || password.contains(";")){
+                showAlertDialog(getResources().getString(R.string.login_illegal));
+            }else{
+                //username and password not empty -> login
+                if (!username.equals("") && !password.equals("")) {
+                    login(username, password);
+                }
+            }
+        }
+    };
+
+    /**
+     * performs automatic Login if there is a username and password saved in SharedPreferences
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,8 +72,8 @@ public class LoginActivity extends AppBarActivity {
         setSupportActionBar(toolbar);
 
         //create UI Elements
-        final EditText username_Field = (EditText) findViewById(R.id.etUsername);
-        final EditText password_Field = (EditText) findViewById(R.id.etPassword);
+        username_Field = (EditText) findViewById(R.id.etUsername);
+        password_Field = (EditText) findViewById(R.id.etPassword);
         Button registerButton = (Button) findViewById(R.id.btnRegister);
         Button signInButton = (Button) findViewById(R.id.btnLogin);
         cbAutomaticLogin = (CheckBox) findViewById(R.id.cbAutomaticLogin);
@@ -49,33 +89,15 @@ public class LoginActivity extends AppBarActivity {
         }
 
         //Register Button
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //start new Activity (Register)
-                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
-            }
-        });
+        registerButton.setOnClickListener(onClickListenerRegister);
 
         //Login Button
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                final String username = username_Field.getText().toString();
-                final String password = password_Field.getText().toString();
-
-                //username or password contain illegal characters
-                if(username.contains(";") || password.contains(";")){
-                    showAlertDialog(getResources().getString(R.string.login_illegal));
-                }else{
-                    //username and password not empty -> login
-                    if (!username.equals("") && !password.equals("")) {
-                        login(username, password);
-                    }
-                }
-            }
-        });
+        signInButton.setOnClickListener(onClickListenerLogin);
     }
 
+    /**
+     * Starts LoginTask
+     */
     private void login(final String username, final String password){
         usernameChosen = username;
         passwordChosen = password;
@@ -83,17 +105,27 @@ public class LoginActivity extends AppBarActivity {
         new LoginTask().execute();
     }
 
+    /**
+     * This Activity doesn't show any Toolbar-Actions
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return false;
     }
 
+    /**
+     * The Back-Button is disabled
+     */
     @Override
     public void onBackPressed() {
         //Do nothing
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Checks if the given username and password are correct
+     * If Checkbox is enabled the username and password are saved for future automatic logins
+     * If login is successful the SearchOptionsActivity is started
+     */
     private class LoginTask extends AsyncTask<Void, Integer, DatabaseResultType> {
 
         @Override

@@ -42,8 +42,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+/**
+ * Gives the user multiple options to adjust the search for places (Restaurants, Cafes, Bars and Takeaways)
+ */
 public class SearchOptionsActivity extends AppBarActivity implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 
+    /**
+     * Enum to select, which Activity needs to be started
+     */
     private enum Operation {
         ChangePosition, Search
     }
@@ -81,6 +87,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     private List<CheckBox> checkBoxesBar;
     private List<CheckBox> checkBoxesTakeaway;
 
+    /**
+     * sets up all UI-Features and loads all saved options from SharedPreferences
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -293,7 +302,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
 
 
         /*
-        Button: Search
+        Search-Button: calls buildApiClient() and sets operation to Operation.Search
          */
         btnSearch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -346,7 +355,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         }
     }
 
-    //Creates all sub-Checkboxes (for Restaurants, Cafes, Bars, Takeaway) and gives them Listeners
+    /**
+     * Creates all sub-Checkboxes (for Restaurants, Cafes, Bars, Takeaway) and gives them Listeners
+     */
     private void setupCheckboxes(final CheckBox cbType, final List<CheckBox> cbSubTypes, final String[] typeArray, LinearLayout llcbType){
         //Main-Type-Checkbox checks or unchecks all Sub-Checkboxes
         cbType.setOnClickListener(new View.OnClickListener() {
@@ -387,7 +398,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         }
     }
 
-    //Checks if all Sub-Checkboxes of Restaurant are checked
+    /**
+     * Checks if all Sub-Checkboxes of a Main-Type (like "Restaurant") are checked
+     */
     private boolean allCheckboxesChecked(List<CheckBox> checkBoxes){
         for(CheckBox cb : checkBoxes){
             if(!cb.isChecked()){
@@ -397,6 +410,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         return true;
     }
 
+    /**
+     * If the chosen time is now, it refreshes the time
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -410,6 +426,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         }
     }
 
+    /**
+     * Saves all necessary options to SharedPreferences
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -452,6 +471,11 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         editor.apply();
     }
 
+    /**
+     * If the ChangePositionActivity returns with a chosen location,
+     * it saves them as Search-Options
+     * @param data Contains the longitude and latitude of the ChangePositionActivity-Result
+     */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CHANGE_POSITION_REQUEST) {
             if (resultCode == RESULT_OK) {
@@ -463,6 +487,11 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         }
     }
 
+    /**
+     * Creates a SearchOptions-Object based on the chosen Options,
+     * this Object will be given to the MapActivity to Search for Places, based on those Search-Options
+     * @return Created SearchOptions-Object
+     */
     private SearchOptions createSearchOptions(){
         SearchOptions options = new SearchOptions();
 
@@ -533,6 +562,7 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
             }
         }
 
+        //either no checkbox is enabled or no Search-Name is entered
         if(options.getName().isEmpty() && restaurantStringList.isEmpty() && barStringList.isEmpty() && cafeStringList.isEmpty() && takeawayStringList.isEmpty()){
             showAlertDialog("You need to either check at least one Checkbox or enter a Search-Name!");
             return null;
@@ -546,6 +576,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         return options;
     }
 
+    /**
+     * Starts the MapActivity and gives it a SearchOptions-Object
+     */
     private void startMapActivity() {
         SearchOptions options = createSearchOptions();
 
@@ -557,12 +590,11 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         }
     }
 
-    /*
-    Everything below gets current Position once
-    buildApiClient() is the first method called
-    onLocationChanged() is the last method called
+    /**
+     * Everything below gets current Position once
+     * buildApiClient() is the first method called
+     * onLocationChanged() is the last method called
      */
-
     private void buildApiClient(){
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -582,10 +614,14 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
 
     private void getLocation(){
         fusedLocationProviderApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-//        location = fusedLocationProviderApi.getLastLocation(googleApiClient);
     }
 
-    //starts a new Activity based on which operation is chosen
+    /**
+     * After getting the user's current location once,
+     * a new Activity gets started, based on the operation-enum,
+     * either ChangePositionActivity, or MapActivity
+     * @param location The current user's location
+     */
     @Override
     public void onLocationChanged(Location location) {
         longitude = location.getLongitude();
@@ -611,7 +647,10 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         }
     }
 
-    //called by googleApiClient.connect()
+    /**
+     * If user hasn't granted permission for location access, he will be asked to
+     * If permission is already granted, getLocation() is called
+     */
     @Override
     public void onConnected(Bundle bundle) {
         //Check permission
@@ -634,6 +673,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
         }
     }
 
+    /**
+     * If user has granted permission for location-service getLocation() gets called
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -661,6 +703,9 @@ public class SearchOptionsActivity extends AppBarActivity implements ConnectionC
     public void onConnectionFailed(ConnectionResult connectionResult) {
     }
 
+    /**
+     * Back-Button is disabled
+     */
     @Override
     public void onBackPressed() {
         //Do nothing (don't go back to Login)

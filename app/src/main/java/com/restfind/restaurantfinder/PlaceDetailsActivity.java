@@ -21,6 +21,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * Shows all available Details of a Place
+ * Enables the user to favorite and unfavorite this Place
+ * Enables the user to start the CreateInvitationActivity to invite friends to this Place
+ */
 public class PlaceDetailsActivity extends AppBarActivity {
 
     private Intent intent;
@@ -30,6 +35,66 @@ public class PlaceDetailsActivity extends AppBarActivity {
     private String placeID;
     private boolean comingFromFavoriteActivity;
 
+    /**
+     * When tapping on the heart in the bottom left:
+     * if this place is not a favorite, it saves this place as a favorite in the Database and changes the empty heart to a filled heart
+     * if this place is already a favorte, it deletes this place from the Database and changes the full heart to an empty heart
+     */
+    private View.OnClickListener onClickListenerFavorite = new View.OnClickListener() {
+        public void onClick(View v) {
+            if (isFavorite) {
+                //Thread that tries to delete this Favorite
+                ExecutorService es = Executors.newSingleThreadExecutor();
+                Future<Boolean> result = es.submit(new Callable<Boolean>() {
+                    public Boolean call() throws IOException {
+                        return Database.deleteFavorite(username, placeID);
+                    }
+                });
+                try {
+                    result.get();
+                    setNotFavorite();
+                } catch (Exception e) {
+                    //Could not connect to Server with .php-files
+                    showAlertDialog(getResources().getString(R.string.connection_error));
+                } finally {
+                    es.shutdown();
+                }
+            } else {
+                //Thread that tries to favorite this place
+                ExecutorService es = Executors.newSingleThreadExecutor();
+                Future<Boolean> result = es.submit(new Callable<Boolean>() {
+                    public Boolean call() throws IOException {
+                        return Database.favorite(username, placeID);
+                    }
+                });
+                try {
+                    result.get();
+                    setFavorite();
+                } catch (Exception e) {
+                    //Could not connect to Server with .php-files
+                    showAlertDialog(getResources().getString(R.string.connection_error));
+                } finally {
+                    es.shutdown();
+                }
+            }
+        }
+    };
+
+    /**
+     * When tapping the "Invite Friends"-Button the CreateInvitationActivity is started
+     */
+    private View.OnClickListener onClickListenerInvite = new View.OnClickListener() {
+        public void onClick(View v) {
+            Intent intent = new Intent(PlaceDetailsActivity.this, CreateInvitationActivity.class);
+            intent.putExtra("username", username);
+            intent.putExtra("placeID", placeID);
+            startActivity(intent);
+        }
+    };
+
+    /**
+     * GetPlacesDetailsTask and CheckFavoriteTask are executed
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,71 +114,35 @@ public class PlaceDetailsActivity extends AppBarActivity {
         username = getCurrentUsername();
 
         btnFavorite = (ImageButton) findViewById(R.id.btnFavorite);
-        btnFavorite.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (isFavorite) {
-                    //Thread that tries to delete this Favorite
-                    ExecutorService es = Executors.newSingleThreadExecutor();
-                    Future<Boolean> result = es.submit(new Callable<Boolean>() {
-                        public Boolean call() throws IOException {
-                            return Database.deleteFavorite(username, placeID);
-                        }
-                    });
-                    try {
-                        result.get();
-                        setNotFavorite();
-                    } catch (Exception e) {
-                        //Could not connect to Server with .php-files
-                        showAlertDialog(getResources().getString(R.string.connection_error));
-                    } finally {
-                        es.shutdown();
-                    }
-                } else {
-                    //Thread that tries to favorite this place
-                    ExecutorService es = Executors.newSingleThreadExecutor();
-                    Future<Boolean> result = es.submit(new Callable<Boolean>() {
-                        public Boolean call() throws IOException {
-                            return Database.favorite(username, placeID);
-                        }
-                    });
-                    try {
-                        result.get();
-                        setFavorite();
-                    } catch (Exception e) {
-                        //Could not connect to Server with .php-files
-                        showAlertDialog(getResources().getString(R.string.connection_error));
-                    } finally {
-                        es.shutdown();
-                    }
-                }
-            }
-        });
+        btnFavorite.setOnClickListener(onClickListenerFavorite);
 
         Button btnInviteFriends = (Button) findViewById(R.id.btnInviteFriends);
-        btnInviteFriends.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(PlaceDetailsActivity.this, CreateInvitationActivity.class);
-                intent.putExtra("username", username);
-                intent.putExtra("placeID", placeID);
-                startActivity(intent);
-            }
-        });
+        btnInviteFriends.setOnClickListener(onClickListenerInvite);
 
         new GetPlacesDetailsTask().execute(place);
         new CheckFavoriteTask().execute();
     }
 
+    /**
+     * Changes the Favorite-ImageButton to a full heart
+     */
     private void setFavorite(){
         btnFavorite.setImageResource(R.drawable.ic_favorite_black_48dp);
         isFavorite = true;
     }
 
+    /**
+     * Changes the Favorite-ImageButton to an empty heart
+     */
     private void setNotFavorite(){
         btnFavorite.setImageResource(R.drawable.ic_favorite_border_black_48dp);
         isFavorite = false;
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Performs a Place-Details Request to the Google Places Api
+     * and displays all available details with icons to the left
+     */
     private class GetPlacesDetailsTask extends AsyncTask<Place, Integer, Place> {
 
         @Override
@@ -124,7 +153,6 @@ public class PlaceDetailsActivity extends AppBarActivity {
             return getPlaceDetails(placeID);
         }
 
-        //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(Place place) {
             TextView tvName = (TextView) findViewById(R.id.tvName);
@@ -209,7 +237,10 @@ public class PlaceDetailsActivity extends AppBarActivity {
         }
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Checks in the Database, if this Place is a favorite
+     * and changes the Favorite-ImageButton heart accordingly
+     */
     private class CheckFavoriteTask extends AsyncTask<Void, Integer, Boolean> {
 
         @Override
@@ -240,6 +271,10 @@ public class PlaceDetailsActivity extends AppBarActivity {
         }
     }
 
+    /**
+     * If the calling Activity was Favorites-MapActivity and this Place was deleted from favorites,
+     * the calling Activity gets notified to remove this Place from the Map
+     */
     @Override
     public void onBackPressed() {
         if(comingFromFavoriteActivity) {

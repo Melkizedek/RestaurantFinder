@@ -17,6 +17,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+/**
+ * Activity in which you can change the location from where you want to search Restaurants
+ */
 public class ChangePositionActivity extends AppBarActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -26,6 +29,51 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
     private Marker lastPos;
     private Circle circle;
     private Intent intent;
+
+    /**
+     * OnClickListener that returns to the last Activity without a new Location
+     */
+    private View.OnClickListener listenerCancel = new View.OnClickListener() {
+        public void onClick(View v) {
+            setResult(RESULT_CANCELED, intent);
+            finish();
+        }
+    };
+
+    /**
+     * OnClickListener that returns to the last Activity with a new Location
+     */
+    private View.OnClickListener listenerAccept = new View.OnClickListener() {
+        public void onClick(View v) {
+            if(lastPos != null){
+                double newLongitude = lastPos.getPosition().longitude;
+                double newLatitude = lastPos.getPosition().latitude;
+
+                intent.putExtra(getResources().getString(R.string.newLongitude), newLongitude);
+                intent.putExtra(getResources().getString(R.string.newLatitude), newLatitude);
+
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        }
+    };
+
+    /**
+     * OnMapClickListener that places a Marker on the clicked Position and draws a Circle around it
+     */
+    private GoogleMap.OnMapClickListener onMapClickListener = new GoogleMap.OnMapClickListener() {
+        @Override
+        public void onMapClick(LatLng point) {
+            if(lastPos != null){
+                lastPos.remove();
+            }
+            lastPos = mMap.addMarker(new MarkerOptions().position(point));
+
+            if(circle != null){
+                circle.setCenter(lastPos.getPosition());
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,26 +89,8 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
         Button btnCancel = (Button) findViewById(R.id.btnCancel);
         Button btnAccept = (Button) findViewById(R.id.btnAccept);
 
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                setResult(RESULT_CANCELED, intent);
-                finish();
-            }
-        });
-        btnAccept.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if(lastPos != null){
-                    double newLongitude = lastPos.getPosition().longitude;
-                    double newLatitude = lastPos.getPosition().latitude;
-
-                    intent.putExtra(getResources().getString(R.string.newLongitude), newLongitude);
-                    intent.putExtra(getResources().getString(R.string.newLatitude), newLatitude);
-
-                    setResult(RESULT_OK, intent);
-                    finish();
-                }
-            }
-        });
+        btnCancel.setOnClickListener(listenerCancel);
+        btnAccept.setOnClickListener(listenerAccept);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -72,11 +102,6 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -88,6 +113,7 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
         mMap.moveCamera(CameraUpdateFactory.newLatLng(currentPos));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15.0f));
 
+        //Add a circle around the current Position
         if(radius > 0){
             circle = mMap.addCircle(new CircleOptions()
                     .center(new LatLng(latitude, longitude))
@@ -97,18 +123,6 @@ public class ChangePositionActivity extends AppBarActivity implements OnMapReady
         }
 
         //create new Marker based on the touched Location
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng point) {
-                if(lastPos != null){
-                    lastPos.remove();
-                }
-                lastPos = mMap.addMarker(new MarkerOptions().position(point));
-
-                if(circle != null){
-                    circle.setCenter(lastPos.getPosition());
-                }
-            }
-        });
+        mMap.setOnMapClickListener(onMapClickListener);
     }
 }

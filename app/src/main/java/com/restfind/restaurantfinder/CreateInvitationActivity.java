@@ -9,7 +9,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -31,6 +30,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * Activity in which you can invite multiple friends to the given Place
+ * by also choosing the time and date
+ */
 public class CreateInvitationActivity extends AppBarActivity {
 
     private String username;
@@ -38,6 +41,95 @@ public class CreateInvitationActivity extends AppBarActivity {
     private List<CheckBox> checkBoxesFriends;
     private Calendar calendar;
 
+    private TextView tvTime;
+    private TextView tvDate;
+
+    /**
+     * When tapping the date, starts a DatePickerDialog to choose the Date of the Invitation
+     */
+    private View.OnClickListener onClickListenerDate = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Calendar c = Calendar.getInstance();
+            final int year = c.get(Calendar.YEAR);
+            final int month = c.get(Calendar.MONTH);
+            final int day = c.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog dialog = new DatePickerDialog(CreateInvitationActivity.this, new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
+                    calendar.set(Calendar.DATE, selectedDay);
+                    calendar.set(Calendar.MONTH, selectedMonth);
+                    calendar.set(Calendar.YEAR, selectedYear);
+
+                    long dateInMs = calendar.getTimeInMillis();
+                    String formatted_date = (DateFormat.format("dd.MM.yyyy", dateInMs))
+                            .toString();
+                    tvDate.setText(formatted_date);
+
+                }
+            }, year, month, day);
+
+            dialog.setTitle("Select Date");
+            dialog.show();
+        }
+    };
+
+    /**
+     * When tapping the time, starts a TimePickerDialog to choose the Time of the Invitation
+     */
+    private View.OnClickListener onClickListenerTime = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Calendar c = Calendar.getInstance();
+            final int min = c.get(Calendar.MINUTE);
+            int hour = c.get(Calendar.HOUR_OF_DAY);
+
+            TimePickerDialog dialog;
+            dialog = new TimePickerDialog(CreateInvitationActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                @Override
+                public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                    calendar.set(Calendar.HOUR_OF_DAY, selectedHour);
+                    calendar.set(Calendar.MINUTE, selectedMinute);
+
+                    tvTime.setText(DateFormat.format("HH:mm", calendar.getTimeInMillis()));
+                }
+            }, hour, min, true);
+
+            dialog.setTitle("Select Time");
+            dialog.show();
+        }
+    };
+
+    /**
+     * When tapping the Invite-Button, starts the InviteTask
+     */
+    private View.OnClickListener onClickListenerInvite = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if(tvDate.getText().equals("Choose Date") || tvTime.getText().equals("Choose Time")){
+                showAlertDialog("Choose a Time and Date!");
+            } else{
+                List<String> friends = new ArrayList<>();
+                for(CheckBox cb : checkBoxesFriends){
+                    if(cb.isChecked()) {
+                        friends.add(cb.getText().toString());
+                    }
+                }
+                if(friends.isEmpty()){
+                    showAlertDialog("Choose at least one Friend!");
+                } else {
+                    findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+
+                    new InviteTask().execute(friends);
+                }
+            }
+        }
+    };
+
+    /**
+     * starts GetFriendsTask
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,97 +145,31 @@ public class CreateInvitationActivity extends AppBarActivity {
 
         calendar = Calendar.getInstance();
 
-        final TextView tvTime = (TextView) findViewById(R.id.tvTime);
-        final TextView tvDate = (TextView) findViewById(R.id.tvDate);
+        tvTime = (TextView) findViewById(R.id.tvTime);
+        tvDate = (TextView) findViewById(R.id.tvDate);
         final Button btnInviteFriends = (Button) findViewById(R.id.btnInviteFriends);
 
         /*
         TextView: Date
          */
         //Change Date
-        tvDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Calendar c = Calendar.getInstance();
-                final int year = c.get(Calendar.YEAR);
-                final int month = c.get(Calendar.MONTH);
-                final int day = c.get(Calendar.DAY_OF_MONTH);
-
-                DatePickerDialog dialog = new DatePickerDialog(CreateInvitationActivity.this, new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker datePicker, int selectedYear, int selectedMonth, int selectedDay) {
-                        calendar.set(Calendar.DATE, selectedDay);
-                        calendar.set(Calendar.MONTH, selectedMonth);
-                        calendar.set(Calendar.YEAR, selectedYear);
-
-                        Log.v(LOG_TAG, "Date: " + new Timestamp(calendar.getTimeInMillis()));
-
-                        long dateInMs = calendar.getTimeInMillis();
-                        String formatted_date = (DateFormat.format("dd.MM.yyyy", dateInMs))
-                                .toString();
-                        tvDate.setText(formatted_date);
-
-                    }
-                }, year, month, day);
-
-                dialog.setTitle("Select Date");
-                dialog.show();
-            }
-        });
+        tvDate.setOnClickListener(onClickListenerDate);
         /*
         TextView: Time
          */
         //Change Time
-        tvTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Calendar c = Calendar.getInstance();
-                final int min = c.get(Calendar.MINUTE);
-                int hour = c.get(Calendar.HOUR_OF_DAY);
+        tvTime.setOnClickListener(onClickListenerTime);
 
-                TimePickerDialog dialog;
-                dialog = new TimePickerDialog(CreateInvitationActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        calendar.set(Calendar.HOUR_OF_DAY, selectedHour);
-                        calendar.set(Calendar.MINUTE, selectedMinute);
-
-                        tvTime.setText(DateFormat.format("HH:mm", calendar.getTimeInMillis()));
-                    }
-                }, hour, min, true);
-
-                dialog.setTitle("Select Time");
-                dialog.show();
-            }
-        });
         //Button Invite Friends
-        btnInviteFriends.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(tvDate.getText().equals("Choose Date") || tvTime.getText().equals("Choose Time")){
-                    showAlertDialog("Choose a Time and Date!");
-                } else{
-                    List<String> friends = new ArrayList<>();
-                    for(CheckBox cb : checkBoxesFriends){
-                        if(cb.isChecked()) {
-                            friends.add(cb.getText().toString());
-                        }
-                    }
-                    if(friends.isEmpty()){
-                        showAlertDialog("Choose at least one Friend!");
-                    } else {
-                        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+        btnInviteFriends.setOnClickListener(onClickListenerInvite);
 
-                        new InviteTask().execute(friends);
-                    }
-                }
-            }
-        });
         findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
         new GetFriendsTask().execute();
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Gets all friends of the current user from the Database and displays them as Checkboxes
+     */
     private class GetFriendsTask extends AsyncTask<Void, Integer, List<String>> {
 
         @Override
@@ -176,7 +202,13 @@ public class CreateInvitationActivity extends AppBarActivity {
         }
     }
 
-    //<Input for doInBackground, (Progress), Input for onPostExecute>
+    /**
+     * Takes all checked friends, Date and Time and saves an Invitation into the Database,
+     * so that all Invitees can get it
+     * If the checkbox to allow location-tracking is disabled, the User-Location gets deleted from the Database
+     * and the user's location will not be visible to others
+     * If the checkbox is enabled user's location will be visible to others
+     */
     private class InviteTask extends AsyncTask<List<String>, Integer, Boolean> {
 
         @Override
@@ -191,7 +223,6 @@ public class CreateInvitationActivity extends AppBarActivity {
             }
         }
 
-        //puts the friend-requests and friends into the listView
         @Override
         protected void onPostExecute(Boolean result) {
             findViewById(R.id.loadingPanel).setVisibility(View.GONE);

@@ -31,13 +31,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * Service that wakes up every 5 minutes to check for new Restaurant-Invitations
+ * Creates a Notification and updates own current Location if necessary
+ */
 public class CheckInvitationsService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     protected static final int NOTIFICATION_ID = 1;
     protected static final String ACTION_START = "ACTION_START";
     protected static final String ACTION_DELETE = "ACTION_DELETE";
     protected String username;
 
-    protected static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 1;
     private FusedLocationProviderApi fusedLocationProviderApi;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
@@ -78,20 +81,26 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
 
     }
 
-    //gets called every few minutes to check for new invitations and create a notification
+    /**
+     * gets called when this service gets created or woken up every 5 minutes
+     * and create a notification for new invitations.
+     * If at least 1 invitation is in 15 minutes or less than 10 minutes ago
+     * and the user has accepted the invitation and location tracking
+     * -> it will call the method buildApiClient(),
+     * to update the current user-location in the Database
+     */
     protected void processStartNotification() {
-        Log.v("Service_Log", "Service started");
-
         if(username == null || username.isEmpty()){
             //Get current logged-in username
             SharedPreferences spLoginCurrent = getApplicationContext().getSharedPreferences(getResources().getString(R.string.login_current), Context.MODE_PRIVATE);
             username = spLoginCurrent.getString(getResources().getString(R.string.login_current), null);
         }
         if(username != null && !username.isEmpty()){
-            //Check if tracking is allowed
+            //Check if user has allowed location-tracking
             SharedPreferences spTracking = getApplicationContext().getSharedPreferences("tracking", Context.MODE_PRIVATE);
             boolean trackingAllowed = spTracking.getBoolean("tracking", false);
 
+            //Gets all Invitations the user is part of (as host or invitee)
             ExecutorService es = Executors.newSingleThreadExecutor();
             Future<List<Invitation>> result = es.submit(new Callable<List<Invitation>>() {
                 public List<Invitation> call() throws IOException {
@@ -103,9 +112,9 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
                 boolean startedLocation = false;
 
                 for(final Invitation i : invitations){
-                    //show Notification
+                    //if this invitation is new and the user is not the host -> show invitation
                     if(!i.getHost().equals(username) && !i.isReceived()){
-                        Log.v("Service_Log", "Notification: " + i.getId());
+                        //set Invitation as received in Database
                         Thread t = new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -118,6 +127,7 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
                         });
                         t.start();
 
+                        //create Notification which sends you to the Invitation-Activity
                         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
                         builder.setContentTitle(getResources().getString(R.string.app_name))
                                 .setAutoCancel(true)
@@ -137,12 +147,9 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
 
                     double timeTillDeadline = i.getTime() - Calendar.getInstance().getTimeInMillis();
 
-                    Log.v("Service_Log", "Invitation: " + i.getId());
-                    Log.v("Service_Log", "timeTillDeadline: " + timeTillDeadline);
-
-                    //between 15 minutes before and 10 minutes after deadline
+                    //Invitation-Deadline is between 15 minutes before and 10 minutes after deadline
+                    //-> update own current-location
                     if(!startedLocation && timeTillDeadline > (-600000) && timeTillDeadline <= 900000 && trackingAllowed && (i.getHost().equals(username) || i.getInvitees().get(username) == 1)){
-                        Log.v("Service_Log", "Deadline: " + i.getId());
                         startedLocation = true;
                         buildApiClient();
                     }
@@ -157,12 +164,15 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
         }
     }
 
+    /**
+     * builds Google Api-LocationRequest which gets the current user-location every 10 seconds for 5 minutes
+     * and calls method onConnected(), if successful
+     */
     private void buildApiClient(){
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(10000); //every 10 seconds
-//        locationRequest.setNumUpdates(30); //for 5 minutes
-        locationRequest.setNumUpdates(1); //for 30 seconds
+        locationRequest.setNumUpdates(30); //for 5 minutes
         fusedLocationProviderApi = LocationServices.FusedLocationApi;
 
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -176,16 +186,30 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
         }
     }
 
+    /**
+     * called after buildApiClient(), calls getLocation()
+     */
+    @Override
+    public void onConnected(Bundle bundle) {
+        getLocation();
+    }
+
+    /**
+     * called after onConnected(), calls onLocationChanged()
+     */
     private void getLocation(){
         fusedLocationProviderApi.requestLocationUpdates(googleApiClient, locationRequest, this);
     }
 
+    /**
+     * gets called every 10 seconds with the current new user-location
+     * and saves it to the Database
+     * @param location New User-Location
+     */
     @Override
     public void onLocationChanged(Location location) {
         final double longitude = location.getLongitude();
         final double latitude = location.getLatitude();
-
-        Log.v("Service_Log", "latitude: " + latitude + ", " + "longitude: " + longitude);
 
         Thread t = new Thread(new Runnable() {
             @Override
@@ -198,12 +222,6 @@ public class CheckInvitationsService extends IntentService implements GoogleApiC
             }
         });
         t.start();
-    }
-
-    //called by googleApiClient.connect()
-    @Override
-    public void onConnected(Bundle bundle) {
-            getLocation();
     }
 
     @Override
